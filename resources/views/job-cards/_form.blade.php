@@ -3,6 +3,7 @@
 
     $jobCard = $jobCard ?? null;
     $ajax = $ajax ?? false;
+    $employees = $employees ?? collect();
 @endphp
 
 <x-ui.form-section
@@ -12,12 +13,27 @@
     <div class="asp-form-grid">
         <x-ui.form-field label="Customer" for="customer_id" name="customer_id" :required="true" :ajax="$ajax">
             @if ($ajax)
-                <x-ui.select id="customer_id" name="customer_id" :ajax="$ajax" x-model="customerId" required>
-                    <option value="">Select customer…</option>
-                    @foreach ($customers as $customer)
-                        <option value="{{ $customer->id }}">{{ $customer->full_name }}</option>
-                    @endforeach
-                </x-ui.select>
+                <div class="asp-field-addon">
+                    <x-ui.select id="customer_id" name="customer_id" :ajax="$ajax" x-model="customerId" required>
+                        <option value="">Select customer…</option>
+                        <template x-for="customer in customers" :key="customer.id">
+                            <option :value="customer.id" x-text="customer.full_name"></option>
+                        </template>
+                    </x-ui.select>
+                    <button
+                        type="button"
+                        class="asp-btn asp-btn-secondary shrink-0 !px-3"
+                        title="Create new customer"
+                        @click="openCustomerModal()"
+                    >
+                        <span class="material-symbols-outlined text-lg">person_add</span>
+                    </button>
+                </div>
+                <p class="asp-field-hint">
+                    <button type="button" class="text-brand-primary-dim hover:underline dark:text-brand-primary" @click="openCustomerModal()">
+                        + Create new customer
+                    </button>
+                </p>
             @else
                 <x-ui.select id="customer_id" name="customer_id" required>
                     <option value="">Select customer…</option>
@@ -30,17 +46,36 @@
             @endif
         </x-ui.form-field>
 
-        <x-ui.form-field label="Vehicle" for="vehicle_id" name="vehicle_id" :required="true" :ajax="$ajax" hint="Filtered by selected customer when applicable.">
+        <x-ui.form-field label="Vehicle" for="vehicle_id" name="vehicle_id" :required="true" :ajax="$ajax" hint="Filtered by selected customer.">
             @if ($ajax)
-                <x-ui.select id="vehicle_id" name="vehicle_id" :ajax="$ajax" x-model="vehicleId" required>
-                    <option value="">Select vehicle…</option>
-                    @foreach ($vehicles as $vehicle)
-                        <option
-                            value="{{ $vehicle->id }}"
-                            x-bind:disabled="customerId && String(customerId) !== '{{ $vehicle->customer_id }}'"
-                        >{{ $vehicle->registration_number }}@if ($vehicle->make) · {{ $vehicle->make }} {{ $vehicle->model }}@endif</option>
-                    @endforeach
-                </x-ui.select>
+                <div class="asp-field-addon">
+                    <x-ui.select id="vehicle_id" name="vehicle_id" :ajax="$ajax" x-model="vehicleId" required>
+                        <option value="">Select vehicle…</option>
+                        <template x-for="vehicle in filteredVehicles" :key="vehicle.id">
+                            <option :value="vehicle.id" x-text="vehicleLabel(vehicle)"></option>
+                        </template>
+                    </x-ui.select>
+                    <button
+                        type="button"
+                        class="asp-btn asp-btn-secondary shrink-0 !px-3"
+                        title="Add vehicle for selected customer"
+                        @click="openVehicleModal()"
+                        :disabled="!customerId"
+                    >
+                        <span class="material-symbols-outlined text-lg">directions_car</span>
+                    </button>
+                </div>
+                <p class="asp-field-hint">
+                    <button
+                        type="button"
+                        class="text-brand-primary-dim hover:underline disabled:cursor-not-allowed disabled:opacity-50 dark:text-brand-primary"
+                        @click="openVehicleModal()"
+                        :disabled="!customerId"
+                    >
+                        + Add vehicle for this customer
+                    </button>
+                    <span x-show="!customerId" class="text-slate-400"> — select a customer first</span>
+                </p>
             @else
                 <x-ui.select id="vehicle_id" name="vehicle_id" required>
                     <option value="">Select vehicle…</option>
@@ -57,26 +92,35 @@
 
 <x-ui.form-section
     title="Assignment"
-    description="Optional booking link and technician assignment."
+    description="Assign the vehicle to an employee and link optional booking details."
 >
     <div class="asp-form-grid">
+        <x-ui.form-field
+            label="Assign vehicle to employee"
+            for="assigned_to"
+            name="assigned_to"
+            :ajax="$ajax"
+            hint="Active employees at your current branch."
+            :col-span="2"
+        >
+            <x-ui.select id="assigned_to" name="assigned_to" :ajax="$ajax">
+                <option value="">Select employee…</option>
+                @forelse ($employees as $employee)
+                    <option value="{{ $employee->id }}" @selected(old('assigned_to', $jobCard?->assigned_to) == $employee->id)>
+                        {{ $employee->displayName() }}
+                    </option>
+                @empty
+                    <option value="" disabled>No active employees at this branch</option>
+                @endforelse
+            </x-ui.select>
+        </x-ui.form-field>
+
         <x-ui.form-field label="Booking" for="booking_id" name="booking_id" :ajax="$ajax" hint="Link to an existing booking, if any.">
             <x-ui.select id="booking_id" name="booking_id" :ajax="$ajax">
                 <option value="">None</option>
                 @foreach ($bookings as $booking)
                     <option value="{{ $booking->id }}" @selected(old('booking_id', $jobCard?->booking_id) == $booking->id)>
                         #{{ $booking->id }} — {{ $booking->customer?->full_name }}
-                    </option>
-                @endforeach
-            </x-ui.select>
-        </x-ui.form-field>
-
-        <x-ui.form-field label="Assigned To" for="assigned_to" name="assigned_to" :ajax="$ajax">
-            <x-ui.select id="assigned_to" name="assigned_to" :ajax="$ajax">
-                <option value="">Unassigned</option>
-                @foreach ($employees as $employee)
-                    <option value="{{ $employee->id }}" @selected(old('assigned_to', $jobCard?->assigned_to) == $employee->id)>
-                        {{ $employee->name }}
                     </option>
                 @endforeach
             </x-ui.select>

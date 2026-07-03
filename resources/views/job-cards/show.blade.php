@@ -15,8 +15,8 @@
             <div class="flex justify-between gap-4"><dt class="text-slate-500">Customer</dt><dd class="font-medium">{{ $jobCard->customer?->full_name ?? '—' }}</dd></div>
             <div class="flex justify-between gap-4"><dt class="text-slate-500">Vehicle</dt><dd>{{ $jobCard->vehicle?->registration_number ?? '—' }}</dd></div>
             <div class="flex justify-between gap-4"><dt class="text-slate-500">Booking</dt><dd>{{ $jobCard->booking_id ? '#'.$jobCard->booking_id : '—' }}</dd></div>
-            <div class="flex justify-between gap-4"><dt class="text-slate-500">Assigned To</dt><dd>{{ $jobCard->employee?->full_name ?? 'Unassigned' }}</dd></div>
-            <div class="flex justify-between gap-4"><dt class="text-slate-500">Status</dt><dd><x-ui.badge color="indigo">{{ ucfirst(str_replace('_', ' ', $jobCard->status)) }}</x-ui.badge></dd></div>
+            <div class="flex justify-between gap-4"><dt class="text-slate-500">Assigned To</dt><dd>{{ $jobCard->assignee?->displayName() ?? 'Unassigned' }}</dd></div>
+            <div class="flex justify-between gap-4"><dt class="text-slate-500">Status</dt><dd><x-ui.badge color="indigo">{{ $jobCard->status->label() }}</x-ui.badge></dd></div>
             <div class="flex justify-between gap-4"><dt class="text-slate-500">Notes</dt><dd>{{ $jobCard->notes ?? '—' }}</dd></div>
         </dl>
     </x-ui.card>

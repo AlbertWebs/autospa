@@ -1,13 +1,13 @@
-<x-layouts.app>
-    <x-slot name="header"><h1 class="text-2xl font-bold text-slate-900 dark:text-white">Edit Product</h1></x-slot>
-    <x-ui.card class="max-w-3xl">
-        <form method="POST" action="{{ route('products.update', $product) }}" class="space-y-6">
-            @csrf @method('PUT')
-            @include('products._form', ['product' => $product])
-            <div class="flex items-center gap-3 border-t border-slate-200 pt-6 dark:border-slate-800">
-                <x-primary-button>Save Changes</x-primary-button>
-                <a href="{{ route('products.show', $product) }}" class="text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">Cancel</a>
-            </div>
-        </form>
-    </x-ui.card>
-</x-layouts.app>
+<x-ui.form-page
+    eyebrow="Inventory"
+    title="Edit Product"
+    subtitle="Update product information, pricing, and stock levels."
+    panel-title="Product Details"
+    panel-icon="inventory"
+    :action="route('products.update', $product)"
+    method="PUT"
+    submit-label="Save Changes"
+    :cancel-url="route('products.index')"
+>
+    @include('products._form', ['product' => $product])
+</x-ui.form-page>

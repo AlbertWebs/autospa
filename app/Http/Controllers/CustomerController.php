@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateCustomerRequest;
 use App\Models\Customer;
 use App\Models\CustomerNote;
 use App\Models\LoyaltyTransaction;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -31,9 +32,19 @@ class CustomerController extends Controller
         return view('customers.create');
     }
 
-    public function store(StoreCustomerRequest $request): RedirectResponse
+    public function store(StoreCustomerRequest $request): RedirectResponse|JsonResponse
     {
         $customer = Customer::create($this->withBranchId($request->validated()));
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Customer created.',
+                'customer' => [
+                    'id' => $customer->id,
+                    'full_name' => $customer->full_name,
+                ],
+            ], 201);
+        }
 
         return redirect()->route('customers.show', $customer)
             ->with('success', 'Customer created.');

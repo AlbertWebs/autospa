@@ -1,13 +1,12 @@
-<x-layouts.app>
-    <x-slot name="header"><h1 class="text-2xl font-bold text-slate-900 dark:text-white">New Booking</h1></x-slot>
-    <x-ui.card class="max-w-3xl">
-        <form method="POST" action="{{ route('bookings.store') }}" class="space-y-6">
-            @csrf
-            @include('bookings._form')
-            <div class="flex items-center gap-3 border-t border-slate-200 pt-6 dark:border-slate-800">
-                <x-primary-button>Create Booking</x-primary-button>
-                <a href="{{ route('bookings.index') }}" class="text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">Cancel</a>
-            </div>
-        </form>
-    </x-ui.card>
-</x-layouts.app>
+<x-ui.form-page
+    eyebrow="Operations"
+    title="New Booking"
+    subtitle="Schedule a new service appointment."
+    panel-title="Booking Details"
+    panel-icon="calendar_month"
+    :action="route('bookings.store')"
+    submit-label="Create Booking"
+    :cancel-url="route('bookings.index')"
+>
+    @include('bookings._form')
+</x-ui.form-page>

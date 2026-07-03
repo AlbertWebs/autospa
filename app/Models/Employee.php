@@ -56,4 +56,24 @@ class Employee extends Model
     {
         return $this->hasMany(PerformanceMetric::class);
     }
+
+    public function assignedJobCards(): HasMany
+    {
+        return $this->hasMany(JobCard::class, 'assigned_to');
+    }
+
+    public function scopeAssignableToJobCards($query, ?int $branchId = null): void
+    {
+        $query
+            ->where('is_active', true)
+            ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
+            ->orderBy('full_name');
+    }
+
+    public function displayName(): string
+    {
+        return $this->position
+            ? "{$this->full_name} — {$this->position}"
+            : $this->full_name;
+    }
 }

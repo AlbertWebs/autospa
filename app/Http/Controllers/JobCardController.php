@@ -8,8 +8,8 @@ use App\Http\Requests\UpdateJobCardRequest;
 use App\Enums\JobCardStatus;
 use App\Models\Booking;
 use App\Models\Customer;
+use App\Models\Employee;
 use App\Models\JobCard;
-use App\Models\User;
 use App\Models\Vehicle;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -34,7 +34,7 @@ class JobCardController extends Controller
             'customers' => Customer::query()->orderBy('full_name')->get(),
             'vehicles' => $vehicles,
             'bookings' => Booking::query()->with('customer')->latest()->limit(50)->get(),
-            'employees' => User::query()->where('branch_id', session('current_branch_id'))->orderBy('name')->get(),
+            'employees' => $this->assignableEmployees(),
         ]);
     }
 
@@ -69,7 +69,7 @@ class JobCardController extends Controller
             'customers' => Customer::query()->orderBy('full_name')->get(),
             'vehicles' => $vehicles,
             'bookings' => Booking::query()->with('customer')->latest()->limit(50)->get(),
-            'employees' => User::query()->where('branch_id', session('current_branch_id'))->orderBy('name')->get(),
+            'employees' => $this->assignableEmployees(),
         ]);
     }
 
@@ -113,5 +113,12 @@ class JobCardController extends Controller
                 ->latest()
                 ->paginate(15),
         ]);
+    }
+
+    protected function assignableEmployees()
+    {
+        return Employee::query()
+            ->assignableToJobCards(session('current_branch_id'))
+            ->get();
     }
 }

@@ -16,7 +16,7 @@ class UpdateJobCardRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'assigned_to' => ['nullable', 'exists:users,id'],
+            'assigned_to' => ['nullable', 'exists:employees,id'],
             'status' => ['nullable', Rule::enum(JobCardStatus::class)],
             'notes' => ['nullable', 'string', 'max:1000'],
         ];

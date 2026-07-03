@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateVehicleRequest;
 use App\Enums\VehicleStatus;
 use App\Models\Customer;
 use App\Models\Vehicle;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -29,9 +30,23 @@ class VehicleController extends Controller
         ]);
     }
 
-    public function store(StoreVehicleRequest $request): RedirectResponse
+    public function store(StoreVehicleRequest $request): RedirectResponse|JsonResponse
     {
         $vehicle = Vehicle::create($this->withBranchId($request->validated()));
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Vehicle registered.',
+                'vehicle' => [
+                    'id' => $vehicle->id,
+                    'customer_id' => $vehicle->customer_id,
+                    'registration_number' => $vehicle->registration_number,
+                    'make' => $vehicle->make,
+                    'model' => $vehicle->model,
+                    'color' => $vehicle->color,
+                ],
+            ], 201);
+        }
 
         return redirect()->route('vehicles.show', $vehicle)
             ->with('success', 'Vehicle registered.');

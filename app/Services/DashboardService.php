@@ -4,10 +4,10 @@ namespace App\Services;
 
 use App\Models\ActivityLog;
 use App\Models\Booking;
+use App\Models\Employee;
 use App\Models\Invoice;
 use App\Models\JobCard;
 use App\Models\Product;
-use App\Models\User;
 use App\Enums\BookingStatus;
 use App\Enums\InvoiceStatus;
 use App\Enums\JobCardStatus;
@@ -92,8 +92,9 @@ class DashboardService
             return collect();
         }
 
-        return User::query()
+        return Employee::query()
             ->where('branch_id', $branchId)
+            ->where('is_active', true)
             ->withCount(['assignedJobCards as completed_jobs' => function ($q) {
                 $q->where('status', JobCardStatus::Completed)
                     ->whereMonth('completed_at', now()->month);

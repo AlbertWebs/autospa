@@ -1,13 +1,12 @@
-<x-layouts.app>
-    <x-slot name="header"><h1 class="text-2xl font-bold text-slate-900 dark:text-white">Add Customer</h1></x-slot>
-    <x-ui.card class="max-w-3xl">
-        <form method="POST" action="{{ route('customers.store') }}" class="space-y-6">
-            @csrf
-            @include('customers._form')
-            <div class="flex items-center gap-3 border-t border-slate-200 pt-6 dark:border-slate-800">
-                <x-primary-button>Create Customer</x-primary-button>
-                <a href="{{ route('customers.index') }}" class="text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">Cancel</a>
-            </div>
-        </form>
-    </x-ui.card>
-</x-layouts.app>
+<x-ui.form-page
+    eyebrow="Customers"
+    title="Add Customer"
+    subtitle="Register a new customer in the system."
+    panel-title="Customer Details"
+    panel-icon="person"
+    :action="route('customers.store')"
+    submit-label="Create Customer"
+    :cancel-url="route('customers.index')"
+>
+    @include('customers._form')
+</x-ui.form-page>

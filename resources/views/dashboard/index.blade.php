@@ -79,10 +79,10 @@
                     <div class="flex items-center gap-3 rounded-xl px-3 py-3 transition hover:bg-slate-50 dark:hover:bg-brand-surface/80">
                         <span class="asp-rank">{{ $index + 1 }}</span>
                         <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-slate-200 to-slate-300 text-xs font-bold text-slate-600 dark:from-brand-surface-high dark:to-brand-border dark:text-slate-300">
-                            {{ collect(explode(' ', $employee->name))->map(fn ($w) => strtoupper(substr($w, 0, 1)))->take(2)->join('') }}
+                            {{ collect(explode(' ', $employee->full_name))->map(fn ($w) => strtoupper(substr($w, 0, 1)))->take(2)->join('') }}
                         </div>
                         <div class="min-w-0 flex-1">
-                            <p class="truncate text-sm font-semibold text-slate-900 dark:text-white">{{ $employee->name }}</p>
+                            <p class="truncate text-sm font-semibold text-slate-900 dark:text-white">{{ $employee->full_name }}</p>
                             <p class="text-xs text-slate-500 dark:text-slate-400">This month</p>
                         </div>
                         <span class="rounded-lg bg-brand-primary/10 px-2.5 py-1 font-mono text-xs font-semibold text-brand-primary-dim dark:text-brand-primary">

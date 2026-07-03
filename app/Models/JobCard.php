@@ -55,7 +55,7 @@ class JobCard extends Model
 
     public function assignee(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'assigned_to');
+        return $this->belongsTo(Employee::class, 'assigned_to');
     }
 
     public function services(): HasMany

@@ -1,13 +1,12 @@
-<x-layouts.app>
-    <x-slot name="header"><h1 class="text-2xl font-bold text-slate-900 dark:text-white">Add Category</h1></x-slot>
-    <x-ui.card class="max-w-3xl">
-        <form method="POST" action="{{ route('services.categories.store') }}" class="space-y-6">
-            @csrf
-            @include('service-categories._form')
-            <div class="flex items-center gap-3 border-t border-slate-200 pt-6 dark:border-slate-800">
-                <x-primary-button>Create Category</x-primary-button>
-                <a href="{{ route('services.categories.index') }}" class="text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">Cancel</a>
-            </div>
-        </form>
-    </x-ui.card>
-</x-layouts.app>
+<x-ui.form-page
+    eyebrow="Services"
+    title="Add Category"
+    subtitle="Create a new category to organize services."
+    panel-title="Category Details"
+    panel-icon="category"
+    :action="route('services.categories.store')"
+    submit-label="Create Category"
+    :cancel-url="route('services.categories.index')"
+>
+    @include('service-categories._form')
+</x-ui.form-page>

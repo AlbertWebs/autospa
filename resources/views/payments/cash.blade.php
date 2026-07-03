@@ -1,31 +1,34 @@
-<x-layouts.app>
-    <x-slot name="header"><h1 class="text-2xl font-bold text-slate-900 dark:text-white">Cash Payments</h1></x-slot>
-    <x-ui.card :padding="false">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
-                <thead class="bg-slate-50 dark:bg-slate-800/50"><tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Payment #</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Customer</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Amount</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Method</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">Actions</th>
-                </tr></thead>
-                <tbody class="divide-y divide-slate-200 bg-white dark:divide-slate-800 dark:bg-slate-900">
-                    @forelse ($payments as $payment)
-                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                            <td class="whitespace-nowrap px-6 py-4 font-medium">#{{ $payment->id }}</td>
-                            <td class="whitespace-nowrap px-6 py-4">{{ $payment->customer?->full_name ?? '—' }}</td>
-                            <td class="whitespace-nowrap px-6 py-4">{{ number_format($payment->amount ?? 0, 2) }}</td>
-                            <td class="whitespace-nowrap px-6 py-4"><x-ui.badge color="indigo">{{ $payment->method ?? $payment->payment_method?->name ?? '—' }}</x-ui.badge></td>
-                            <td class="whitespace-nowrap px-6 py-4 text-right text-sm">
-                                <a href="{{ route('payments.show', $payment) }}" class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400">View</a>
-                            </td>
-                        </tr>
-                    @empty @endforelse
-                </tbody>
-            </table>
-        </div>
-        @if ($payments->isEmpty())<x-ui.empty-state title="No payments" description="Payment records will appear here." />@endif
-        @include('partials.crud.pagination', ['paginator' => $payments])
-    </x-ui.card>
-</x-layouts.app>
+<x-ui.index-page
+    eyebrow="Finance"
+    title="Cash Payments"
+    subtitle="Payment records received in cash."
+>
+    <x-ui.data-table
+        :paginator="$payments"
+        :empty="$payments->isEmpty()"
+        empty-title="No payments"
+        empty-description="Payment records will appear here."
+    >
+        <x-slot name="header">
+            <x-ui.th>Payment #</x-ui.th>
+            <x-ui.th>Customer</x-ui.th>
+            <x-ui.th>Amount</x-ui.th>
+            <x-ui.th>Method</x-ui.th>
+            <x-ui.th align="right">Actions</x-ui.th>
+        </x-slot>
+
+        @foreach ($payments as $payment)
+            <tr class="asp-table-row">
+                <x-ui.td primary mono>#{{ $payment->id }}</x-ui.td>
+                <x-ui.td>{{ $payment->customer?->full_name ?? '—' }}</x-ui.td>
+                <x-ui.td>{{ number_format($payment->amount ?? 0, 2) }}</x-ui.td>
+                <x-ui.td>
+                    <x-ui.badge color="indigo">{{ $payment->method ?? $payment->payment_method?->name ?? '—' }}</x-ui.badge>
+                </x-ui.td>
+                <x-ui.td align="right">
+                    <x-ui.table-actions :view="route('payments.show', $payment)" />
+                </x-ui.td>
+            </tr>
+        @endforeach
+    </x-ui.data-table>
+</x-ui.index-page>

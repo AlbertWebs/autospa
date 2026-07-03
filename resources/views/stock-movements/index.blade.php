@@ -1,32 +1,36 @@
-<x-layouts.app>
-    <x-slot name="header"><h1 class="text-2xl font-bold text-slate-900 dark:text-white">Stock Movements</h1></x-slot>
-    @include('partials.crud.index-header', ['createRoute' => route('stock-movements.create'), 'createLabel' => 'Record Movement', 'title' => 'Stock Movements'])
-    <x-ui.card :padding="false">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
-                <thead class="bg-slate-50 dark:bg-slate-800/50"><tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Product</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Type</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Quantity</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Date</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">Actions</th>
-                </tr></thead>
-                <tbody class="divide-y divide-slate-200 bg-white dark:divide-slate-800 dark:bg-slate-900">
-                    @forelse ($movements as $movement)
-                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                            <td class="whitespace-nowrap px-6 py-4 font-medium">{{ $movement->product?->name ?? '—' }}</td>
-                            <td class="whitespace-nowrap px-6 py-4"><x-ui.badge color="indigo">{{ ucfirst($movement->type) }}</x-ui.badge></td>
-                            <td class="whitespace-nowrap px-6 py-4">{{ $movement->quantity }}</td>
-                            <td class="whitespace-nowrap px-6 py-4 text-slate-500">{{ $movement->created_at?->format('M j, Y') }}</td>
-                            <td class="whitespace-nowrap px-6 py-4 text-right text-sm">
-                                <a href="{{ route('stock-movements.show', $movement) }}" class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400">View</a>
-                            </td>
-                        </tr>
-                    @empty @endforelse
-                </tbody>
-            </table>
-        </div>
-        @if ($movements->isEmpty())<x-ui.empty-state title="No stock movements" description="Record stock in/out movements here." />@endif
-        @include('partials.crud.pagination', ['paginator' => $movements])
-    </x-ui.card>
-</x-layouts.app>
+<x-ui.index-page
+    eyebrow="Inventory"
+    title="Stock Movements"
+    subtitle="Track stock in and out across your inventory."
+    :create-route="route('stock-movements.create')"
+    create-label="Record Movement"
+>
+    <x-ui.data-table
+        :paginator="$movements"
+        :empty="$movements->isEmpty()"
+        empty-title="No stock movements"
+        empty-description="Record stock in/out movements here."
+    >
+        <x-slot name="header">
+            <x-ui.th>Product</x-ui.th>
+            <x-ui.th>Type</x-ui.th>
+            <x-ui.th>Quantity</x-ui.th>
+            <x-ui.th>Date</x-ui.th>
+            <x-ui.th align="right">Actions</x-ui.th>
+        </x-slot>
+
+        @foreach ($movements as $movement)
+            <tr class="asp-table-row">
+                <x-ui.td primary>{{ $movement->product?->name ?? '—' }}</x-ui.td>
+                <x-ui.td>
+                    <x-ui.badge color="indigo">{{ ucfirst($movement->type) }}</x-ui.badge>
+                </x-ui.td>
+                <x-ui.td>{{ $movement->quantity }}</x-ui.td>
+                <x-ui.td muted>{{ $movement->created_at?->format('M j, Y') }}</x-ui.td>
+                <x-ui.td align="right">
+                    <x-ui.table-actions :view="route('stock-movements.show', $movement)" />
+                </x-ui.td>
+            </tr>
+        @endforeach
+    </x-ui.data-table>
+</x-ui.index-page>

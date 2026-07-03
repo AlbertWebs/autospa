@@ -1,32 +1,36 @@
-<x-layouts.app>
-    <x-slot name="header"><h1 class="text-2xl font-bold text-slate-900 dark:text-white">Attendance</h1></x-slot>
-    @include('partials.crud.index-header', ['createRoute' => route('attendance.create'), 'createLabel' => 'Record Attendance', 'title' => 'Attendance'])
-    <x-ui.card :padding="false">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
-                <thead class="bg-slate-50 dark:bg-slate-800/50"><tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Employee</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Date</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Clock In/Out</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Status</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">Actions</th>
-                </tr></thead>
-                <tbody class="divide-y divide-slate-200 bg-white dark:divide-slate-800 dark:bg-slate-900">
-                    @forelse ($attendance as $record)
-                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                            <td class="whitespace-nowrap px-6 py-4 font-medium">{{ $record->employee?->full_name ?? '—' }}</td>
-                            <td class="whitespace-nowrap px-6 py-4">{{ $record->date?->format('M j, Y') }}</td>
-                            <td class="whitespace-nowrap px-6 py-4 text-slate-500">{{ $record->clock_in ?? '—' }} / {{ $record->clock_out ?? '—' }}</td>
-                            <td class="whitespace-nowrap px-6 py-4"><x-ui.badge color="indigo">{{ ucfirst(str_replace('_', ' ', $record->status)) }}</x-ui.badge></td>
-                            <td class="whitespace-nowrap px-6 py-4 text-right text-sm">
-                                <a href="{{ route('attendance.show', $record) }}" class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400">View</a>
-                            </td>
-                        </tr>
-                    @empty @endforelse
-                </tbody>
-            </table>
-        </div>
-        @if ($attendance->isEmpty())<x-ui.empty-state title="No attendance records" description="Record employee attendance here." />@endif
-        @include('partials.crud.pagination', ['paginator' => $attendance])
-    </x-ui.card>
-</x-layouts.app>
+<x-ui.index-page
+    eyebrow="Staff"
+    title="Attendance"
+    subtitle="Record and review employee clock-in and clock-out times."
+    :create-route="route('attendance.create')"
+    create-label="Record Attendance"
+>
+    <x-ui.data-table
+        :paginator="$attendance"
+        :empty="$attendance->isEmpty()"
+        empty-title="No attendance records"
+        empty-description="Record employee attendance here."
+    >
+        <x-slot name="header">
+            <x-ui.th>Employee</x-ui.th>
+            <x-ui.th>Date</x-ui.th>
+            <x-ui.th>Clock In/Out</x-ui.th>
+            <x-ui.th>Status</x-ui.th>
+            <x-ui.th align="right">Actions</x-ui.th>
+        </x-slot>
+
+        @foreach ($attendance as $record)
+            <tr class="asp-table-row">
+                <x-ui.td primary>{{ $record->employee?->full_name ?? '—' }}</x-ui.td>
+                <x-ui.td>{{ $record->date?->format('M j, Y') }}</x-ui.td>
+                <x-ui.td muted>{{ $record->clock_in ?? '—' }} / {{ $record->clock_out ?? '—' }}</x-ui.td>
+                <x-ui.td>
+                    <x-ui.badge color="indigo">{{ ucfirst(str_replace('_', ' ', $record->status)) }}</x-ui.badge>
+                </x-ui.td>
+                <x-ui.td align="right">
+                    <x-ui.table-actions :view="route('attendance.show', $record)" />
+                </x-ui.td>
+            </tr>
+        @endforeach
+    </x-ui.data-table>
+</x-ui.index-page>

@@ -1,30 +1,30 @@
-<x-layouts.app>
-    <x-slot name="header"><h1 class="text-2xl font-bold text-slate-900 dark:text-white">Receipts</h1></x-slot>
-    @include('partials.crud.index-header', ['createRoute' => null, 'createLabel' => '', 'title' => 'Receipts'])
-    <x-ui.card :padding="false">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
-                <thead class="bg-slate-50 dark:bg-slate-800/50"><tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Receipt #</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Customer</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Amount</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">Actions</th>
-                </tr></thead>
-                <tbody class="divide-y divide-slate-200 bg-white dark:divide-slate-800 dark:bg-slate-900">
-                    @forelse ($receipts as $receipt)
-                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                            <td class="whitespace-nowrap px-6 py-4 font-medium">{{ $receipt->number ?? '#'.$receipt->id }}</td>
-                            <td class="whitespace-nowrap px-6 py-4">{{ $receipt->customer?->full_name ?? '—' }}</td>
-                            <td class="whitespace-nowrap px-6 py-4">{{ number_format($receipt->total ?? 0, 2) }}</td>
-                            <td class="whitespace-nowrap px-6 py-4 text-right text-sm">
-                                <a href="{{ route('receipts.show', $receipt) }}" class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400">View</a>
-                            </td>
-                        </tr>
-                    @empty @endforelse
-                </tbody>
-            </table>
-        </div>
-        @if ($receipts->isEmpty())<x-ui.empty-state title="No receipts yet" description="Payment receipts will appear here." />@endif
-        @include('partials.crud.pagination', ['paginator' => $receipts])
-    </x-ui.card>
-</x-layouts.app>
+<x-ui.index-page
+    eyebrow="Finance"
+    title="Receipts"
+    subtitle="Payment receipts issued to customers."
+>
+    <x-ui.data-table
+        :paginator="$receipts"
+        :empty="$receipts->isEmpty()"
+        empty-title="No receipts yet"
+        empty-description="Payment receipts will appear here."
+    >
+        <x-slot name="header">
+            <x-ui.th>Receipt #</x-ui.th>
+            <x-ui.th>Customer</x-ui.th>
+            <x-ui.th>Amount</x-ui.th>
+            <x-ui.th align="right">Actions</x-ui.th>
+        </x-slot>
+
+        @foreach ($receipts as $receipt)
+            <tr class="asp-table-row">
+                <x-ui.td primary mono>{{ $receipt->number ?? '#'.$receipt->id }}</x-ui.td>
+                <x-ui.td>{{ $receipt->customer?->full_name ?? '—' }}</x-ui.td>
+                <x-ui.td>{{ number_format($receipt->total ?? 0, 2) }}</x-ui.td>
+                <x-ui.td align="right">
+                    <x-ui.table-actions :view="route('receipts.show', $receipt)" />
+                </x-ui.td>
+            </tr>
+        @endforeach
+    </x-ui.data-table>
+</x-ui.index-page>

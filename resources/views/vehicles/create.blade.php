@@ -1,13 +1,12 @@
-<x-layouts.app>
-    <x-slot name="header"><h1 class="text-2xl font-bold text-slate-900 dark:text-white">Add Vehicle</h1></x-slot>
-    <x-ui.card class="max-w-3xl">
-        <form method="POST" action="{{ route('vehicles.store') }}" class="space-y-6">
-            @csrf
-            @include('vehicles._form')
-            <div class="flex items-center gap-3 border-t border-slate-200 pt-6 dark:border-slate-800">
-                <x-primary-button>Create Vehicle</x-primary-button>
-                <a href="{{ route('vehicles.index') }}" class="text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">Cancel</a>
-            </div>
-        </form>
-    </x-ui.card>
-</x-layouts.app>
+<x-ui.form-page
+    eyebrow="Vehicles"
+    title="Add Vehicle"
+    subtitle="Register a new vehicle in the system."
+    panel-title="Vehicle Details"
+    panel-icon="directions_car"
+    :action="route('vehicles.store')"
+    submit-label="Create Vehicle"
+    :cancel-url="route('vehicles.index')"
+>
+    @include('vehicles._form')
+</x-ui.form-page>

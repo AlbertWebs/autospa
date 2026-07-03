@@ -1,13 +1,13 @@
-<x-layouts.app>
-    <x-slot name="header"><h1 class="text-2xl font-bold text-slate-900 dark:text-white">Edit Promotion</h1></x-slot>
-    <x-ui.card class="max-w-3xl">
-        <form method="POST" action="{{ route('promotions.update', $promotion) }}" class="space-y-6">
-            @csrf @method('PUT')
-            @include('promotions._form', ['promotion' => $promotion])
-            <div class="flex items-center gap-3 border-t border-slate-200 pt-6 dark:border-slate-800">
-                <x-primary-button>Save Changes</x-primary-button>
-                <a href="{{ route('promotions.show', $promotion) }}" class="text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">Cancel</a>
-            </div>
-        </form>
-    </x-ui.card>
-</x-layouts.app>
+<x-ui.form-page
+    eyebrow="Marketing"
+    title="Edit Promotion"
+    subtitle="Update promotion terms, dates, and discount rules."
+    panel-title="Promotion Details"
+    panel-icon="sell"
+    :action="route('promotions.update', $promotion)"
+    method="PUT"
+    submit-label="Save Changes"
+    :cancel-url="route('promotions.index')"
+>
+    @include('promotions._form', ['promotion' => $promotion])
+</x-ui.form-page>

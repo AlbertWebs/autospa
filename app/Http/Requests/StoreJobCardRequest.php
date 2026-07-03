@@ -19,7 +19,7 @@ class StoreJobCardRequest extends FormRequest
             'customer_id' => ['required', 'exists:customers,id'],
             'vehicle_id' => ['required', 'exists:vehicles,id'],
             'booking_id' => ['nullable', 'exists:bookings,id'],
-            'assigned_to' => ['nullable', 'exists:users,id'],
+            'assigned_to' => ['nullable', 'exists:employees,id'],
             'status' => ['nullable', Rule::enum(JobCardStatus::class)],
             'notes' => ['nullable', 'string', 'max:1000'],
         ];
