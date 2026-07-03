@@ -22,10 +22,16 @@ class PosService
         $branchId = $branchId ?? $this->branchService->currentBranchId();
 
         return [
-            'services' => Service::query()->where('branch_id', $branchId)->where('is_active', true)->with('category')->get(),
-            'products' => Product::query()->where('branch_id', $branchId)->where('is_active', true)->get(),
+            'services' => Service::query()->where('branch_id', $branchId)->where('is_active', true)->with('category')->orderBy('name')->get(),
+            'products' => Product::query()->where('branch_id', $branchId)->where('is_active', true)->orderBy('name')->get(),
             'customers' => Customer::query()->where('branch_id', $branchId)->orderBy('full_name')->get(),
-            'paymentMethods' => PaymentMethod::query()->where('branch_id', $branchId)->where('is_active', true)->get(),
+            'paymentMethods' => PaymentMethod::query()
+                ->where('is_active', true)
+                ->where(function ($query) use ($branchId) {
+                    $query->where('branch_id', $branchId)->orWhereNull('branch_id');
+                })
+                ->orderBy('name')
+                ->get(),
         ];
     }
 

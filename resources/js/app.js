@@ -375,6 +375,117 @@ document.addEventListener('alpine:init', () => {
             }
         },
     }));
+
+    Alpine.data('posCheckout', (config = {}) => ({
+        cart: [],
+        customerId: config.defaultCustomerId ?? '',
+        paymentMethodId: '',
+        catalogTab: 'all',
+        search: '',
+        services: config.services ?? [],
+        products: config.products ?? [],
+        paymentMethods: config.paymentMethods ?? [],
+
+        get filteredItems() {
+            let items = [];
+
+            if (this.catalogTab === 'all' || this.catalogTab === 'service') {
+                items = items.concat(
+                    this.services.map((service) => ({ ...service, itemType: 'service' })),
+                );
+            }
+
+            if (this.catalogTab === 'all' || this.catalogTab === 'product') {
+                items = items.concat(
+                    this.products.map((product) => ({ ...product, itemType: 'product' })),
+                );
+            }
+
+            if (this.search.trim()) {
+                const query = this.search.trim().toLowerCase();
+                items = items.filter((item) => item.name.toLowerCase().includes(query));
+            }
+
+            return items;
+        },
+
+        get itemCount() {
+            return this.cart.reduce((sum, item) => sum + item.qty, 0);
+        },
+
+        get subtotal() {
+            return this.cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+        },
+
+        get total() {
+            return this.subtotal;
+        },
+
+        get selectedMethodSlug() {
+            const method = this.paymentMethods.find(
+                (entry) => String(entry.id) === String(this.paymentMethodId),
+            );
+
+            return method?.slug ?? '';
+        },
+
+        get canCheckout() {
+            return this.cart.length > 0 && this.customerId && this.paymentMethodId;
+        },
+
+        formatMoney(amount) {
+            return Number(amount).toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            });
+        },
+
+        addItem(item) {
+            const existing = this.cart.find(
+                (entry) => entry.id === item.id && entry.itemType === item.itemType,
+            );
+
+            if (existing) {
+                existing.qty++;
+                return;
+            }
+
+            this.cart.push({
+                id: item.id,
+                itemType: item.itemType,
+                name: item.name,
+                price: parseFloat(item.price),
+                qty: 1,
+            });
+        },
+
+        incrementItem(index) {
+            if (this.cart[index]) {
+                this.cart[index].qty++;
+            }
+        },
+
+        decrementItem(index) {
+            if (!this.cart[index]) {
+                return;
+            }
+
+            if (this.cart[index].qty <= 1) {
+                this.cart.splice(index, 1);
+                return;
+            }
+
+            this.cart[index].qty--;
+        },
+
+        removeItem(index) {
+            this.cart.splice(index, 1);
+        },
+
+        clearCart() {
+            this.cart = [];
+        },
+    }));
 });
 
 Alpine.start();
