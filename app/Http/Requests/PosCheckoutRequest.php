@@ -1,0 +1,34 @@
+<?php
+
+namespace App\Http\Requests;
+
+use App\Enums\PaymentMethodType;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+
+class PosCheckoutRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    public function rules(): array
+    {
+        return [
+            'customer_id' => ['required', 'exists:customers,id'],
+            'vehicle_id' => ['nullable', 'exists:vehicles,id'],
+            'payment_method_id' => ['required', 'exists:payment_methods,id'],
+            'method' => ['required', Rule::enum(PaymentMethodType::class)],
+            'subtotal' => ['required', 'numeric', 'min:0'],
+            'discount_amount' => ['nullable', 'numeric', 'min:0'],
+            'tax_amount' => ['nullable', 'numeric', 'min:0'],
+            'total_amount' => ['required', 'numeric', 'min:0'],
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.description' => ['required', 'string', 'max:255'],
+            'items.*.quantity' => ['required', 'numeric', 'min:0.01'],
+            'items.*.unit_price' => ['required', 'numeric', 'min:0'],
+            'items.*.total' => ['required', 'numeric', 'min:0'],
+        ];
+    }
+}

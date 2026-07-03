@@ -1,0 +1,440 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Hanken+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+[x-cloak] {
+    display: none !important;
+}
+
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+@layer base {
+    .dark body {
+        @apply bg-brand-bg text-slate-200;
+    }
+}
+
+@layer components {
+    /* ── Page shell ── */
+    .asp-main {
+        @apply relative min-h-full;
+    }
+
+    .asp-main::before {
+        content: '';
+        @apply pointer-events-none absolute inset-0 bg-grid-pattern bg-grid opacity-60;
+    }
+
+    .dark .asp-main::before {
+        opacity: 1;
+    }
+
+    /* ── Page header ── */
+    .asp-page-header {
+        @apply relative mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between;
+    }
+
+    .asp-page-eyebrow {
+        @apply font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-primary;
+    }
+
+    .asp-page-title {
+        @apply font-display text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl;
+    }
+
+    .asp-page-subtitle {
+        @apply mt-1 text-sm text-slate-500 dark:text-slate-400;
+    }
+
+    /* ── Panels ── */
+    .asp-panel {
+        @apply relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-soft dark:border-brand-border/60 dark:bg-gradient-to-br dark:from-brand-surface-high dark:to-brand-surface dark:shadow-panel;
+    }
+
+    .asp-panel-header {
+        @apply flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-brand-border-subtle/80;
+    }
+
+    .asp-panel-title {
+        @apply font-display text-base font-semibold text-slate-900 dark:text-white;
+    }
+
+    .asp-panel-body {
+        @apply p-6;
+    }
+
+    /* ── Stat cards ── */
+    .asp-stat {
+        @apply relative overflow-hidden rounded-2xl border p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-glow-sm;
+    }
+
+    .asp-stat-icon {
+        @apply flex h-11 w-11 items-center justify-center rounded-xl;
+    }
+
+    .asp-stat-label {
+        @apply text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400;
+    }
+
+    .asp-stat-value {
+        @apply mt-2 font-display text-2xl font-bold tracking-tight text-slate-900 dark:text-white;
+    }
+
+    .asp-stat--revenue {
+        @apply border-emerald-200/60 bg-gradient-to-br from-emerald-50 to-white dark:border-emerald-500/20 dark:from-emerald-500/10 dark:to-brand-surface;
+    }
+
+    .asp-stat--revenue .asp-stat-icon {
+        @apply bg-emerald-500/15 text-emerald-600 dark:text-emerald-400;
+    }
+
+    .asp-stat--bookings {
+        @apply border-sky-200/60 bg-gradient-to-br from-sky-50 to-white dark:border-sky-500/20 dark:from-sky-500/10 dark:to-brand-surface;
+    }
+
+    .asp-stat--bookings .asp-stat-icon {
+        @apply bg-sky-500/15 text-sky-600 dark:text-sky-400;
+    }
+
+    .asp-stat--service {
+        @apply border-amber-200/60 bg-gradient-to-br from-amber-50 to-white dark:border-amber-500/20 dark:from-amber-500/10 dark:to-brand-surface;
+    }
+
+    .asp-stat--service .asp-stat-icon {
+        @apply bg-amber-500/15 text-amber-600 dark:text-amber-400;
+    }
+
+    .asp-stat--ready {
+        @apply border-brand-primary/30 bg-gradient-to-br from-indigo-50 to-white dark:border-brand-primary/20 dark:from-brand-primary/10 dark:to-brand-surface;
+    }
+
+    .asp-stat--ready .asp-stat-icon {
+        @apply bg-brand-primary/20 text-indigo-600 dark:text-brand-primary;
+    }
+
+    .asp-stat--payments {
+        @apply border-rose-200/60 bg-gradient-to-br from-rose-50 to-white dark:border-rose-500/20 dark:from-rose-500/10 dark:to-brand-surface;
+    }
+
+    .asp-stat--payments .asp-stat-icon {
+        @apply bg-rose-500/15 text-rose-600 dark:text-rose-400;
+    }
+
+    .asp-stat--stock {
+        @apply border-orange-200/60 bg-gradient-to-br from-orange-50 to-white dark:border-orange-500/20 dark:from-orange-500/10 dark:to-brand-surface;
+    }
+
+    .asp-stat--stock .asp-stat-icon {
+        @apply bg-orange-500/15 text-orange-600 dark:text-orange-400;
+    }
+
+    /* ── Quick actions ── */
+    .asp-action {
+        @apply flex items-center gap-3 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-3.5 transition-all duration-200 hover:border-brand-primary/40 hover:bg-brand-primary/5 hover:shadow-glow-sm dark:border-brand-border/60 dark:bg-brand-surface/50 dark:hover:border-brand-primary/30 dark:hover:bg-brand-primary/10;
+    }
+
+    .asp-action-icon {
+        @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-brand-primary-dim shadow-sm transition group-hover:bg-brand-primary group-hover:text-brand-on-primary dark:bg-brand-surface-high dark:text-brand-primary dark:group-hover:bg-brand-primary dark:group-hover:text-brand-on-primary;
+    }
+
+    /* ── Timeline ── */
+    .asp-timeline-item {
+        @apply relative flex gap-4 pb-5 pl-6 last:pb-0;
+    }
+
+    .asp-timeline-item::before {
+        content: '';
+        @apply absolute left-[7px] top-3 bottom-0 w-px bg-slate-200 dark:bg-brand-border;
+    }
+
+    .asp-timeline-item:last-child::before {
+        display: none;
+    }
+
+    .asp-timeline-dot {
+        @apply absolute left-0 top-1.5 h-3.5 w-3.5 rounded-full border-2 border-white bg-brand-primary shadow-glow-sm dark:border-brand-surface;
+    }
+
+    /* ── Employee rank ── */
+    .asp-rank {
+        @apply flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-primary/15 font-mono text-xs font-bold text-brand-primary-dim dark:text-brand-primary;
+    }
+
+    /* ── Booking calendar ── */
+    .asp-cal {
+        @apply asp-panel overflow-hidden p-0;
+    }
+
+    .asp-cal-nav-btn {
+        @apply inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200/80 bg-white text-slate-600 transition hover:border-brand-primary/40 hover:bg-brand-primary/5 hover:text-brand-primary-dim dark:border-brand-border/60 dark:bg-brand-surface-high dark:text-slate-300 dark:hover:border-brand-primary/30 dark:hover:bg-brand-primary/10 dark:hover:text-brand-primary;
+    }
+
+    .asp-cal-weekday {
+        @apply border-b border-slate-200/80 bg-slate-50/80 px-2 py-2.5 text-center font-mono text-[10px] font-semibold uppercase tracking-widest text-slate-500 dark:border-brand-border/60 dark:bg-brand-surface/80 dark:text-slate-400;
+    }
+
+    .asp-cal-cell {
+        @apply relative min-h-[7.5rem] border-b border-r border-slate-200/60 p-1.5 transition-colors sm:min-h-[6.5rem] sm:p-2 lg:min-h-[7.25rem] dark:border-brand-border/40;
+    }
+
+    .asp-cal-cell--muted {
+        @apply bg-slate-50/50 dark:bg-brand-surface/30;
+    }
+
+    .asp-cal-cell--today {
+        @apply bg-brand-primary/5 ring-1 ring-inset ring-brand-primary/30 dark:bg-brand-primary/10;
+    }
+
+    .asp-cal-cell--selected {
+        @apply bg-brand-primary/10 ring-2 ring-inset ring-brand-primary/50 dark:bg-brand-primary/15;
+    }
+
+    .asp-cal-day-num {
+        @apply mb-1 flex h-7 w-7 items-center justify-center rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200;
+    }
+
+    .asp-cal-day-num--today {
+        @apply bg-brand-primary font-semibold text-brand-on-primary shadow-glow-sm;
+    }
+
+    .asp-cal-pill {
+        @apply mb-0.5 block truncate rounded-md px-1.5 py-0.5 text-[10px] font-medium leading-tight transition hover:opacity-90 sm:text-[11px];
+    }
+
+    .asp-cal-pill--pending {
+        @apply bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300;
+    }
+
+    .asp-cal-pill--confirmed {
+        @apply bg-sky-100 text-sky-800 dark:bg-sky-500/20 dark:text-sky-300;
+    }
+
+    .asp-cal-pill--in_progress {
+        @apply bg-indigo-100 text-indigo-800 dark:bg-indigo-500/20 dark:text-indigo-300;
+    }
+
+    .asp-cal-pill--completed {
+        @apply bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300;
+    }
+
+    .asp-cal-pill--cancelled {
+        @apply bg-slate-100 text-slate-500 line-through dark:bg-slate-700/40 dark:text-slate-400;
+    }
+
+    .asp-cal-more {
+        @apply mt-0.5 block text-[10px] font-medium text-brand-primary-dim hover:underline dark:text-brand-primary;
+    }
+
+    .asp-cal-legend-dot {
+        @apply h-2.5 w-2.5 shrink-0 rounded-full;
+    }
+
+    .asp-cal-detail-item {
+        @apply flex gap-3 rounded-xl border border-slate-200/80 bg-slate-50/50 p-3 transition hover:border-brand-primary/30 hover:bg-brand-primary/5 dark:border-brand-border/60 dark:bg-brand-surface/50 dark:hover:border-brand-primary/20 dark:hover:bg-brand-primary/10;
+    }
+
+    /* ── Forms ── */
+    .asp-form {
+        @apply space-y-8;
+    }
+
+    .asp-form-section {
+        @apply space-y-5;
+    }
+
+    .asp-form-section-header {
+        @apply border-b border-slate-200/80 pb-3 dark:border-brand-border/60;
+    }
+
+    .asp-form-section-title {
+        @apply font-display text-sm font-semibold text-slate-900 dark:text-white;
+    }
+
+    .asp-form-section-desc {
+        @apply mt-0.5 text-xs text-slate-500 dark:text-slate-400;
+    }
+
+    .asp-form-grid {
+        @apply grid gap-5 sm:grid-cols-2;
+    }
+
+    .asp-form-field {
+        @apply space-y-1.5;
+    }
+
+    .asp-label {
+        @apply block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400;
+    }
+
+    .asp-label-required::after {
+        content: ' *';
+        @apply text-rose-500;
+    }
+
+    .asp-input,
+    .asp-select,
+    .asp-textarea {
+        @apply block w-full rounded-xl border border-slate-200/80 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-brand-primary/60 focus:outline-none focus:ring-2 focus:ring-brand-primary/25 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:opacity-60 dark:border-brand-border/60 dark:bg-brand-surface-high dark:text-white dark:placeholder:text-slate-500 dark:disabled:bg-brand-surface;
+    }
+
+    .asp-select {
+        @apply cursor-pointer appearance-none bg-[length:1.25rem] bg-[right_0.75rem_center] bg-no-repeat pr-10;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+    }
+
+    .asp-select option:disabled {
+        display: none;
+    }
+
+    .asp-textarea {
+        @apply min-h-[6rem] resize-y;
+    }
+
+    .asp-input--error,
+    .asp-select--error,
+    .asp-textarea--error {
+        @apply border-rose-400 focus:border-rose-400 focus:ring-rose-400/25 dark:border-rose-500/60;
+    }
+
+    .asp-field-hint {
+        @apply text-xs text-slate-400 dark:text-slate-500;
+    }
+
+    .asp-field-error {
+        @apply flex items-center gap-1 text-xs text-rose-600 dark:text-rose-400;
+    }
+
+    .asp-form-actions {
+        @apply flex flex-wrap items-center gap-3 border-t border-slate-200/80 pt-6 dark:border-brand-border/60;
+    }
+
+    .asp-btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:focus:ring-offset-brand-surface;
+    }
+
+    .asp-btn-primary {
+        @apply bg-brand-primary text-brand-on-primary shadow-glow-sm hover:bg-brand-primary-dim focus:ring-brand-primary;
+    }
+
+    .asp-btn-secondary {
+        @apply border border-slate-200/80 bg-white text-slate-700 hover:border-brand-primary/40 hover:bg-brand-primary/5 dark:border-brand-border/60 dark:bg-brand-surface-high dark:text-slate-200 dark:hover:border-brand-primary/30 dark:hover:bg-brand-primary/10;
+    }
+
+    .asp-btn-ghost {
+        @apply text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200;
+    }
+
+    .asp-form-alert {
+        @apply flex items-start gap-3 rounded-xl border border-rose-200/80 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300;
+    }
+
+    .asp-form-alert--success {
+        @apply border-emerald-200/80 bg-emerald-50 text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300;
+    }
+
+    /* ── Detail / show pages ── */
+    .asp-detail-hero {
+        @apply asp-panel mb-6 overflow-hidden;
+    }
+
+    .asp-detail-hero-body {
+        @apply flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between;
+    }
+
+    .asp-detail-time {
+        @apply font-mono text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl;
+    }
+
+    .asp-detail-date {
+        @apply mt-1 text-sm text-slate-500 dark:text-slate-400;
+    }
+
+    .asp-status-pill {
+        @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide;
+    }
+
+    .asp-status-pill--pending {
+        @apply bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300;
+    }
+
+    .asp-status-pill--confirmed {
+        @apply bg-sky-100 text-sky-800 dark:bg-sky-500/20 dark:text-sky-300;
+    }
+
+    .asp-status-pill--in_progress {
+        @apply bg-indigo-100 text-indigo-800 dark:bg-indigo-500/20 dark:text-indigo-300;
+    }
+
+    .asp-status-pill--completed {
+        @apply bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300;
+    }
+
+    .asp-status-pill--cancelled {
+        @apply bg-slate-100 text-slate-600 line-through dark:bg-slate-700/40 dark:text-slate-400;
+    }
+
+    .asp-detail-link {
+        @apply inline-flex items-center gap-1 font-medium text-brand-primary-dim transition hover:underline dark:text-brand-primary;
+    }
+
+    .asp-detail-dl {
+        @apply divide-y divide-slate-200/80 dark:divide-brand-border/60;
+    }
+
+    .asp-detail-dl > div {
+        @apply flex items-center justify-between gap-4 py-3.5 text-sm;
+    }
+
+    .asp-detail-dt {
+        @apply text-slate-500 dark:text-slate-400;
+    }
+
+    .asp-detail-dd {
+        @apply text-right font-medium text-slate-900 dark:text-white;
+    }
+
+    .asp-service-row {
+        @apply flex items-center justify-between gap-4 rounded-xl border border-slate-200/80 bg-slate-50/50 px-4 py-3 transition hover:border-brand-primary/30 dark:border-brand-border/60 dark:bg-brand-surface/40 dark:hover:border-brand-primary/20;
+    }
+
+    .asp-service-row-icon {
+        @apply flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-primary/10 text-brand-primary-dim dark:text-brand-primary;
+    }
+
+    .asp-btn-danger {
+        @apply border border-rose-200/80 bg-white text-rose-600 hover:border-rose-300 hover:bg-rose-50 dark:border-rose-500/30 dark:bg-brand-surface-high dark:text-rose-400 dark:hover:bg-rose-500/10;
+    }
+
+    .asp-meta-line {
+        @apply flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-400 dark:text-slate-500;
+    }
+}
+
+@layer utilities {
+    .sidebar-nav {
+        scrollbar-width: thin;
+        scrollbar-color: rgb(51 65 85) transparent;
+    }
+
+    .sidebar-nav::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .sidebar-nav::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .sidebar-nav::-webkit-scrollbar-thumb {
+        background-color: rgb(51 65 85);
+        border-radius: 9999px;
+    }
+
+    .sidebar-nav::-webkit-scrollbar-thumb:hover {
+        background-color: rgb(71 85 105);
+    }
+}
