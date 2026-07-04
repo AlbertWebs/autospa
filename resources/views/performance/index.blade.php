@@ -4,10 +4,10 @@
     subtitle="Overview of team productivity, revenue, and attendance."
 >
     <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <x-ui.stat-card title="Jobs Completed" :value="$metrics['jobs_completed'] ?? 0" />
-        <x-ui.stat-card title="Revenue Generated" :value="number_format($metrics['revenue'] ?? 0, 2)" />
-        <x-ui.stat-card title="Avg. Rating" :value="$metrics['avg_rating'] ?? '—'" />
-        <x-ui.stat-card title="Attendance Rate" :value="($metrics['attendance_rate'] ?? 0).'%'" />
+        <x-ui.stat-card label="Jobs Completed" :value="$metrics['jobs_completed'] ?? 0" />
+        <x-ui.stat-card label="Revenue Generated" :value="number_format($metrics['revenue'] ?? 0, 2)" />
+        <x-ui.stat-card label="Avg. Rating" :value="$metrics['avg_rating'] ?? 'N/A'" />
+        <x-ui.stat-card label="Attendance Rate" :value="($metrics['attendance_rate'] ?? 0).'%'" />
     </div>
 
     <x-ui.data-table
@@ -26,10 +26,10 @@
 
         @foreach ($metrics['employees'] ?? [] as $row)
             <tr class="asp-table-row">
-                <x-ui.td primary>{{ $row['name'] ?? '—' }}</x-ui.td>
+                <x-ui.td primary>{{ $row['name'] ?? 'N/A' }}</x-ui.td>
                 <x-ui.td>{{ $row['jobs'] ?? 0 }}</x-ui.td>
                 <x-ui.td>{{ number_format($row['revenue'] ?? 0, 2) }}</x-ui.td>
-                <x-ui.td>{{ $row['rating'] ?? '—' }}</x-ui.td>
+                <x-ui.td>{{ $row['rating'] ?? 'N/A' }}</x-ui.td>
             </tr>
         @endforeach
     </x-ui.data-table>

@@ -12,11 +12,11 @@
 
     <x-ui.card>
         <dl class="space-y-3 text-sm">
-            <div class="flex justify-between gap-4"><dt class="text-slate-500">Category</dt><dd>{{ $service->category?->name ?? '—' }}</dd></div>
+            <div class="flex justify-between gap-4"><dt class="text-slate-500">Category</dt><dd>{{ $service->category?->name ?? 'N/A' }}</dd></div>
             <div class="flex justify-between gap-4"><dt class="text-slate-500">Price</dt><dd class="font-medium">{{ number_format($service->price, 2) }}</dd></div>
             <div class="flex justify-between gap-4"><dt class="text-slate-500">Duration</dt><dd>{{ $service->duration_minutes }} minutes</dd></div>
             <div class="flex justify-between gap-4"><dt class="text-slate-500">Status</dt><dd>@if($service->is_active)<x-ui.badge color="green">Active</x-ui.badge>@else<x-ui.badge color="slate">Inactive</x-ui.badge>@endif</dd></div>
-            <div class="flex justify-between gap-4"><dt class="text-slate-500">Description</dt><dd>{{ $service->description ?? '—' }}</dd></div>
+            <div class="flex justify-between gap-4"><dt class="text-slate-500">Description</dt><dd>{{ $service->description ?? 'N/A' }}</dd></div>
         </dl>
     </x-ui.card>
 </x-layouts.app>

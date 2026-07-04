@@ -2,19 +2,27 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\VehicleStatus;
 use App\Http\Controllers\Concerns\AssignsBranchId;
 use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
 use App\Models\Customer;
 use App\Models\CustomerNote;
 use App\Models\LoyaltyTransaction;
+use App\Models\Vehicle;
+use App\Services\VehicleSmsNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class CustomerController extends Controller
 {
     use AssignsBranchId;
+
+    public function __construct(
+        protected VehicleSmsNotificationService $vehicleSmsNotificationService,
+    ) {}
 
     public function index(): View
     {
@@ -34,7 +42,32 @@ class CustomerController extends Controller
 
     public function store(StoreCustomerRequest $request): RedirectResponse|JsonResponse
     {
-        $customer = Customer::create($this->withBranchId($request->validated()));
+        [$customer, $vehicle] = DB::transaction(function () use ($request) {
+            $validated = $request->validated();
+            $registrationNumber = filled($validated['registration_number'] ?? null)
+                ? trim((string) $validated['registration_number'])
+                : null;
+
+            unset($validated['registration_number']);
+
+            $customer = Customer::create($this->withBranchId($validated));
+
+            $vehicle = null;
+
+            if ($registrationNumber) {
+                $vehicle = Vehicle::create($this->withBranchId([
+                    'customer_id' => $customer->id,
+                    'registration_number' => $registrationNumber,
+                    'status' => VehicleStatus::Active,
+                ]));
+            }
+
+            return [$customer, $vehicle];
+        });
+
+        if ($vehicle) {
+            $this->vehicleSmsNotificationService->sendVehicleRegistered($customer, $vehicle);
+        }
 
         if ($request->wantsJson()) {
             return response()->json([
@@ -42,7 +75,20 @@ class CustomerController extends Controller
                 'customer' => [
                     'id' => $customer->id,
                     'full_name' => $customer->full_name,
+                    'phone' => $customer->phone,
+                    'display_name' => $customer->full_name,
+                    'vehicle_summary' => $vehicle?->registration_number,
+                    'option_label' => $customer->full_name
+                        . ($vehicle?->registration_number ? ' · ' . $vehicle->registration_number : ''),
                 ],
+                'vehicle' => $vehicle ? [
+                    'id' => $vehicle->id,
+                    'customer_id' => $vehicle->customer_id,
+                    'registration_number' => $vehicle->registration_number,
+                    'make' => $vehicle->make,
+                    'model' => $vehicle->model,
+                    'color' => $vehicle->color,
+                ] : null,
             ], 201);
         }
 

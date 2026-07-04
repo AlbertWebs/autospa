@@ -21,7 +21,7 @@
 
         @foreach ($movements as $movement)
             <tr class="asp-table-row">
-                <x-ui.td primary>{{ $movement->product?->name ?? '—' }}</x-ui.td>
+                <x-ui.td primary>{{ $movement->product?->name ?? 'N/A' }}</x-ui.td>
                 <x-ui.td>
                     <x-ui.badge color="indigo">{{ ucfirst($movement->type) }}</x-ui.badge>
                 </x-ui.td>

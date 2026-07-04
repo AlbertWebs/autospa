@@ -23,9 +23,9 @@
             <tr class="asp-table-row">
                 <x-ui.td mono primary>{{ $vehicle->registration_number }}</x-ui.td>
                 <x-ui.td>{{ $vehicle->make }} {{ $vehicle->model }}</x-ui.td>
-                <x-ui.td>{{ $vehicle->customer?->full_name ?? '—' }}</x-ui.td>
+                <x-ui.td>{{ $vehicle->customer?->full_name ?? 'N/A' }}</x-ui.td>
                 <x-ui.td>
-                    <x-ui.badge color="indigo">{{ ucfirst(str_replace('_', ' ', $vehicle->status)) }}</x-ui.badge>
+                    <x-ui.badge color="indigo">{{ $vehicle->status?->label() ?? 'N/A' }}</x-ui.badge>
                 </x-ui.td>
                 <x-ui.td align="right">
                     <x-ui.table-actions

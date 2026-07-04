@@ -1,15 +1,53 @@
 @php
-    $navigation = config('navigation');
     $branchService = app(\App\Services\BranchService::class);
     $currentBranch = auth()->check() ? $branchService->currentBranch() : null;
     $user = auth()->user();
-    $userInitials = $user
-        ? collect(explode(' ', $user->name))->map(fn ($w) => strtoupper(substr($w, 0, 1)))->take(2)->join('')
-        : '';
-    $userRole = $user?->roles->first()?->name ?? 'Staff';
+    $visibleNavigation = [];
+    $pendingSection = null;
+    $hasAccess = static function (array|string|null $permissions) use ($user): bool {
+        if ($permissions === null) {
+            return true;
+        }
+
+        if (! $user) {
+            return false;
+        }
+
+        return $user->hasAnyPermission((array) $permissions);
+    };
+
+    foreach (config('navigation') as $item) {
+        if (isset($item['section'])) {
+            $pendingSection = $item;
+
+            continue;
+        }
+
+        if (isset($item['children'])) {
+            $item['children'] = array_values(array_filter(
+                $item['children'],
+                fn (array $child) => $hasAccess($child['permission'] ?? null)
+            ));
+
+            if ($item['children'] === []) {
+                continue;
+            }
+        } elseif (! $hasAccess($item['permission'] ?? null)) {
+            continue;
+        }
+
+        if ($pendingSection) {
+            $visibleNavigation[] = $pendingSection;
+            $pendingSection = null;
+        }
+
+        $visibleNavigation[] = $item;
+    }
+
+    $navigation = $visibleNavigation;
 @endphp
 
-<aside class="sidebar fixed inset-y-0 left-0 z-50 flex w-64 transform flex-col border-r border-slate-800/80 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 shadow-xl shadow-black/20 transition-transform duration-300 ease-out lg:translate-x-0"
+<aside data-tour="sidebar" class="sidebar fixed inset-y-0 left-0 z-50 flex w-64 transform flex-col border-r border-slate-800/80 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 shadow-xl shadow-black/20 transition-transform duration-300 ease-out lg:translate-x-0"
     :class="{ '-translate-x-full': !sidebarOpen, 'translate-x-0': sidebarOpen }">
 
     {{-- Brand --}}
@@ -36,22 +74,32 @@
                 @keydown.escape="query = ''"
             />
         </div>
+        <p x-show="$store.navMode.isMinimalist()" x-cloak class="mt-2 px-1 text-[10px] font-semibold uppercase tracking-widest text-indigo-400/80">
+            Minimalist
+        </p>
 
         <nav class="sidebar-nav mt-3 min-h-0 flex-1 overflow-y-auto pb-2">
             <ul class="space-y-0.5">
                 @foreach ($navigation as $index => $item)
                     @if (isset($item['section']))
-                        <li class="px-3 pb-1 pt-4 first:pt-1" x-show="query === ''">
+                        @php
+                            $isMinimalist = $item['minimalist'] ?? false;
+                            $minimalistOnly = $item['minimalist_only'] ?? false;
+                        @endphp
+                        <li class="px-3 pb-1 pt-4 first:pt-1" x-show="$store.navMode.visible({{ $isMinimalist ? 'true' : 'false' }}, {{ $minimalistOnly ? 'true' : 'false' }}) && query === ''">
                             <span class="text-[10px] font-semibold uppercase tracking-widest text-slate-500">{{ $item['section'] }}</span>
                         </li>
                     @elseif (isset($item['children']))
                         @php
                             $isGroupActive = collect($item['children'])->contains(fn ($c) => request()->routeIs($c['route'].'*'));
+                            $hasMinimalistChild = collect($item['children'])->contains(fn ($c) => ($c['minimalist'] ?? false));
+                            $groupMinimalist = ($item['minimalist'] ?? false) || $hasMinimalistChild;
+                            $groupMinimalistOnly = $item['minimalist_only'] ?? false;
                         @endphp
                         <li
                             data-nav-item
                             x-data="{ open: {{ $isGroupActive ? 'true' : 'false' }} }"
-                            x-show="query === '' || '{{ strtolower($item['label']) }}'.includes(query.toLowerCase()) || {{ json_encode(collect($item['children'])->pluck('label')->map(fn ($l) => strtolower($l))->values()) }}.some(l => l.includes(query.toLowerCase()))"
+                            x-show="$store.navMode.visible({{ $groupMinimalist ? 'true' : 'false' }}, {{ $groupMinimalistOnly ? 'true' : 'false' }}) && (query === '' || '{{ strtolower($item['label']) }}'.includes(query.toLowerCase()) || {{ json_encode(collect($item['children'])->pluck('label')->map(fn ($l) => strtolower($l))->values()) }}.some(l => l.includes(query.toLowerCase())))"
                         >
                             <button
                                 type="button"
@@ -87,7 +135,11 @@
                                 x-cloak
                             >
                                 @foreach ($item['children'] as $child)
-                                    <li x-show="query === '' || '{{ strtolower($child['label']) }}'.includes(query.toLowerCase())">
+                                    @php
+                                        $childMinimalist = $child['minimalist'] ?? false;
+                                        $childMinimalistOnly = $child['minimalist_only'] ?? false;
+                                    @endphp
+                                    <li x-show="$store.navMode.visible({{ $childMinimalist ? 'true' : 'false' }}, {{ $childMinimalistOnly ? 'true' : 'false' }}) && (query === '' || '{{ strtolower($child['label']) }}'.includes(query.toLowerCase()))">
                                         <a
                                             href="{{ Route::has($child['route']) ? route($child['route']) : '#' }}"
                                             @class([
@@ -103,9 +155,14 @@
                             </ul>
                         </li>
                     @else
+                        @php
+                            $isMinimalist = $item['minimalist'] ?? false;
+                            $minimalistOnly = $item['minimalist_only'] ?? false;
+                        @endphp
                         <li
                             data-nav-item
-                            x-show="query === '' || '{{ strtolower($item['label']) }}'.includes(query.toLowerCase())"
+                            x-show="$store.navMode.visible({{ $isMinimalist ? 'true' : 'false' }}, {{ $minimalistOnly ? 'true' : 'false' }}) && (query === '' || '{{ strtolower($item['label']) }}'.includes(query.toLowerCase()))"
+                            @if (! empty($item['tour'])) data-tour="{{ $item['tour'] }}" @endif
                         >
                             <a
                                 href="{{ Route::has($item['route']) ? route($item['route']) : '#' }}"
@@ -134,15 +191,6 @@
     {{-- User + Logout --}}
     @auth
         <div class="shrink-0 border-t border-slate-800/80 bg-slate-900/50 p-3">
-            <div class="mb-2 flex items-center gap-3 rounded-xl px-2 py-2">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-slate-600 to-slate-700 text-xs font-bold text-white ring-2 ring-slate-700">
-                    {{ $userInitials }}
-                </div>
-                <div class="min-w-0 flex-1">
-                    <p class="truncate text-sm font-medium text-white">{{ $user->name }}</p>
-                    <p class="truncate text-xs text-slate-400">{{ $userRole }}</p>
-                </div>
-            </div>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button

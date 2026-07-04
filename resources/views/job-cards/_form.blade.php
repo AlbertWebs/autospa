@@ -4,13 +4,35 @@
     $jobCard = $jobCard ?? null;
     $ajax = $ajax ?? false;
     $employees = $employees ?? collect();
+    $customersJson = ($customers ?? collect())->map(fn ($customer) => [
+        'id' => $customer->id,
+        'full_name' => $customer->full_name,
+    ])->values();
+    $vehiclesJson = ($vehicles ?? collect())->map(fn ($vehicle) => [
+        'id' => $vehicle->id,
+        'customer_id' => $vehicle->customer_id,
+        'registration_number' => $vehicle->registration_number,
+        'make' => $vehicle->make,
+        'model' => $vehicle->model,
+        'color' => $vehicle->color,
+    ])->values();
 @endphp
 
 <x-ui.form-section
     title="Vehicle & Customer"
     description="Link the job card to a customer and their vehicle."
 >
-    <div class="asp-form-grid">
+    <div
+        class="asp-form-grid"
+        @if (! $ajax)
+            x-data="customerVehicleLinkForm({
+                customerId: @js(old('customer_id', $jobCard?->customer_id ?? '')),
+                vehicleId: @js(old('vehicle_id', $jobCard?->vehicle_id ?? '')),
+                customers: @js($customersJson),
+                vehicles: @js($vehiclesJson),
+            })"
+        @endif
+    >
         <x-ui.form-field label="Customer" for="customer_id" name="customer_id" :required="true" :ajax="$ajax">
             @if ($ajax)
                 <div class="asp-field-addon">
@@ -35,13 +57,11 @@
                     </button>
                 </p>
             @else
-                <x-ui.select id="customer_id" name="customer_id" required>
+                <x-ui.select id="customer_id" name="customer_id" x-model="customerId" required>
                     <option value="">Select customer…</option>
-                    @foreach ($customers as $customer)
-                        <option value="{{ $customer->id }}" @selected(old('customer_id', $jobCard?->customer_id) == $customer->id)>
-                            {{ $customer->full_name }}
-                        </option>
-                    @endforeach
+                    <template x-for="customer in customers" :key="customer.id">
+                        <option :value="customer.id" x-text="customer.full_name"></option>
+                    </template>
                 </x-ui.select>
             @endif
         </x-ui.form-field>
@@ -74,16 +94,14 @@
                     >
                         + Add vehicle for this customer
                     </button>
-                    <span x-show="!customerId" class="text-slate-400"> — select a customer first</span>
+                    <span x-show="!customerId" class="text-slate-400">: select a customer first</span>
                 </p>
             @else
-                <x-ui.select id="vehicle_id" name="vehicle_id" required>
+                <x-ui.select id="vehicle_id" name="vehicle_id" x-model="vehicleId" required>
                     <option value="">Select vehicle…</option>
-                    @foreach ($vehicles as $vehicle)
-                        <option value="{{ $vehicle->id }}" @selected(old('vehicle_id', $jobCard?->vehicle_id) == $vehicle->id)>
-                            {{ $vehicle->registration_number }}@if ($vehicle->make) · {{ $vehicle->make }} {{ $vehicle->model }}@endif
-                        </option>
-                    @endforeach
+                    <template x-for="vehicle in filteredVehicles" :key="vehicle.id">
+                        <option :value="vehicle.id" x-text="vehicleLabel(vehicle)"></option>
+                    </template>
                 </x-ui.select>
             @endif
         </x-ui.form-field>
@@ -120,7 +138,7 @@
                 <option value="">None</option>
                 @foreach ($bookings as $booking)
                     <option value="{{ $booking->id }}" @selected(old('booking_id', $jobCard?->booking_id) == $booking->id)>
-                        #{{ $booking->id }} — {{ $booking->customer?->full_name }}
+                        #{{ $booking->id }}: {{ $booking->customer?->full_name }}
                     </option>
                 @endforeach
             </x-ui.select>

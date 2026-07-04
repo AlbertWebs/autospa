@@ -13,10 +13,10 @@
     <x-ui.card>
         <dl class="space-y-3 text-sm">
             <div class="flex justify-between gap-4"><dt class="text-slate-500">Code</dt><dd><x-ui.badge color="indigo">{{ $promotion->code }}</x-ui.badge></dd></div>
-            <div class="flex justify-between gap-4"><dt class="text-slate-500">Type / Value</dt><dd>{{ ucfirst($promotion->type) }} — {{ $promotion->type === 'percentage' ? $promotion->value.'%' : number_format($promotion->value, 2) }}</dd></div>
-            <div class="flex justify-between gap-4"><dt class="text-slate-500">Valid</dt><dd>{{ $promotion->starts_at?->format('M j, Y') ?? '—' }} — {{ $promotion->ends_at?->format('M j, Y') ?? '—' }}</dd></div>
+            <div class="flex justify-between gap-4"><dt class="text-slate-500">Type / Value</dt><dd>{{ ucfirst($promotion->type) }}: {{ $promotion->type === 'percentage' ? $promotion->value.'%' : number_format($promotion->value, 2) }}</dd></div>
+            <div class="flex justify-between gap-4"><dt class="text-slate-500">Valid</dt><dd>{{ $promotion->starts_at?->format('M j, Y') ?? 'N/A' }} to {{ $promotion->ends_at?->format('M j, Y') ?? 'N/A' }}</dd></div>
             <div class="flex justify-between gap-4"><dt class="text-slate-500">Status</dt><dd>@if($promotion->is_active)<x-ui.badge color="green">Active</x-ui.badge>@else<x-ui.badge color="slate">Inactive</x-ui.badge>@endif</dd></div>
-            <div class="flex justify-between gap-4"><dt class="text-slate-500">Description</dt><dd>{{ $promotion->description ?? '—' }}</dd></div>
+            <div class="flex justify-between gap-4"><dt class="text-slate-500">Description</dt><dd>{{ $promotion->description ?? 'N/A' }}</dd></div>
         </dl>
     </x-ui.card>
 </x-layouts.app>

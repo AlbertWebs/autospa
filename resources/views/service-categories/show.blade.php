@@ -12,7 +12,7 @@
 
     <x-ui.card>
         <dl class="space-y-3 text-sm">
-            <div class="flex justify-between gap-4"><dt class="text-slate-500">Description</dt><dd>{{ $category->description ?? '—' }}</dd></div>
+            <div class="flex justify-between gap-4"><dt class="text-slate-500">Description</dt><dd>{{ $category->description ?? 'N/A' }}</dd></div>
             <div class="flex justify-between gap-4"><dt class="text-slate-500">Sort Order</dt><dd>{{ $category->sort_order }}</dd></div>
             <div class="flex justify-between gap-4"><dt class="text-slate-500">Status</dt><dd>@if($category->is_active)<x-ui.badge color="green">Active</x-ui.badge>@else<x-ui.badge color="slate">Inactive</x-ui.badge>@endif</dd></div>
         </dl>

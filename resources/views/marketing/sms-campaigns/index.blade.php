@@ -24,7 +24,7 @@
                 <x-ui.td>
                     <x-ui.badge color="indigo">{{ ucfirst($campaign->status) }}</x-ui.badge>
                 </x-ui.td>
-                <x-ui.td muted>{{ $campaign->scheduled_at?->format('M j, Y g:i A') ?? '—' }}</x-ui.td>
+                <x-ui.td muted>{{ $campaign->scheduled_at?->format('M j, Y g:i A') ?? 'N/A' }}</x-ui.td>
                 <x-ui.td align="right">
                     <x-ui.table-actions
                         :view="route('marketing.sms.show', $campaign)"

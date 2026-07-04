@@ -15,7 +15,7 @@
             @endisset
         </div>
 
-        <div class="flex items-center gap-2 sm:gap-4">
+        <div class="flex items-center gap-2 sm:gap-4" data-tour="header-tools">
             @if ($branches->count() > 0)
                 <form method="POST" action="{{ route('branch.switch') }}" class="hidden sm:block">
                     @csrf
@@ -33,6 +33,52 @@
                 <svg x-show="$store.theme.dark" x-cloak class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
             </button>
 
+            <button
+                type="button"
+                @click="$store.navMode.toggle()"
+                x-bind:aria-label="$store.navMode.isMinimalist() ? 'Switch to Beast mode' : 'Switch to Minimalist mode'"
+                x-bind:title="$store.navMode.isMinimalist() ? 'Switch to Beast mode' : 'Switch to Minimalist mode'"
+                class="rounded-xl p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+            >
+                <svg x-show="!$store.navMode.isMinimalist()" x-cloak class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h10M4 14h16M4 18h8" />
+                </svg>
+                <svg x-show="$store.navMode.isMinimalist()" x-cloak class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+                </svg>
+            </button>
+
+            <button
+                type="button"
+                x-show="$store.pwa.canInstall && ! $store.pwa.installed"
+                x-cloak
+                @click="$store.pwa.install()"
+                aria-label="Install app"
+                title="Install app"
+                class="rounded-xl p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+            >
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" />
+                </svg>
+            </button>
+
+            <button
+                type="button"
+                x-show="$store.fullscreen.supported"
+                x-cloak
+                @click="$store.fullscreen.toggle()"
+                x-bind:aria-label="$store.fullscreen.active ? 'Exit full screen' : 'Enter full screen'"
+                x-bind:title="$store.fullscreen.active ? 'Exit full screen' : 'Enter full screen'"
+                class="rounded-xl p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+            >
+                <svg x-show="!$store.fullscreen.active" x-cloak class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 3H5a2 2 0 00-2 2v3m16-5h-3m3 0v3M3 16v3a2 2 0 002 2h3m11-5v3a2 2 0 01-2 2h-3" />
+                </svg>
+                <svg x-show="$store.fullscreen.active" x-cloak class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9H5m0 0V5m0 4l5-5m5 5h4m0 0V5m0 4l-5-5M9 15H5m0 0v4m0-4l5 5m5-5h4m0 0v4m0-4l-5 5" />
+                </svg>
+            </button>
+
             <a href="{{ route('notifications.index') }}" class="relative rounded-xl p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
             </a>
@@ -45,6 +91,7 @@
                     </button>
                 </x-slot>
                 <x-slot name="content">
+                    <x-dropdown-link :href="route('manual.index')">{{ __('User Manual') }}</x-dropdown-link>
                     <x-dropdown-link :href="route('profile.edit')">{{ __('Profile') }}</x-dropdown-link>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf

@@ -3,18 +3,26 @@
 namespace App\Services;
 
 use App\Enums\InvoiceStatus;
+use App\Enums\PaymentMethodType;
+use App\Data\Integrations\StkPushData;
+use App\Data\Integrations\StkPushResult;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Models\Product;
+use App\Models\Receipt;
 use App\Models\Service;
+use App\Models\Scopes\BranchScope;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class PosService
 {
     public function __construct(
         protected BranchService $branchService,
+        protected IntegrationService $integrationService,
+        protected VehicleSmsNotificationService $vehicleSmsNotificationService,
     ) {}
 
     public function checkoutData(?int $branchId = null): array
@@ -24,9 +32,19 @@ class PosService
         return [
             'services' => Service::query()->where('branch_id', $branchId)->where('is_active', true)->with('category')->orderBy('name')->get(),
             'products' => Product::query()->where('branch_id', $branchId)->where('is_active', true)->orderBy('name')->get(),
-            'customers' => Customer::query()->where('branch_id', $branchId)->orderBy('full_name')->get(),
+            'customers' => Customer::query()
+                ->where('branch_id', $branchId)
+                ->with([
+                    'vehicles' => fn ($query) => $query
+                        ->select(['id', 'customer_id', 'registration_number'])
+                        ->orderByDesc('id'),
+                ])
+                ->orderBy('full_name')
+                ->get(),
             'paymentMethods' => PaymentMethod::query()
+                ->withoutGlobalScope(BranchScope::class)
                 ->where('is_active', true)
+                ->whereIn('slug', [PaymentMethodType::Cash->value, PaymentMethodType::Mpesa->value])
                 ->where(function ($query) use ($branchId) {
                     $query->where('branch_id', $branchId)->orWhereNull('branch_id');
                 })
@@ -35,9 +53,25 @@ class PosService
         ];
     }
 
-    public function checkout(int $branchId, int $userId, array $data): Invoice
+    public function initiateStkPush(int $branchId, array $data): StkPushResult
     {
-        return DB::transaction(function () use ($branchId, $userId, $data) {
+        $customer = Customer::query()
+            ->where('branch_id', $branchId)
+            ->findOrFail($data['customer_id']);
+
+        return $this->integrationService->mpesa()->initiateStkPush(
+            new StkPushData(
+                phone: $data['phone'],
+                amount: (float) $data['amount'],
+                reference: $this->generateStkReference(),
+                description: 'POS sale for ' . ($customer->full_name ?: 'customer #' . $customer->id),
+            )
+        );
+    }
+
+    public function checkout(int $branchId, int $userId, array $data): Receipt
+    {
+        $receipt = DB::transaction(function () use ($branchId, $userId, $data) {
             $invoice = Invoice::create([
                 'branch_id' => $branchId,
                 'customer_id' => $data['customer_id'],
@@ -55,7 +89,16 @@ class PosService
             ]);
 
             foreach ($data['items'] as $item) {
-                $invoice->items()->create($item);
+                $invoice->items()->create([
+                    'item_type' => $item['item_type'],
+                    'item_id' => $item['item_id'] ?? null,
+                    'description' => $item['description'],
+                    'quantity' => $item['quantity'],
+                    'unit_price' => $item['unit_price'],
+                    'discount' => 0,
+                    'tax_amount' => 0,
+                    'total' => $item['total'],
+                ]);
             }
 
             Payment::create([
@@ -67,11 +110,38 @@ class PosService
                 'method' => $data['method'],
                 'amount' => $data['total_amount'],
                 'status' => 'completed',
+                'reference' => $data['stk_reference'] ?? null,
+                'metadata' => array_filter([
+                    'stk_phone' => $data['stk_phone'] ?? null,
+                    'stk_status' => $data['stk_status'] ?? null,
+                ], fn ($value) => filled($value)),
                 'paid_at' => now(),
             ]);
 
-            return $invoice->load('items');
+            return Receipt::create([
+                'branch_id' => $branchId,
+                'invoice_id' => $invoice->id,
+                'receipt_number' => $this->nextReceiptNumber($branchId),
+                'amount' => $data['total_amount'],
+                'delivery_method' => $data['method'] === PaymentMethodType::Cash->value ? 'printed' : 'digital',
+            ]);
         });
+
+        $receipt->load([
+            'invoice.customer',
+            'invoice.vehicle',
+            'invoice.items',
+            'invoice.payments.paymentMethod',
+        ]);
+
+        if ($receipt->invoice?->customer) {
+            $this->vehicleSmsNotificationService->sendVehicleCollected(
+                $receipt->invoice->customer,
+                $receipt->invoice->vehicle
+            );
+        }
+
+        return $receipt;
     }
 
     protected function nextInvoiceNumber(int $branchId): string
@@ -79,5 +149,20 @@ class PosService
         $count = Invoice::query()->where('branch_id', $branchId)->count() + 1;
 
         return sprintf('INV-%s-%05d', now()->format('Ymd'), $count);
+    }
+
+    protected function nextReceiptNumber(int $branchId): string
+    {
+        $count = Receipt::query()
+            ->withoutGlobalScope(BranchScope::class)
+            ->where('branch_id', $branchId)
+            ->count() + 1;
+
+        return sprintf('RCP-%s-%05d', now()->format('Ymd'), $count);
+    }
+
+    protected function generateStkReference(): string
+    {
+        return sprintf('POS-%s-%s', now()->format('YmdHis'), strtoupper(Str::random(4)));
     }
 }

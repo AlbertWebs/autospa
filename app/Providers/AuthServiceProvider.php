@@ -33,5 +33,17 @@ class AuthServiceProvider extends ServiceProvider
 
             return null;
         });
+
+        Gate::define('permission', function (User $user, string $permission): bool {
+            return $user->hasPermission($permission);
+        });
+
+        Gate::define('any-permission', function (User $user, array|string $permissions): bool {
+            return $user->hasAnyPermission((array) $permissions);
+        });
+
+        Gate::define('all-permissions', function (User $user, array|string $permissions): bool {
+            return $user->hasAllPermissions((array) $permissions);
+        });
     }
 }

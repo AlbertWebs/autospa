@@ -1,4 +1,17 @@
-@props(['backRoute' => null, 'editRoute' => null, 'deleteRoute' => null, 'deleteConfirm' => 'Are you sure you want to delete this item?'])
+@props([
+    'backRoute' => null,
+    'editRoute' => null,
+    'deleteRoute' => null,
+    'editVisible' => true,
+    'deleteVisible' => true,
+    'deleteConfirm' => 'Are you sure you want to delete this item?',
+])
+
+@php
+    $routeAccess = app(\App\Support\RouteAccess::class);
+    $canEditRoute = $editRoute ? $routeAccess->allowsUrl(auth()->user(), $editRoute) : false;
+    $canDeleteRoute = $deleteRoute ? $routeAccess->allowsUrl(auth()->user(), $deleteRoute, 'DELETE') : false;
+@endphp
 
 <div class="flex flex-wrap items-center gap-2">
     @if ($backRoute)
@@ -7,10 +20,10 @@
             Back
         </a>
     @endif
-    @if ($editRoute)
+    @if ($editRoute && $editVisible && $canEditRoute)
         <a href="{{ $editRoute }}" class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700">Edit</a>
     @endif
-    @if ($deleteRoute)
+    @if ($deleteRoute && $deleteVisible && $canDeleteRoute)
         <form method="POST" action="{{ $deleteRoute }}" onsubmit="return confirm(@json($deleteConfirm))">
             @csrf
             @method('DELETE')

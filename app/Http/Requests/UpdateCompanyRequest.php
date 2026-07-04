@@ -7,6 +7,13 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateCompanyRequest extends FormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'sms_notifications_enabled' => $this->boolean('sms_notifications_enabled'),
+        ]);
+    }
+
     public function authorize(): bool
     {
         return $this->user()->can('update', Setting::class);
@@ -23,6 +30,7 @@ class UpdateCompanyRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:50'],
             'email' => ['nullable', 'email', 'max:255'],
             'website' => ['nullable', 'url', 'max:255'],
+            'sms_notifications_enabled' => ['nullable', 'boolean'],
         ];
     }
 }

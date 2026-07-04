@@ -45,11 +45,11 @@ class JobCardController extends Controller
         if ($request->wantsJson()) {
             return response()->json([
                 'message' => 'Job card created.',
-                'redirect' => route('job-cards.show', $jobCard),
+                'redirect' => route('job-cards.live'),
             ], 201);
         }
 
-        return redirect()->route('job-cards.show', $jobCard)
+        return redirect()->route('job-cards.live')
             ->with('success', 'Job card created.');
     }
 
@@ -75,7 +75,7 @@ class JobCardController extends Controller
 
     public function update(UpdateJobCardRequest $request, JobCard $jobCard): RedirectResponse
     {
-        $jobCard->update($request->validated());
+        $jobCard->update($this->statusAwarePayload($jobCard, $request->validated()));
 
         return redirect()->route('job-cards.show', $jobCard)
             ->with('success', 'Job card updated.');
@@ -99,9 +99,49 @@ class JobCardController extends Controller
         return $this->listByStatus(JobCardStatus::InProgress, 'job-cards.in-progress');
     }
 
+    public function live(): View
+    {
+        $jobCards = JobCard::query()
+            ->with(['customer', 'vehicle', 'assignee'])
+            ->whereIn('status', [JobCardStatus::Open, JobCardStatus::InProgress])
+            ->latest()
+            ->get();
+
+        return view('job-cards.live', [
+            'jobCards' => $jobCards,
+            'stats' => [
+                'total' => $jobCards->count(),
+                'open' => $jobCards->where('status', JobCardStatus::Open)->count(),
+                'in_progress' => $jobCards->where('status', JobCardStatus::InProgress)->count(),
+                'unassigned' => $jobCards->whereNull('assigned_to')->count(),
+            ],
+        ]);
+    }
+
     public function completed(): View
     {
         return $this->listByStatus(JobCardStatus::Completed, 'job-cards.completed');
+    }
+
+    public function updateLiveStatus(UpdateJobCardRequest $request, JobCard $jobCard): RedirectResponse|JsonResponse
+    {
+        $jobCard->update($this->statusAwarePayload($jobCard, $request->validated()));
+        $jobCard->refresh();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Car washing status updated.',
+                'remove_from_live' => ! in_array($jobCard->status, [JobCardStatus::Open, JobCardStatus::InProgress], true),
+                'job_card' => [
+                    'id' => $jobCard->id,
+                    'status' => $jobCard->status?->value ?? JobCardStatus::Open->value,
+                    'started_at_human' => $jobCard->started_at?->diffForHumans(),
+                    'completed_at_human' => $jobCard->completed_at?->diffForHumans(),
+                ],
+            ]);
+        }
+
+        return back()->with('success', 'Car washing status updated.');
     }
 
     protected function listByStatus(JobCardStatus $status, string $view): View
@@ -120,5 +160,36 @@ class JobCardController extends Controller
         return Employee::query()
             ->assignableToJobCards(session('current_branch_id'))
             ->get();
+    }
+
+    protected function statusAwarePayload(JobCard $jobCard, array $data): array
+    {
+        $status = $data['status'] ?? null;
+
+        if (is_string($status)) {
+            $status = JobCardStatus::tryFrom($status);
+        }
+
+        if (! $status instanceof JobCardStatus) {
+            return $data;
+        }
+
+        return match ($status) {
+            JobCardStatus::Open => array_merge($data, [
+                'started_at' => null,
+                'completed_at' => null,
+            ]),
+            JobCardStatus::InProgress => array_merge($data, [
+                'started_at' => $jobCard->started_at ?? now(),
+                'completed_at' => null,
+            ]),
+            JobCardStatus::Completed => array_merge($data, [
+                'started_at' => $jobCard->started_at ?? now(),
+                'completed_at' => now(),
+            ]),
+            JobCardStatus::Cancelled => array_merge($data, [
+                'completed_at' => null,
+            ]),
+        };
     }
 }

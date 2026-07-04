@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ?? 'Sign In' }} — AutoSpa Pro</title>
+    <title>{{ $title ?? 'Sign In' }} | AutoSpa Pro</title>
     @vite(['resources/css/auth.css'])
 </head>
 <body class="auth-body">

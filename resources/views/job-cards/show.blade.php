@@ -12,12 +12,12 @@
 
     <x-ui.card>
         <dl class="space-y-3 text-sm">
-            <div class="flex justify-between gap-4"><dt class="text-slate-500">Customer</dt><dd class="font-medium">{{ $jobCard->customer?->full_name ?? '—' }}</dd></div>
-            <div class="flex justify-between gap-4"><dt class="text-slate-500">Vehicle</dt><dd>{{ $jobCard->vehicle?->registration_number ?? '—' }}</dd></div>
-            <div class="flex justify-between gap-4"><dt class="text-slate-500">Booking</dt><dd>{{ $jobCard->booking_id ? '#'.$jobCard->booking_id : '—' }}</dd></div>
+            <div class="flex justify-between gap-4"><dt class="text-slate-500">Customer</dt><dd class="font-medium">{{ $jobCard->customer?->full_name ?? 'N/A' }}</dd></div>
+            <div class="flex justify-between gap-4"><dt class="text-slate-500">Vehicle</dt><dd>{{ $jobCard->vehicle?->registration_number ?? 'N/A' }}</dd></div>
+            <div class="flex justify-between gap-4"><dt class="text-slate-500">Booking</dt><dd>{{ $jobCard->booking_id ? '#'.$jobCard->booking_id : 'N/A' }}</dd></div>
             <div class="flex justify-between gap-4"><dt class="text-slate-500">Assigned To</dt><dd>{{ $jobCard->assignee?->displayName() ?? 'Unassigned' }}</dd></div>
             <div class="flex justify-between gap-4"><dt class="text-slate-500">Status</dt><dd><x-ui.badge color="indigo">{{ $jobCard->status->label() }}</x-ui.badge></dd></div>
-            <div class="flex justify-between gap-4"><dt class="text-slate-500">Notes</dt><dd>{{ $jobCard->notes ?? '—' }}</dd></div>
+            <div class="flex justify-between gap-4"><dt class="text-slate-500">Notes</dt><dd>{{ $jobCard->notes ?? 'N/A' }}</dd></div>
         </dl>
     </x-ui.card>
 </x-layouts.app>

@@ -8,5 +8,8 @@
     method="PUT"
     submit-label="Save Company Details"
 >
-    @include('settings.company._form', ['company' => $company])
+    @include('settings.company._form', [
+        'company' => $company,
+        'smsNotificationsEnabled' => $smsNotificationsEnabled,
+    ])
 </x-ui.form-page>

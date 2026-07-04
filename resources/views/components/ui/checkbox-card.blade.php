@@ -12,5 +12,5 @@
         class="asp-checkbox"
         @checked($checked)
     />
-    <span class="text-sm text-slate-700 dark:text-slate-300">{{ $slot }}</span>
+    <span class="block text-sm text-slate-700 dark:text-slate-300">{{ $slot }}</span>
 </label>

@@ -18,7 +18,7 @@
 
         @foreach ($transactions as $transaction)
             <tr class="asp-table-row">
-                <x-ui.td primary>{{ $transaction->customer?->full_name ?? '—' }}</x-ui.td>
+                <x-ui.td primary>{{ $transaction->customer?->full_name ?? 'N/A' }}</x-ui.td>
                 <x-ui.td>
                     <x-ui.badge color="indigo">{{ $transaction->type }}</x-ui.badge>
                 </x-ui.td>

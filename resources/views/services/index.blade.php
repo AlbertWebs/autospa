@@ -22,7 +22,7 @@
         @foreach ($services as $service)
             <tr class="asp-table-row">
                 <x-ui.td primary>{{ $service->name }}</x-ui.td>
-                <x-ui.td muted>{{ $service->category?->name ?? '—' }}</x-ui.td>
+                <x-ui.td muted>{{ $service->category?->name ?? 'N/A' }}</x-ui.td>
                 <x-ui.td>{{ number_format($service->price, 2) }}</x-ui.td>
                 <x-ui.td>{{ $service->duration_minutes }} min</x-ui.td>
                 <x-ui.td align="right">

@@ -22,8 +22,8 @@
         @foreach ($jobCards as $jobCard)
             <tr class="asp-table-row">
                 <x-ui.td mono primary>#{{ $jobCard->id }}</x-ui.td>
-                <x-ui.td>{{ $jobCard->customer?->full_name ?? '—' }}</x-ui.td>
-                <x-ui.td mono>{{ $jobCard->vehicle?->registration_number ?? '—' }}</x-ui.td>
+                <x-ui.td>{{ $jobCard->customer?->full_name ?? 'N/A' }}</x-ui.td>
+                <x-ui.td mono>{{ $jobCard->vehicle?->registration_number ?? 'N/A' }}</x-ui.td>
                 <x-ui.td>
                     <x-ui.badge color="indigo">{{ $jobCard->status->label() }}</x-ui.badge>
                 </x-ui.td>

@@ -21,8 +21,8 @@
         @foreach ($suppliers as $supplier)
             <tr class="asp-table-row">
                 <x-ui.td primary>{{ $supplier->name }}</x-ui.td>
-                <x-ui.td muted>{{ $supplier->contact_person ?? '—' }}</x-ui.td>
-                <x-ui.td>{{ $supplier->phone ?? '—' }}</x-ui.td>
+                <x-ui.td muted>{{ $supplier->contact_person ?? 'N/A' }}</x-ui.td>
+                <x-ui.td>{{ $supplier->phone ?? 'N/A' }}</x-ui.td>
                 <x-ui.td align="right">
                     <x-ui.table-actions
                         :view="route('suppliers.show', $supplier)"

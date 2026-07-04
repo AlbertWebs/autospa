@@ -18,8 +18,8 @@
 
         @foreach ($notes as $note)
             <tr class="asp-table-row">
-                <x-ui.td primary>{{ $note->customer?->full_name ?? '—' }}</x-ui.td>
-                <x-ui.td>{{ $note->rating ?? '—' }}</x-ui.td>
+                <x-ui.td primary>{{ $note->customer?->full_name ?? 'N/A' }}</x-ui.td>
+                <x-ui.td>{{ $note->rating ?? 'N/A' }}</x-ui.td>
                 <x-ui.td muted>{{ Str::limit($note->content ?? $note->notes ?? '', 80) }}</x-ui.td>
                 <x-ui.td muted>{{ $note->created_at?->format('M j, Y') }}</x-ui.td>
             </tr>

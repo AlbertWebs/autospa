@@ -115,7 +115,7 @@
                                     <span class="material-symbols-outlined text-sm">open_in_new</span>
                                 </a>
                             @else
-                                —
+                                N/A
                             @endif
                         </dd>
                     </div>
@@ -136,7 +136,7 @@
                                     </p>
                                 @endif
                             @else
-                                —
+                                N/A
                             @endif
                         </dd>
                     </div>

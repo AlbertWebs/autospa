@@ -9,10 +9,10 @@
 
     <x-ui.card>
         <dl class="space-y-3 text-sm">
-            <div class="flex justify-between gap-4"><dt class="text-slate-500">Product</dt><dd class="font-medium">{{ $movement->product?->name ?? '—' }}</dd></div>
+            <div class="flex justify-between gap-4"><dt class="text-slate-500">Product</dt><dd class="font-medium">{{ $movement->product?->name ?? 'N/A' }}</dd></div>
             <div class="flex justify-between gap-4"><dt class="text-slate-500">Type</dt><dd><x-ui.badge color="indigo">{{ ucfirst($movement->type) }}</x-ui.badge></dd></div>
             <div class="flex justify-between gap-4"><dt class="text-slate-500">Quantity</dt><dd>{{ $movement->quantity }}</dd></div>
-            <div class="flex justify-between gap-4"><dt class="text-slate-500">Notes</dt><dd>{{ $movement->notes ?? '—' }}</dd></div>
+            <div class="flex justify-between gap-4"><dt class="text-slate-500">Notes</dt><dd>{{ $movement->notes ?? 'N/A' }}</dd></div>
             <div class="flex justify-between gap-4"><dt class="text-slate-500">Date</dt><dd>{{ $movement->created_at?->format('M j, Y g:i A') }}</dd></div>
         </dl>
     </x-ui.card>

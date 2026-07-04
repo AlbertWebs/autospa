@@ -75,6 +75,20 @@
                         <span x-text="customerErrors.email?.[0]"></span>
                     </p>
                 </x-ui.form-field>
+
+                <x-ui.form-field label="Car Registration" for="quick_customer_registration_number" hint="Optional">
+                    <x-ui.input
+                        id="quick_customer_registration_number"
+                        type="text"
+                        x-model="customerForm.registration_number"
+                        x-bind:class="{ 'asp-input--error': customerErrors.registration_number }"
+                        placeholder="KDA 123A"
+                    />
+                    <p class="asp-field-error" x-show="customerErrors.registration_number" x-cloak>
+                        <span class="material-symbols-outlined text-sm">error</span>
+                        <span x-text="customerErrors.registration_number?.[0]"></span>
+                    </p>
+                </x-ui.form-field>
             </div>
 
             <div class="asp-modal-footer">

@@ -14,9 +14,9 @@
         <x-ui.card>
             <dl class="space-y-3 text-sm">
                 <div class="flex justify-between gap-4"><dt class="text-slate-500">Price</dt><dd class="font-medium">{{ number_format($package->price, 2) }}</dd></div>
-                <div class="flex justify-between gap-4"><dt class="text-slate-500">Duration</dt><dd>{{ $package->duration_minutes ?? '—' }} min</dd></div>
+                <div class="flex justify-between gap-4"><dt class="text-slate-500">Duration</dt><dd>{{ $package->duration_minutes ?? 'N/A' }} min</dd></div>
                 <div class="flex justify-between gap-4"><dt class="text-slate-500">Status</dt><dd>@if($package->is_active)<x-ui.badge color="green">Active</x-ui.badge>@else<x-ui.badge color="slate">Inactive</x-ui.badge>@endif</dd></div>
-                <div class="flex justify-between gap-4"><dt class="text-slate-500">Description</dt><dd>{{ $package->description ?? '—' }}</dd></div>
+                <div class="flex justify-between gap-4"><dt class="text-slate-500">Description</dt><dd>{{ $package->description ?? 'N/A' }}</dd></div>
             </dl>
         </x-ui.card>
         <x-ui.card>

@@ -30,6 +30,7 @@ class SettingSeeder extends Seeder
         $settings = [
             ['group' => 'receipt', 'key' => 'footer_text', 'value' => 'Thank you for choosing AutoSpa!'],
             ['group' => 'receipt', 'key' => 'show_logo', 'value' => 'true'],
+            ['group' => 'sms', 'key' => 'enabled', 'value' => 'false'],
             ['group' => 'sms', 'key' => 'sender_id', 'value' => 'AUTOSPA'],
             ['group' => 'email', 'key' => 'from_name', 'value' => 'AutoSpa'],
         ];

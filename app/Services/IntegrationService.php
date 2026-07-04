@@ -14,21 +14,24 @@ class IntegrationService
     public function mpesa(): MpesaDriverInterface
     {
         return match (config('integrations.mpesa.driver')) {
-            'stub', default => new MpesaStubDriver,
+            'stub' => new MpesaStubDriver(),
+            default => new MpesaStubDriver(),
         };
     }
 
     public function sms(): SmsDriverInterface
     {
         return match (config('integrations.sms.driver')) {
-            'stub', default => new SmsStubDriver,
+            'stub' => new SmsStubDriver(),
+            default => new SmsStubDriver(),
         };
     }
 
     public function whatsapp(): WhatsAppDriverInterface
     {
         return match (config('integrations.whatsapp.driver')) {
-            'stub', default => new WhatsAppStubDriver,
+            'stub' => new WhatsAppStubDriver(),
+            default => new WhatsAppStubDriver(),
         };
     }
 }

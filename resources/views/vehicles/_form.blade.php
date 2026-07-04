@@ -1,4 +1,7 @@
-@php $vehicle = $vehicle ?? null; @endphp
+@php
+    $vehicle = $vehicle ?? null;
+    $selectedStatus = old('status', $vehicle?->status?->value ?? \App\Enums\VehicleStatus::Active->value);
+@endphp
 
 <x-ui.form-section title="Vehicle Information" description="Registration, make/model, and vehicle details.">
     <div class="asp-form-grid">
@@ -41,8 +44,8 @@
 
         <x-ui.form-field label="Status" for="status" name="status">
             <x-ui.select id="status" name="status">
-                @foreach (['active', 'in_service', 'ready', 'inactive'] as $status)
-                    <option value="{{ $status }}" @selected(old('status', $vehicle->status ?? 'active') == $status)>{{ ucfirst(str_replace('_', ' ', $status)) }}</option>
+                @foreach (\App\Enums\VehicleStatus::cases() as $status)
+                    <option value="{{ $status->value }}" @selected($selectedStatus === $status->value)>{{ $status->label() }}</option>
                 @endforeach
             </x-ui.select>
         </x-ui.form-field>

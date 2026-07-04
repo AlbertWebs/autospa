@@ -18,7 +18,7 @@
         @foreach ($roles as $role)
             <tr class="asp-table-row">
                 <x-ui.td primary>{{ $role->name }}</x-ui.td>
-                <x-ui.td muted>{{ $role->permissions->count() }} permissions</x-ui.td>
+                <x-ui.td muted>{{ $role->permissions_count }} permissions</x-ui.td>
                 <x-ui.td align="right">
                     <x-ui.table-actions :edit="route('settings.roles.edit', $role)" />
                 </x-ui.td>

@@ -1,9 +1,9 @@
 <x-layouts.app>
     <x-slot name="header"><h1 class="text-2xl font-bold text-slate-900 dark:text-white">Loyalty Program</h1></x-slot>
     <div class="grid gap-6 lg:grid-cols-3">
-        <x-ui.stat-card title="Total Members" value="—" />
-        <x-ui.stat-card title="Points Issued" value="—" />
-        <x-ui.stat-card title="Points Redeemed" value="—" />
+        <x-ui.stat-card label="Total Members" value="N/A" />
+        <x-ui.stat-card label="Points Issued" value="N/A" />
+        <x-ui.stat-card label="Points Redeemed" value="N/A" />
     </div>
     <x-ui.card class="mt-6">
         <h2 class="mb-4 text-lg font-semibold">Loyalty Program Settings</h2>

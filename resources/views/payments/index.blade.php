@@ -20,10 +20,10 @@
         @foreach ($payments as $payment)
             <tr class="asp-table-row">
                 <x-ui.td primary mono>#{{ $payment->id }}</x-ui.td>
-                <x-ui.td>{{ $payment->customer?->full_name ?? '—' }}</x-ui.td>
+                <x-ui.td>{{ $payment->customer?->full_name ?? 'N/A' }}</x-ui.td>
                 <x-ui.td>{{ number_format($payment->amount ?? 0, 2) }}</x-ui.td>
                 <x-ui.td>
-                    <x-ui.badge color="indigo">{{ $payment->method ?? $payment->payment_method?->name ?? '—' }}</x-ui.badge>
+                    <x-ui.badge color="indigo">{{ $payment->method ?? $payment->payment_method?->name ?? 'N/A' }}</x-ui.badge>
                 </x-ui.td>
                 <x-ui.td align="right">
                     <x-ui.table-actions :view="route('payments.show', $payment)" />

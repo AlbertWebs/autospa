@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateVehicleRequest;
 use App\Enums\VehicleStatus;
 use App\Models\Customer;
 use App\Models\Vehicle;
+use App\Services\VehicleSmsNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -15,6 +16,10 @@ use Illuminate\View\View;
 class VehicleController extends Controller
 {
     use AssignsBranchId;
+
+    public function __construct(
+        protected VehicleSmsNotificationService $vehicleSmsNotificationService,
+    ) {}
 
     public function index(): View
     {
@@ -33,6 +38,11 @@ class VehicleController extends Controller
     public function store(StoreVehicleRequest $request): RedirectResponse|JsonResponse
     {
         $vehicle = Vehicle::create($this->withBranchId($request->validated()));
+        $vehicle->load('customer');
+
+        if ($vehicle->customer) {
+            $this->vehicleSmsNotificationService->sendVehicleRegistered($vehicle->customer, $vehicle);
+        }
 
         if ($request->wantsJson()) {
             return response()->json([
@@ -69,7 +79,17 @@ class VehicleController extends Controller
 
     public function update(UpdateVehicleRequest $request, Vehicle $vehicle): RedirectResponse
     {
+        $previousStatus = $vehicle->status;
         $vehicle->update($request->validated());
+        $vehicle->load('customer');
+
+        if (
+            $vehicle->customer
+            && $previousStatus !== VehicleStatus::ReadyForPickup
+            && $vehicle->status === VehicleStatus::ReadyForPickup
+        ) {
+            $this->vehicleSmsNotificationService->sendVehicleReadyForCollection($vehicle->customer, $vehicle);
+        }
 
         return redirect()->route('vehicles.show', $vehicle)
             ->with('success', 'Vehicle updated.');

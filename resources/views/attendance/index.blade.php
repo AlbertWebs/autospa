@@ -21,9 +21,9 @@
 
         @foreach ($attendance as $record)
             <tr class="asp-table-row">
-                <x-ui.td primary>{{ $record->employee?->full_name ?? '—' }}</x-ui.td>
+                <x-ui.td primary>{{ $record->employee?->full_name ?? 'N/A' }}</x-ui.td>
                 <x-ui.td>{{ $record->date?->format('M j, Y') }}</x-ui.td>
-                <x-ui.td muted>{{ $record->clock_in ?? '—' }} / {{ $record->clock_out ?? '—' }}</x-ui.td>
+                <x-ui.td muted>{{ $record->clock_in ?? 'N/A' }} / {{ $record->clock_out ?? 'N/A' }}</x-ui.td>
                 <x-ui.td>
                     <x-ui.badge color="indigo">{{ ucfirst(str_replace('_', ' ', $record->status)) }}</x-ui.badge>
                 </x-ui.td>

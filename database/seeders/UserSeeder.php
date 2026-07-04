@@ -17,8 +17,8 @@ class UserSeeder extends Seeder
         $west = Branch::where('code', 'WEST')->first();
 
         $users = [
-            ['name' => 'Super Admin', 'email' => 'admin@autospa.test', 'role' => RoleSlug::SuperAdmin, 'branch' => null],
-            ['name' => 'Branch Manager', 'email' => 'manager@autospa.test', 'role' => RoleSlug::Manager, 'branch' => $hq],
+            ['name' => 'Admin', 'email' => 'admin@autospa.test', 'role' => RoleSlug::SuperAdmin, 'branch' => null],
+            ['name' => 'Branch Supervisor', 'email' => 'manager@autospa.test', 'role' => RoleSlug::Manager, 'branch' => $hq],
             ['name' => 'Front Desk', 'email' => 'reception@autospa.test', 'role' => RoleSlug::Receptionist, 'branch' => $hq],
             ['name' => 'POS Cashier', 'email' => 'cashier@autospa.test', 'role' => RoleSlug::Cashier, 'branch' => $hq],
             ['name' => 'Lead Detailer', 'email' => 'detailer@autospa.test', 'role' => RoleSlug::Detailer, 'branch' => $hq],
@@ -35,6 +35,7 @@ class UserSeeder extends Seeder
                     'password' => Hash::make('password'),
                     'email_verified_at' => now(),
                     'is_active' => true,
+                    'onboarding_completed_at' => now(),
                 ]
             );
 

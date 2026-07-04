@@ -23,7 +23,7 @@
             <tr class="asp-table-row">
                 <x-ui.td primary>{{ $user->name }}</x-ui.td>
                 <x-ui.td muted>{{ $user->email }}</x-ui.td>
-                <x-ui.td>{{ $user->branch?->name ?? '—' }}</x-ui.td>
+                <x-ui.td>{{ $user->branch?->name ?? 'N/A' }}</x-ui.td>
                 <x-ui.td wrap>
                     @foreach ($user->roles as $role)
                         <x-ui.badge color="indigo">{{ $role->name }}</x-ui.badge>

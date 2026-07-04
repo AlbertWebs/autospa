@@ -4,7 +4,7 @@
         <dl class="grid gap-4 sm:grid-cols-3 text-sm">
             <div><dt class="text-slate-500">Registration</dt><dd class="font-medium">{{ $vehicle->registration_number }}</dd></div>
             <div><dt class="text-slate-500">Vehicle</dt><dd>{{ $vehicle->make }} {{ $vehicle->model }}</dd></div>
-            <div><dt class="text-slate-500">Customer</dt><dd>{{ $vehicle->customer?->full_name ?? '—' }}</dd></div>
+            <div><dt class="text-slate-500">Customer</dt><dd>{{ $vehicle->customer?->full_name ?? 'N/A' }}</dd></div>
         </dl>
     </x-ui.card>
     <div class="grid gap-6 lg:grid-cols-2">

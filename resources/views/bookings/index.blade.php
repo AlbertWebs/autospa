@@ -21,9 +21,9 @@
 
         @foreach ($bookings as $booking)
             <tr class="asp-table-row">
-                <x-ui.td primary>{{ $booking->customer?->full_name ?? '—' }}</x-ui.td>
-                <x-ui.td mono>{{ $booking->vehicle?->registration_number ?? '—' }}</x-ui.td>
-                <x-ui.td>{{ $booking->scheduled_at?->format('M j, Y g:i A') ?? '—' }}</x-ui.td>
+                <x-ui.td primary>{{ $booking->customer?->full_name ?? 'N/A' }}</x-ui.td>
+                <x-ui.td mono>{{ $booking->vehicle?->registration_number ?? 'N/A' }}</x-ui.td>
+                <x-ui.td>{{ $booking->scheduled_at?->format('M j, Y g:i A') ?? 'N/A' }}</x-ui.td>
                 <x-ui.td>
                     <x-ui.badge color="indigo">{{ ucfirst(str_replace('_', ' ', $booking->status)) }}</x-ui.badge>
                 </x-ui.td>

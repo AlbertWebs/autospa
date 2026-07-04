@@ -29,7 +29,11 @@ class UserController extends Controller
 
         return view('settings.users.create', [
             'branches' => Branch::query()->where('is_active', true)->orderBy('name')->get(),
-            'roles' => Role::query()->orderBy('name')->get(),
+            'roles' => Role::query()
+                ->withCount('permissions')
+                ->with('permissions:id,name,slug,group')
+                ->orderBy('name')
+                ->get(),
         ]);
     }
 
@@ -51,7 +55,7 @@ class UserController extends Controller
         $this->authorize('view', $user);
 
         return view('settings.users.show', [
-            'user' => $user->load(['branch', 'roles']),
+            'user' => $user->load(['branch', 'roles.permissions']),
         ]);
     }
 
@@ -60,9 +64,13 @@ class UserController extends Controller
         $this->authorize('update', $user);
 
         return view('settings.users.edit', [
-            'user' => $user->load('roles'),
+            'user' => $user->load('roles.permissions'),
             'branches' => Branch::query()->where('is_active', true)->orderBy('name')->get(),
-            'roles' => Role::query()->orderBy('name')->get(),
+            'roles' => Role::query()
+                ->withCount('permissions')
+                ->with('permissions:id,name,slug,group')
+                ->orderBy('name')
+                ->get(),
         ]);
     }
 

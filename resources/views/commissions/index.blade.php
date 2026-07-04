@@ -18,9 +18,9 @@
 
         @foreach ($commissions as $commission)
             <tr class="asp-table-row">
-                <x-ui.td primary>{{ $commission->employee?->full_name ?? '—' }}</x-ui.td>
+                <x-ui.td primary>{{ $commission->employee?->full_name ?? 'N/A' }}</x-ui.td>
                 <x-ui.td>{{ number_format($commission->amount ?? 0, 2) }}</x-ui.td>
-                <x-ui.td muted>{{ $commission->period ?? '—' }}</x-ui.td>
+                <x-ui.td muted>{{ $commission->period ?? 'N/A' }}</x-ui.td>
                 <x-ui.td>
                     <x-ui.badge color="indigo">{{ $commission->status ?? 'pending' }}</x-ui.badge>
                 </x-ui.td>

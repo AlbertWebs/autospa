@@ -17,12 +17,22 @@ class CompanyController extends Controller
 
         return view('settings.company.edit', [
             'company' => Company::query()->firstOrFail(),
+            'smsNotificationsEnabled' => filter_var(
+                Setting::getValue('sms', 'enabled', false),
+                FILTER_VALIDATE_BOOLEAN
+            ),
         ]);
     }
 
     public function update(UpdateCompanyRequest $request): RedirectResponse
     {
-        Company::query()->firstOrFail()->update($request->validated());
+        $validated = $request->validated();
+        $smsNotificationsEnabled = $request->boolean('sms_notifications_enabled');
+
+        unset($validated['sms_notifications_enabled']);
+
+        Company::query()->firstOrFail()->update($validated);
+        Setting::setValue('sms', 'enabled', $smsNotificationsEnabled, null, 'boolean');
 
         return back()->with('success', 'Company details updated.');
     }

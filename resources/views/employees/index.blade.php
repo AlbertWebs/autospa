@@ -23,9 +23,9 @@
         @foreach ($employees as $employee)
             <tr class="asp-table-row">
                 <x-ui.td primary>{{ $employee->full_name }}</x-ui.td>
-                <x-ui.td mono>{{ $employee->employee_number ?? '—' }}</x-ui.td>
-                <x-ui.td>{{ $employee->position ?? '—' }}</x-ui.td>
-                <x-ui.td muted>{{ $employee->phone ?? '—' }}</x-ui.td>
+                <x-ui.td mono>{{ $employee->employee_number ?? 'N/A' }}</x-ui.td>
+                <x-ui.td>{{ $employee->position ?? 'N/A' }}</x-ui.td>
+                <x-ui.td muted>{{ $employee->phone ?? 'N/A' }}</x-ui.td>
                 <x-ui.td>
                     @if ($employee->is_active)
                         <x-ui.badge color="green">Active</x-ui.badge>

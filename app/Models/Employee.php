@@ -73,7 +73,7 @@ class Employee extends Model
     public function displayName(): string
     {
         return $this->position
-            ? "{$this->full_name} — {$this->position}"
+            ? "{$this->full_name} ({$this->position})"
             : $this->full_name;
     }
 }

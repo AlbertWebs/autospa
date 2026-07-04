@@ -1,4 +1,23 @@
 @php
+    $customersJson = $customers->map(function ($customer) {
+        $customerName = filled(trim((string) $customer->full_name)) ? trim((string) $customer->full_name) : null;
+        $primaryVehicle = $customer->vehicles->first()?->registration_number;
+        $additionalVehicleCount = max($customer->vehicles->count() - 1, 0);
+        $vehicleSummary = $primaryVehicle
+            ? $primaryVehicle . ($additionalVehicleCount > 0 ? ' +' . $additionalVehicleCount . ' more' : '')
+            : null;
+
+        return [
+            'id' => $customer->id,
+            'display_name' => $customerName,
+            'phone' => $customer->phone,
+            'vehicle_summary' => $vehicleSummary,
+            'option_label' => $customerName
+                ? $customerName . ($vehicleSummary ? ' · ' . $vehicleSummary : '')
+                : ($vehicleSummary ?? 'Unnamed customer'),
+        ];
+    })->values();
+
     $servicesJson = $services->map(fn ($s) => [
         'id' => $s->id,
         'name' => $s->name,
@@ -27,12 +46,26 @@
 
     <div
         x-data="posCheckout({
+            customers: @js($customersJson),
+            customerStoreUrl: @js(route('customers.store')),
+            stkPushUrl: @js(route('pos.stk-push')),
             services: @js($servicesJson),
             products: @js($productsJson),
             paymentMethods: @js($paymentMethodsJson),
             defaultCustomerId: @js(old('customer_id', $customers->first()?->id ?? '')),
+            oldCustomerId: @js(old('customer_id')),
+            oldPaymentMethodId: @js(old('payment_method_id')),
+            oldItems: @js(old('items', [])),
         })"
     >
+        @if ($errors->any())
+            <script>
+                document.addEventListener('alpine:init', () => {
+                    Alpine.store('toast').show(@json($errors->first()), 'error');
+                });
+            </script>
+        @endif
+
         <header class="asp-page-header">
             <div>
                 <p class="asp-page-eyebrow">Sales</p>
@@ -77,7 +110,7 @@
 
                     <div class="asp-pos-grid">
                         <template x-for="item in filteredItems" :key="item.itemType + '-' + item.id">
-                            <button type="button" class="asp-pos-tile" @click="addItem(item)">
+                            <button type="button" class="group asp-pos-tile" @click="addItem(item)">
                                 <span class="asp-pos-tile-add material-symbols-outlined text-lg">add</span>
                                 <span class="asp-pos-tile-type" x-bind:class="item.itemType === 'service' ? 'asp-pos-tile-type--service' : 'asp-pos-tile-type--product'" x-text="item.itemType"></span>
                                 <span class="asp-pos-tile-name" x-text="item.name"></span>
@@ -119,30 +152,72 @@
                         </button>
                     </div>
 
-                    <form method="POST" action="{{ route('pos.store') }}" class="asp-pos-cart-body asp-form !space-y-4">
+                    <form method="POST" action="{{ route('pos.store') }}" class="asp-pos-cart-body asp-form !space-y-4" @submit.prevent="handleCheckout">
                         @csrf
 
                         <input type="hidden" name="customer_id" x-model="customerId">
+                        <input type="hidden" name="payment_method_id" x-bind:value="paymentMethodId">
                         <input type="hidden" name="method" x-bind:value="selectedMethodSlug">
+                        <input type="hidden" name="stk_phone" x-model="stkPhone">
+                        <input type="hidden" name="stk_reference" x-model="stkReference">
+                        <input type="hidden" name="stk_status" x-model="stkStatus">
                         <input type="hidden" name="subtotal" x-bind:value="subtotal.toFixed(2)">
                         <input type="hidden" name="discount_amount" value="0">
                         <input type="hidden" name="tax_amount" value="0">
                         <input type="hidden" name="total_amount" x-bind:value="total.toFixed(2)">
 
-                        <template x-for="(item, index) in cart" :key="index">
-                            <input type="hidden" x-bind:name="'items[' + index + '][description]'" x-bind:value="item.name">
-                            <input type="hidden" x-bind:name="'items[' + index + '][quantity]'" x-bind:value="item.qty">
-                            <input type="hidden" x-bind:name="'items[' + index + '][unit_price]'" x-bind:value="item.price.toFixed(2)">
-                            <input type="hidden" x-bind:name="'items[' + index + '][total]'" x-bind:value="(item.price * item.qty).toFixed(2)">
-                        </template>
+                        <div
+                            x-show="showCheckoutGuide"
+                            x-cloak
+                            class="rounded-2xl border border-slate-200/80 bg-slate-50 px-4 py-3 dark:border-brand-border/60 dark:bg-brand-surface-high/60"
+                        >
+                            <p class="font-mono text-[10px] font-semibold uppercase tracking-widest text-slate-400">Checkout Steps</p>
+                            <ol class="mt-2 space-y-1 text-sm text-slate-600 dark:text-slate-300">
+                                <li>1. Select or create a customer.</li>
+                                <li>2. Add services or products to the cart.</li>
+                                <li>3. Choose a payment method.</li>
+                                <li>4. Complete the sale to issue a receipt.</li>
+                            </ol>
+                            <div class="mt-3 flex justify-end">
+                                <button
+                                    type="button"
+                                    class="asp-btn asp-btn-primary !px-4 !py-2 text-sm"
+                                    @click="dismissCheckoutGuide()"
+                                >
+                                    Understood
+                                </button>
+                            </div>
+                        </div>
 
                         <x-ui.form-field label="Customer" for="pos_customer" hint="Required for invoicing.">
-                            <x-ui.select id="pos_customer" x-model="customerId" required>
-                                <option value="">Select customer…</option>
-                                @foreach ($customers as $customer)
-                                    <option value="{{ $customer->id }}">{{ $customer->full_name }}</option>
-                                @endforeach
-                            </x-ui.select>
+                            <div class="asp-field-addon">
+                                <x-ui.select id="pos_customer" x-model="customerId" required>
+                                    <option value="">Select customer…</option>
+                                    <template x-for="customer in customers" :key="customer.id">
+                                        <option :value="customer.id" x-text="customer.option_label"></option>
+                                    </template>
+                                </x-ui.select>
+                                <button
+                                    type="button"
+                                    class="asp-btn asp-btn-secondary shrink-0 !px-3"
+                                    title="Create new customer"
+                                    @click="openCustomerModal()"
+                                >
+                                    <span class="material-symbols-outlined text-lg">person_add</span>
+                                </button>
+                            </div>
+                            <p class="asp-field-hint">
+                                <button type="button" class="text-brand-primary-dim hover:underline dark:text-brand-primary" @click="openCustomerModal()">
+                                    + Add new customer
+                                </button>
+                            </p>
+                            <p
+                                class="mt-2 text-xs text-slate-500 dark:text-slate-400"
+                                x-show="selectedCustomerVehicle"
+                                x-cloak
+                            >
+                                Vehicle: <span class="font-mono" x-text="selectedCustomerVehicle"></span>
+                            </p>
                         </x-ui.form-field>
 
                         <div class="asp-pos-cart-lines">
@@ -190,24 +265,96 @@
                         </div>
 
                         <x-ui.form-field label="Payment Method" for="payment_method">
-                            <x-ui.select id="payment_method" name="payment_method_id" x-model="paymentMethodId" required>
+                            <x-ui.select id="payment_method" x-model="paymentMethodId" required>
                                 <option value="">Select method…</option>
                                 @foreach ($paymentMethods as $method)
                                     <option value="{{ $method->id }}">{{ $method->name }}</option>
                                 @endforeach
                             </x-ui.select>
+                            <p class="mt-2 text-xs text-slate-500 dark:text-slate-400" x-show="isMpesaSelected" x-cloak>
+                                STK push will be sent to <span class="font-mono" x-text="selectedCustomerPhone || 'the customer phone'"></span>.
+                            </p>
                         </x-ui.form-field>
 
                         <button
                             type="submit"
                             class="asp-btn asp-btn-primary w-full justify-center !py-3"
-                            x-bind:disabled="!canCheckout"
+                            x-bind:disabled="!canCheckout || checkoutSubmitting"
                         >
                             <span class="material-symbols-outlined text-lg">payments</span>
-                            Complete Sale
+                            <span x-text="isMpesaSelected ? 'Send STK Push & Issue Receipt' : 'Complete Sale & Issue Receipt'"></span>
                         </button>
                     </form>
                 </div>
+            </div>
+        </div>
+
+        @include('partials.customers.quick-create-modal')
+
+        <div
+            x-show="showStkModal"
+            x-cloak
+            class="asp-modal-backdrop"
+            @keydown.escape.window="showStkModal && closeStkModal()"
+        >
+            <div
+                class="asp-modal"
+                @click.outside="closeStkModal()"
+                x-transition
+            >
+                <div class="asp-modal-header">
+                    <div>
+                        <p class="font-mono text-[10px] font-semibold uppercase tracking-widest text-brand-primary">M-Pesa</p>
+                        <h3 class="asp-modal-title">Send STK Push</h3>
+                    </div>
+                    <button type="button" class="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-brand-surface-high dark:hover:text-slate-200" @click="closeStkModal()">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+
+                <form @submit.prevent="confirmStkPush" class="asp-form !space-y-5">
+                    <div class="asp-modal-body space-y-5">
+                        <div class="rounded-xl border border-slate-200/80 bg-slate-50 px-4 py-3 text-sm dark:border-brand-border/60 dark:bg-brand-surface-high">
+                            <div class="flex items-center justify-between gap-4">
+                                <span class="text-slate-500 dark:text-slate-400">Amount</span>
+                                <span class="font-mono font-semibold text-slate-900 dark:text-white">KES <span x-text="formatMoney(total)"></span></span>
+                            </div>
+                            <div class="mt-2 flex items-center justify-between gap-4">
+                                <span class="text-slate-500 dark:text-slate-400">Customer</span>
+                                <span class="font-medium text-slate-900 dark:text-white" x-text="selectedCustomer?.display_name || 'Selected customer'"></span>
+                            </div>
+                        </div>
+
+                        <x-ui.form-field label="Phone Number" for="stk_phone" hint="Edit before sending if needed.">
+                            <x-ui.input
+                                id="stk_phone"
+                                type="tel"
+                                x-model="stkPhoneDraft"
+                                x-bind:class="{ 'asp-input--error': stkPushErrors.phone }"
+                                placeholder="+2547XXXXXXXX"
+                                required
+                            />
+                            <p class="asp-field-error" x-show="stkPushErrors.phone" x-cloak>
+                                <span class="material-symbols-outlined text-sm">error</span>
+                                <span x-text="stkPushErrors.phone?.[0]"></span>
+                            </p>
+                        </x-ui.form-field>
+                    </div>
+
+                    <div class="asp-modal-footer">
+                        <button type="button" class="asp-btn asp-btn-ghost" @click="closeStkModal()" x-bind:disabled="stkPushLoading">
+                            Cancel
+                        </button>
+                        <button type="submit" class="asp-btn asp-btn-primary min-w-[12rem]" x-bind:disabled="stkPushLoading">
+                            <svg x-show="stkPushLoading" x-cloak class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            <span class="material-symbols-outlined text-lg" x-show="!stkPushLoading">smartphone</span>
+                            <span x-text="stkPushLoading ? 'Sending…' : 'Send STK Push & Complete Sale'"></span>
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

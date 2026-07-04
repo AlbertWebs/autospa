@@ -23,7 +23,7 @@
             <tr class="asp-table-row">
                 <x-ui.td primary>{{ $branch->name }}</x-ui.td>
                 <x-ui.td mono muted>{{ $branch->code }}</x-ui.td>
-                <x-ui.td>{{ $branch->phone ?? '—' }}</x-ui.td>
+                <x-ui.td>{{ $branch->phone ?? 'N/A' }}</x-ui.td>
                 <x-ui.td>
                     @if ($branch->is_active)
                         <x-ui.badge color="green">Active</x-ui.badge>

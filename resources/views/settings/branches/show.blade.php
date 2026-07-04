@@ -12,9 +12,9 @@
     <x-ui.card>
         <dl class="space-y-3 text-sm">
             <div class="flex justify-between gap-4"><dt class="text-slate-500">Code</dt><dd class="font-medium">{{ $branch->code }}</dd></div>
-            <div class="flex justify-between gap-4"><dt class="text-slate-500">Address</dt><dd>{{ $branch->address ?? '—' }}</dd></div>
-            <div class="flex justify-between gap-4"><dt class="text-slate-500">Phone</dt><dd>{{ $branch->phone ?? '—' }}</dd></div>
-            <div class="flex justify-between gap-4"><dt class="text-slate-500">Email</dt><dd>{{ $branch->email ?? '—' }}</dd></div>
+            <div class="flex justify-between gap-4"><dt class="text-slate-500">Address</dt><dd>{{ $branch->address ?? 'N/A' }}</dd></div>
+            <div class="flex justify-between gap-4"><dt class="text-slate-500">Phone</dt><dd>{{ $branch->phone ?? 'N/A' }}</dd></div>
+            <div class="flex justify-between gap-4"><dt class="text-slate-500">Email</dt><dd>{{ $branch->email ?? 'N/A' }}</dd></div>
             <div class="flex justify-between gap-4"><dt class="text-slate-500">Status</dt><dd>@if($branch->is_active)<x-ui.badge color="green">Active</x-ui.badge>@else<x-ui.badge color="slate">Inactive</x-ui.badge>@endif</dd></div>
         </dl>
     </x-ui.card>

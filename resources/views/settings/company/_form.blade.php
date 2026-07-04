@@ -1,4 +1,7 @@
-@php $company = $company ?? null; @endphp
+@php
+    $company = $company ?? null;
+    $smsNotificationsEnabled = $smsNotificationsEnabled ?? false;
+@endphp
 
 <x-ui.form-section title="Company Information" description="Legal identity, contact details, and registration information.">
     <div class="asp-form-grid">
@@ -32,6 +35,17 @@
 
         <x-ui.form-field label="Website" for="website" name="website" :col-span="2">
             <x-ui.input id="website" name="website" :value="old('website', $company->website)" />
+        </x-ui.form-field>
+
+        <x-ui.form-field :col-span="2" name="sms_notifications_enabled">
+            <div class="asp-checkbox-group">
+                <x-ui.checkbox
+                    name="sms_notifications_enabled"
+                    :checked="old('sms_notifications_enabled', $smsNotificationsEnabled)"
+                >
+                    Enable SMS notifications for vehicle updates
+                </x-ui.checkbox>
+            </div>
         </x-ui.form-field>
     </div>
 </x-ui.form-section>

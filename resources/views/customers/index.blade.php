@@ -22,7 +22,7 @@
             <tr class="asp-table-row">
                 <x-ui.td primary>{{ $customer->full_name }}</x-ui.td>
                 <x-ui.td>{{ $customer->phone }}</x-ui.td>
-                <x-ui.td muted>{{ $customer->email ?? '—' }}</x-ui.td>
+                <x-ui.td muted>{{ $customer->email ?? 'N/A' }}</x-ui.td>
                 <x-ui.td align="right">
                     <x-ui.table-actions
                         :view="route('customers.show', $customer)"

@@ -13,10 +13,10 @@
     <x-ui.card>
         <dl class="space-y-3 text-sm">
             <div class="flex justify-between gap-4"><dt class="text-slate-500">Employee #</dt><dd class="font-medium">{{ $employee->employee_number }}</dd></div>
-            <div class="flex justify-between gap-4"><dt class="text-slate-500">Position</dt><dd>{{ $employee->position ?? '—' }}</dd></div>
-            <div class="flex justify-between gap-4"><dt class="text-slate-500">Phone</dt><dd>{{ $employee->phone ?? '—' }}</dd></div>
-            <div class="flex justify-between gap-4"><dt class="text-slate-500">Email</dt><dd>{{ $employee->email ?? '—' }}</dd></div>
-            <div class="flex justify-between gap-4"><dt class="text-slate-500">Hire Date</dt><dd>{{ $employee->hire_date?->format('M j, Y') ?? '—' }}</dd></div>
+            <div class="flex justify-between gap-4"><dt class="text-slate-500">Position</dt><dd>{{ $employee->position ?? 'N/A' }}</dd></div>
+            <div class="flex justify-between gap-4"><dt class="text-slate-500">Phone</dt><dd>{{ $employee->phone ?? 'N/A' }}</dd></div>
+            <div class="flex justify-between gap-4"><dt class="text-slate-500">Email</dt><dd>{{ $employee->email ?? 'N/A' }}</dd></div>
+            <div class="flex justify-between gap-4"><dt class="text-slate-500">Hire Date</dt><dd>{{ $employee->hire_date?->format('M j, Y') ?? 'N/A' }}</dd></div>
             <div class="flex justify-between gap-4"><dt class="text-slate-500">Status</dt><dd>@if($employee->is_active)<x-ui.badge color="green">Active</x-ui.badge>@else<x-ui.badge color="slate">Inactive</x-ui.badge>@endif</dd></div>
         </dl>
     </x-ui.card>

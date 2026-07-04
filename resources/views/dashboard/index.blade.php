@@ -10,7 +10,7 @@
             <p class="asp-page-eyebrow">Live Operations</p>
             <h1 class="asp-page-title">Mission Control</h1>
             <p class="asp-page-subtitle">
-                Good {{ now()->hour < 12 ? 'morning' : (now()->hour < 17 ? 'afternoon' : 'evening') }}, {{ auth()->user()->name }} —
+                Good {{ now()->hour < 12 ? 'morning' : (now()->hour < 17 ? 'afternoon' : 'evening') }}, {{ auth()->user()->name }}.
                 {{ now()->format('l, F j, Y') }}
             </p>
         </div>

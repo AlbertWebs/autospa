@@ -17,7 +17,7 @@ class RoleController extends Controller
         $this->authorize('viewAny', Setting::class);
 
         return view('settings.roles.index', [
-            'roles' => Role::query()->withCount('users')->orderBy('name')->get(),
+            'roles' => Role::query()->withCount(['users', 'permissions'])->orderBy('name')->get(),
         ]);
     }
 
@@ -27,7 +27,7 @@ class RoleController extends Controller
 
         return view('settings.roles.edit', [
             'role' => $role->load('permissions'),
-            'permissions' => Permission::query()->orderBy('name')->get(),
+            'permissions' => Permission::query()->orderBy('group')->orderBy('name')->get(),
         ]);
     }
 

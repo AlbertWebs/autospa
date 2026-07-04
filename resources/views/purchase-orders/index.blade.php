@@ -21,7 +21,7 @@
         @foreach ($purchaseOrders as $purchaseOrder)
             <tr class="asp-table-row">
                 <x-ui.td primary mono>{{ $purchaseOrder->reference ?? '#'.$purchaseOrder->id }}</x-ui.td>
-                <x-ui.td>{{ $purchaseOrder->supplier?->name ?? '—' }}</x-ui.td>
+                <x-ui.td>{{ $purchaseOrder->supplier?->name ?? 'N/A' }}</x-ui.td>
                 <x-ui.td>
                     <x-ui.badge color="indigo">{{ ucfirst($purchaseOrder->status) }}</x-ui.badge>
                 </x-ui.td>

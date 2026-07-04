@@ -14,8 +14,8 @@ enum RoleSlug: string
     public function label(): string
     {
         return match ($this) {
-            self::SuperAdmin => 'Super Admin',
-            self::Manager => 'Manager',
+            self::SuperAdmin => 'Admin',
+            self::Manager => 'Supervisor',
             self::Cashier => 'Cashier',
             self::Receptionist => 'Receptionist',
             self::Detailer => 'Detailer',

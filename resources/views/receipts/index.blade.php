@@ -18,9 +18,9 @@
 
         @foreach ($receipts as $receipt)
             <tr class="asp-table-row">
-                <x-ui.td primary mono>{{ $receipt->number ?? '#'.$receipt->id }}</x-ui.td>
-                <x-ui.td>{{ $receipt->customer?->full_name ?? '—' }}</x-ui.td>
-                <x-ui.td>{{ number_format($receipt->total ?? 0, 2) }}</x-ui.td>
+                <x-ui.td primary mono>{{ $receipt->receipt_number }}</x-ui.td>
+                <x-ui.td>{{ $receipt->invoice?->customer?->full_name ?? 'N/A' }}</x-ui.td>
+                <x-ui.td>{{ number_format((float) $receipt->amount, 2) }}</x-ui.td>
                 <x-ui.td align="right">
                     <x-ui.table-actions :view="route('receipts.show', $receipt)" />
                 </x-ui.td>

@@ -15,9 +15,9 @@
             <h2 class="mb-4 text-lg font-semibold">Contact Details</h2>
             <dl class="space-y-3 text-sm">
                 <div class="flex justify-between gap-4"><dt class="text-slate-500">Phone</dt><dd class="font-medium">{{ $customer->phone }}</dd></div>
-                <div class="flex justify-between gap-4"><dt class="text-slate-500">Email</dt><dd>{{ $customer->email ?? '—' }}</dd></div>
-                <div class="flex justify-between gap-4"><dt class="text-slate-500">ID Number</dt><dd>{{ $customer->id_number ?? '—' }}</dd></div>
-                <div class="flex justify-between gap-4"><dt class="text-slate-500">Address</dt><dd>{{ $customer->address ?? '—' }}</dd></div>
+                <div class="flex justify-between gap-4"><dt class="text-slate-500">Email</dt><dd>{{ $customer->email ?? 'N/A' }}</dd></div>
+                <div class="flex justify-between gap-4"><dt class="text-slate-500">ID Number</dt><dd>{{ $customer->id_number ?? 'N/A' }}</dd></div>
+                <div class="flex justify-between gap-4"><dt class="text-slate-500">Address</dt><dd>{{ $customer->address ?? 'N/A' }}</dd></div>
             </dl>
         </x-ui.card>
         <x-ui.card>
