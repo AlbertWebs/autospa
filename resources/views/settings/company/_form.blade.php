@@ -1,6 +1,10 @@
 @php
     $company = $company ?? null;
     $smsNotificationsEnabled = $smsNotificationsEnabled ?? false;
+    $commissionsEnabled = $commissionsEnabled ?? false;
+    $commissionDefaultRatePercent = $commissionDefaultRatePercent ?? 0;
+    $commissionTrigger = $commissionTrigger ?? 'pos_checkout';
+    $commissionTriggerOptions = $commissionTriggerOptions ?? [];
 @endphp
 
 <x-ui.form-section title="Company Information" description="Legal identity, contact details, and registration information.">
@@ -46,6 +50,41 @@
                     Enable SMS notifications for vehicle updates
                 </x-ui.checkbox>
             </div>
+        </x-ui.form-field>
+    </div>
+</x-ui.form-section>
+
+<x-ui.form-section title="Commission Settings" description="Configure how staff commissions are calculated and when they are earned.">
+    <div class="asp-form-grid">
+        <x-ui.form-field :col-span="2" name="commissions_enabled">
+            <div class="asp-checkbox-group">
+                <x-ui.checkbox
+                    name="commissions_enabled"
+                    :checked="old('commissions_enabled', $commissionsEnabled)"
+                >
+                    Enable staff commissions
+                </x-ui.checkbox>
+            </div>
+        </x-ui.form-field>
+
+        <x-ui.form-field label="Default Commission Rate (%)" for="commission_default_rate" name="commission_default_rate">
+            <x-ui.input
+                id="commission_default_rate"
+                name="commission_default_rate"
+                type="number"
+                step="0.01"
+                min="0"
+                max="100"
+                :value="old('commission_default_rate', $commissionDefaultRatePercent)"
+            />
+        </x-ui.form-field>
+
+        <x-ui.form-field label="Earn Commission" for="commission_trigger" name="commission_trigger">
+            <x-ui.select id="commission_trigger" name="commission_trigger">
+                @foreach ($commissionTriggerOptions as $value => $label)
+                    <option value="{{ $value }}" @selected(old('commission_trigger', $commissionTrigger) === $value)>{{ $label }}</option>
+                @endforeach
+            </x-ui.select>
         </x-ui.form-field>
     </div>
 </x-ui.form-section>

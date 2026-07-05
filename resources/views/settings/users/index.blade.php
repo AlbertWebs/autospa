@@ -33,6 +33,9 @@
                     <x-ui.table-actions
                         :view="route('settings.users.show', $user)"
                         :edit="route('settings.users.edit', $user)"
+                        :delete="route('settings.users.destroy', $user)"
+                        :delete-visible="auth()->user()->can('delete', $user)"
+                        delete-confirm="Delete this user permanently?"
                     />
                 </x-ui.td>
             </tr>

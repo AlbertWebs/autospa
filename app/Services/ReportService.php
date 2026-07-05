@@ -8,15 +8,18 @@ use App\Models\Employee;
 use App\Models\Invoice;
 use App\Models\JobCard;
 use App\Models\Product;
+use App\Models\StockMovement;
 use App\Enums\BookingStatus;
 use App\Enums\InvoiceStatus;
 use App\Enums\JobCardStatus;
+use App\Services\StockMovementService;
 use Carbon\Carbon;
 
 class ReportService
 {
     public function __construct(
         protected BranchService $branchService,
+        protected StockMovementService $stockMovementService,
     ) {}
 
     public function daily(?int $branchId = null, ?Carbon $date = null): array
@@ -124,20 +127,93 @@ class ReportService
         ];
     }
 
-    public function inventory(?int $branchId = null): array
-    {
+    public function inventory(
+        ?int $branchId = null,
+        ?Carbon $asOf = null,
+        ?Carbon $from = null,
+        ?Carbon $to = null,
+    ): array {
         $branchId = $branchId ?? $this->branchService->currentBranchId();
+        $asOf = $asOf ?? now();
+        $from = $from ?? now()->copy()->startOfMonth()->startOfDay();
+        $to = $to ?? now()->copy()->endOfDay();
+
+        $products = Product::query()
+            ->where('branch_id', $branchId)
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        $stockPositions = $products->map(function (Product $product) use ($asOf) {
+            $quantity = $this->stockMovementService->stockBalanceAsOf($product, $asOf);
+
+            return [
+                'product' => $product,
+                'quantity' => $quantity,
+                'value' => $quantity * (float) $product->cost_price,
+                'is_low' => $quantity <= (float) $product->minimum_level,
+            ];
+        });
+
+        $movements = StockMovement::query()
+            ->with(['product', 'user'])
+            ->where('branch_id', $branchId)
+            ->whereBetween('moved_at', [$from, $to])
+            ->orderByDesc('moved_at')
+            ->orderByDesc('id')
+            ->limit(100)
+            ->get();
 
         return [
-            'total_products' => Product::query()->where('branch_id', $branchId)->where('is_active', true)->count(),
-            'low_stock' => Product::query()
+            'as_of' => $asOf->format('Y-m-d\TH:i'),
+            'from' => $from->toDateString(),
+            'to' => $to->toDateString(),
+            'total_products' => $products->count(),
+            'low_stock' => $stockPositions->where('is_low', true)->count(),
+            'stock_value' => $stockPositions->sum('value'),
+            'stock_in_count' => $movements->where('type', 'in')->count(),
+            'stock_in_quantity' => $movements->where('type', 'in')->sum('quantity'),
+            'movements' => $movements,
+            'stock_positions' => $stockPositions,
+        ];
+    }
+
+    public function jobCards(?int $branchId = null, ?Carbon $date = null): array
+    {
+        $branchId = $branchId ?? $this->branchService->currentBranchId();
+        $date = $date ?? now();
+        $weekStart = $date->copy()->startOfWeek();
+        $weekEnd = $date->copy()->endOfWeek();
+        $monthStart = $date->copy()->startOfMonth();
+        $monthEnd = $date->copy()->endOfMonth();
+
+        $statusCounts = function (Carbon $start, Carbon $end) use ($branchId): array {
+            $base = fn () => JobCard::query()
                 ->where('branch_id', $branchId)
-                ->whereColumn('quantity_on_hand', '<=', 'minimum_level')
-                ->count(),
-            'stock_value' => Product::query()
+                ->forPeriod($start, $end);
+
+            return [
+                'open' => $base()->where('status', JobCardStatus::Open)->count(),
+                'in_progress' => $base()->where('status', JobCardStatus::InProgress)->count(),
+                'completed' => $base()->where('status', JobCardStatus::Completed)->count(),
+                'cancelled' => $base()->where('status', JobCardStatus::Cancelled)->count(),
+                'total' => $base()->count(),
+            ];
+        };
+
+        return [
+            'date' => $date->toDateString(),
+            'today' => $statusCounts($date->copy()->startOfDay(), $date->copy()->endOfDay()),
+            'week' => $statusCounts($weekStart, $weekEnd),
+            'month' => $statusCounts($monthStart, $monthEnd),
+            'week_period' => [$weekStart->toDateString(), $weekEnd->toDateString()],
+            'month_label' => $date->format('F Y'),
+            'job_cards' => JobCard::query()
+                ->with(['customer', 'vehicle', 'assignee'])
                 ->where('branch_id', $branchId)
-                ->selectRaw('SUM(quantity_on_hand * cost_price) as value')
-                ->value('value') ?? 0,
+                ->forDay($date)
+                ->latest()
+                ->get(),
         ];
     }
 

@@ -37,8 +37,8 @@ return [
         'target' => null,
     ],
     [
-        'title' => 'Reports & marketing',
-        'body' => 'Run daily, weekly, and monthly reports for revenue, customers, staff, and inventory. Launch SMS, email, and promotion campaigns from Marketing.',
+        'title' => 'Reports',
+        'body' => 'Run daily, weekly, and monthly reports for revenue, customers, staff, inventory, and job cards.',
         'target' => null,
     ],
     [
@@ -48,7 +48,7 @@ return [
     ],
     [
         'title' => 'Settings & user manual',
-        'body' => 'Configure company details, branches, users, roles, taxes, payment methods, and integrations under Settings. The User Manual explains every module in detail.',
+        'body' => 'Configure company details, branches, users, roles, payment methods, and integrations under Settings. The User Manual explains every module in detail.',
         'target' => 'user-manual',
     ],
     [

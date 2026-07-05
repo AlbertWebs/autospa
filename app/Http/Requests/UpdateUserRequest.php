@@ -22,6 +22,7 @@ class UpdateUserRequest extends FormRequest
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($this->route('user'))],
             'phone' => ['nullable', 'string', 'max:50'],
             'password' => ['nullable', 'confirmed', Password::defaults()],
+            'pin' => ['nullable', 'digits_between:4,6', 'confirmed'],
             'is_active' => ['boolean'],
             'roles' => ['array'],
             'roles.*' => ['exists:roles,id'],

@@ -20,7 +20,7 @@ class UserSeeder extends Seeder
             ['name' => 'Admin', 'email' => 'admin@autospa.test', 'role' => RoleSlug::SuperAdmin, 'branch' => null],
             ['name' => 'Branch Supervisor', 'email' => 'manager@autospa.test', 'role' => RoleSlug::Manager, 'branch' => $hq],
             ['name' => 'Front Desk', 'email' => 'reception@autospa.test', 'role' => RoleSlug::Receptionist, 'branch' => $hq],
-            ['name' => 'POS Cashier', 'email' => 'cashier@autospa.test', 'role' => RoleSlug::Cashier, 'branch' => $hq],
+            ['name' => 'POS Cashier', 'email' => 'cashier@autospa.test', 'role' => RoleSlug::Cashier, 'branch' => $hq, 'pin' => '1234'],
             ['name' => 'Lead Detailer', 'email' => 'detailer@autospa.test', 'role' => RoleSlug::Detailer, 'branch' => $hq],
             ['name' => 'Stock Manager', 'email' => 'inventory@autospa.test', 'role' => RoleSlug::InventoryManager, 'branch' => $west],
         ];
@@ -33,6 +33,7 @@ class UserSeeder extends Seeder
                     'branch_id' => $data['branch']?->id,
                     'phone' => '+254700000000',
                     'password' => Hash::make('password'),
+                    'pin' => isset($data['pin']) ? $data['pin'] : null,
                     'email_verified_at' => now(),
                     'is_active' => true,
                     'onboarding_completed_at' => now(),

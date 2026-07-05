@@ -20,10 +20,10 @@
 
             <main class="flex-1 p-4 sm:p-6 lg:p-8">
                 @if (session('success'))
-                    <script>document.addEventListener('alpine:init', () => Alpine.store('toast').show(@json(session('success')), 'success'))</script>
+                    <meta name="flash-success" content="{{ session('success') }}">
                 @endif
                 @if (session('error'))
-                    <script>document.addEventListener('alpine:init', () => Alpine.store('toast').show(@json(session('error')), 'error'))</script>
+                    <meta name="flash-error" content="{{ session('error') }}">
                 @endif
 
                 @yield('content')

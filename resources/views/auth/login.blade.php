@@ -38,8 +38,30 @@
                     <div class="auth-status">{{ session('status') }}</div>
                 @endif
 
-                <form method="POST" action="{{ route('login') }}" class="auth-form">
+                <div class="auth-login-tabs" role="tablist" aria-label="Sign in method">
+                    <button
+                        type="button"
+                        class="auth-login-tab is-active"
+                        data-login-tab="password"
+                        role="tab"
+                        aria-selected="true"
+                    >
+                        Password
+                    </button>
+                    <button
+                        type="button"
+                        class="auth-login-tab"
+                        data-login-tab="pin"
+                        role="tab"
+                        aria-selected="false"
+                    >
+                        PIN
+                    </button>
+                </div>
+
+                <form method="POST" action="{{ route('login') }}" class="auth-form" id="login-form">
                     @csrf
+                    <input type="hidden" name="login_method" id="login_method" value="{{ old('login_method', 'password') }}">
 
                     <div class="auth-field">
                         <label for="email">Email Address</label>
@@ -62,7 +84,7 @@
                         @enderror
                     </div>
 
-                    <div class="auth-field">
+                    <div class="auth-field" data-login-panel="password">
                         <div class="auth-field-header">
                             <label for="password">Password</label>
                             @if (Route::has('password.request'))
@@ -75,7 +97,6 @@
                                 id="password"
                                 type="password"
                                 name="password"
-                                required
                                 autocomplete="current-password"
                                 placeholder="••••••••"
                                 class="auth-input @error('password') is-invalid @enderror"
@@ -84,6 +105,29 @@
                         @error('password')
                             <p class="auth-error">{{ $message }}</p>
                         @enderror
+                        <p class="auth-field-hint">For Admin and Supervisor accounts.</p>
+                    </div>
+
+                    <div class="auth-field is-hidden" data-login-panel="pin">
+                        <label for="pin">PIN</label>
+                        <div class="auth-input-wrap">
+                            <span class="material-symbols-outlined auth-input-icon">pin</span>
+                            <input
+                                id="pin"
+                                type="password"
+                                name="pin"
+                                inputmode="numeric"
+                                pattern="[0-9]*"
+                                maxlength="6"
+                                autocomplete="one-time-code"
+                                placeholder="4–6 digit PIN"
+                                class="auth-input auth-input--pin @error('pin') is-invalid @enderror"
+                            >
+                        </div>
+                        @error('pin')
+                            <p class="auth-error">{{ $message }}</p>
+                        @enderror
+                        <p class="auth-field-hint">Quick sign-in for staff with a PIN set by your administrator.</p>
                     </div>
 
                     <label class="auth-remember">
@@ -91,7 +135,7 @@
                         Remember me
                     </label>
 
-                    <button type="submit" class="auth-submit">Login to System</button>
+                    <button type="submit" class="auth-submit" id="login-submit">Login to System</button>
                 </form>
 
                 <p class="auth-footer-note">
@@ -100,4 +144,49 @@
             </div>
         </section>
     </main>
+
+    <script>
+        (() => {
+            const form = document.getElementById('login-form');
+            const methodInput = document.getElementById('login_method');
+            const passwordInput = document.getElementById('password');
+            const pinInput = document.getElementById('pin');
+            const submitButton = document.getElementById('login-submit');
+            const tabs = document.querySelectorAll('[data-login-tab]');
+            const panels = document.querySelectorAll('[data-login-panel]');
+
+            const setMode = (mode) => {
+                methodInput.value = mode;
+
+                tabs.forEach((tab) => {
+                    const active = tab.dataset.loginTab === mode;
+                    tab.classList.toggle('is-active', active);
+                    tab.setAttribute('aria-selected', active ? 'true' : 'false');
+                });
+
+                panels.forEach((panel) => {
+                    const show = panel.dataset.loginPanel === mode;
+                    panel.classList.toggle('is-hidden', !show);
+                });
+
+                if (mode === 'pin') {
+                    passwordInput.removeAttribute('required');
+                    passwordInput.value = '';
+                    pinInput.setAttribute('required', 'required');
+                    submitButton.textContent = 'Sign In with PIN';
+                } else {
+                    pinInput.removeAttribute('required');
+                    pinInput.value = '';
+                    passwordInput.setAttribute('required', 'required');
+                    submitButton.textContent = 'Login to System';
+                }
+            };
+
+            tabs.forEach((tab) => {
+                tab.addEventListener('click', () => setMode(tab.dataset.loginTab));
+            });
+
+            setMode(methodInput.value === 'pin' ? 'pin' : 'password');
+        })();
+    </script>
 </x-auth-layout>

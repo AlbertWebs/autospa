@@ -241,7 +241,7 @@
 
                 <div class="border-t border-slate-200/80 p-4 dark:border-brand-border/60">
                     <a
-                        :href="'{{ route('bookings.create') }}?scheduled_at=' + selectedDate"
+                        :href="'{{ route('bookings.create') }}?scheduled_at=' + encodeURIComponent(selectedDate)"
                         class="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-brand-primary/40 py-2.5 text-sm font-medium text-brand-primary-dim transition hover:border-brand-primary hover:bg-brand-primary/5 dark:text-brand-primary"
                     >
                         <span class="material-symbols-outlined text-lg">add_circle</span>

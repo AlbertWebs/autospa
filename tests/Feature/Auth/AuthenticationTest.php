@@ -27,6 +27,8 @@ class AuthenticationTest extends TestCase
         $response = $this->get('/login');
 
         $response->assertStatus(200);
+        $response->assertSee('Password');
+        $response->assertSee('PIN');
     }
 
     public function test_super_admin_users_can_authenticate_using_the_login_screen(): void
@@ -34,6 +36,7 @@ class AuthenticationTest extends TestCase
         $user = $this->makeUserWithRole(RoleSlug::SuperAdmin);
 
         $response = $this->post('/login', [
+            'login_method' => 'password',
             'email' => $user->email,
             'password' => 'password',
         ]);
@@ -47,6 +50,7 @@ class AuthenticationTest extends TestCase
         $user = $this->makeUserWithRole(RoleSlug::Manager);
 
         $response = $this->post('/login', [
+            'login_method' => 'password',
             'email' => $user->email,
             'password' => 'password',
         ]);
@@ -60,6 +64,7 @@ class AuthenticationTest extends TestCase
         $user = User::factory()->create();
 
         $this->post('/login', [
+            'login_method' => 'password',
             'email' => $user->email,
             'password' => 'wrong-password',
         ]);
@@ -74,6 +79,7 @@ class AuthenticationTest extends TestCase
         ]);
 
         $response = $this->post('/login', [
+            'login_method' => 'password',
             'email' => $user->email,
             'password' => 'password',
         ]);
@@ -87,14 +93,61 @@ class AuthenticationTest extends TestCase
         $user = $this->makeUserWithRole(RoleSlug::Cashier);
 
         $response = $this->post('/login', [
+            'login_method' => 'password',
             'email' => $user->email,
             'password' => 'password',
         ]);
 
         $this->assertGuest();
         $response->assertSessionHasErrors([
-            'email' => 'Only Admin and Supervisor accounts can sign in.',
+            'email' => 'Only Admin and Supervisor accounts can sign in with a password.',
         ]);
+    }
+
+    public function test_staff_user_can_authenticate_with_pin(): void
+    {
+        $user = $this->makeUserWithRole(RoleSlug::Cashier, [
+            'pin' => '1234',
+        ]);
+
+        $response = $this->post('/login', [
+            'login_method' => 'pin',
+            'email' => $user->email,
+            'pin' => '1234',
+        ]);
+
+        $this->assertAuthenticated();
+        $response->assertRedirect(route('dashboard', absolute: false));
+    }
+
+    public function test_staff_user_cannot_authenticate_with_invalid_pin(): void
+    {
+        $user = $this->makeUserWithRole(RoleSlug::Cashier, [
+            'pin' => '1234',
+        ]);
+
+        $response = $this->post('/login', [
+            'login_method' => 'pin',
+            'email' => $user->email,
+            'pin' => '9999',
+        ]);
+
+        $this->assertGuest();
+        $response->assertSessionHasErrors('email');
+    }
+
+    public function test_staff_user_without_pin_cannot_use_pin_login(): void
+    {
+        $user = $this->makeUserWithRole(RoleSlug::Cashier);
+
+        $response = $this->post('/login', [
+            'login_method' => 'pin',
+            'email' => $user->email,
+            'pin' => '1234',
+        ]);
+
+        $this->assertGuest();
+        $response->assertSessionHasErrors('email');
     }
 
     public function test_users_can_logout(): void

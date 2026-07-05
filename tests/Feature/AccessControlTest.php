@@ -79,6 +79,32 @@ class AccessControlTest extends TestCase
         $response->assertSee('You do not have permission to use this area');
     }
 
+    public function test_manager_can_delete_user_from_users_index(): void
+    {
+        $manager = $this->makeUserWithRole(RoleSlug::Manager);
+        $branch = Branch::query()->firstOrFail();
+
+        $target = User::factory()->create([
+            'branch_id' => $branch->id,
+            'email_verified_at' => now(),
+        ]);
+        $target->roles()->attach(Role::query()->where('slug', RoleSlug::Cashier->value)->firstOrFail());
+
+        $response = $this->actingAs($manager)->delete(route('settings.users.destroy', $target));
+
+        $response->assertRedirect(route('settings.users.index'));
+        $this->assertSoftDeleted('users', ['id' => $target->id]);
+    }
+
+    public function test_user_cannot_delete_themselves(): void
+    {
+        $manager = $this->makeUserWithRole(RoleSlug::Manager);
+
+        $response = $this->actingAs($manager)->delete(route('settings.users.destroy', $manager));
+
+        $response->assertForbidden();
+    }
+
     protected function makeUserWithRole(RoleSlug $roleSlug): User
     {
         $branch = Branch::query()->firstOrFail();

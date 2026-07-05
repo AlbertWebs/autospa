@@ -1,5 +1,6 @@
 @php
     $booking = $booking ?? null;
+    $scheduledAt = $scheduledAt ?? null;
     $customersJson = $customers->map(fn ($customer) => [
         'id' => $customer->id,
         'full_name' => $customer->full_name,
@@ -59,7 +60,7 @@
         </x-ui.form-field>
 
         <x-ui.form-field label="Scheduled At" for="scheduled_at" name="scheduled_at">
-            <x-ui.input id="scheduled_at" name="scheduled_at" type="datetime-local" :value="old('scheduled_at', isset($booking->scheduled_at) ? $booking->scheduled_at->format('Y-m-d\TH:i') : '')" />
+            <x-ui.input id="scheduled_at" name="scheduled_at" type="datetime-local" :value="old('scheduled_at', $scheduledAt ?? (isset($booking->scheduled_at) ? $booking->scheduled_at->format('Y-m-d\TH:i') : ''))" />
         </x-ui.form-field>
 
         <x-ui.form-field label="Ends At" for="ends_at" name="ends_at">

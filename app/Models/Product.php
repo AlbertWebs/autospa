@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Models\Concerns\BelongsToBranch;
 use App\Models\Concerns\HasUuid;
+use App\Services\StockMovementService;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -53,5 +55,10 @@ class Product extends Model
     public function purchaseOrderItems(): HasMany
     {
         return $this->hasMany(PurchaseOrderItem::class);
+    }
+
+    public function stockBalanceAsOf(Carbon $at): float
+    {
+        return app(StockMovementService::class)->stockBalanceAsOf($this, $at);
     }
 }

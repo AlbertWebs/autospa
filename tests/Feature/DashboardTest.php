@@ -17,7 +17,12 @@ class DashboardTest extends TestCase
 
     protected function setUp(): void
     {
+        if ($this->name() === 'test_guest_is_redirected_to_setup') {
+            $this->seedInstalledApplication = false;
+        }
+
         parent::setUp();
+
         $this->seed([RoleSeeder::class, BranchSeeder::class]);
     }
 
@@ -38,10 +43,10 @@ class DashboardTest extends TestCase
         $response->assertSee('Mission Control');
     }
 
-    public function test_guest_is_redirected_to_login(): void
+    public function test_guest_is_redirected_to_setup(): void
     {
         $response = $this->get(route('dashboard'));
 
-        $response->assertRedirect(route('login'));
+        $response->assertRedirect(route('setup.welcome'));
     }
 }

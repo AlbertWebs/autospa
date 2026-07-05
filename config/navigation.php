@@ -22,10 +22,7 @@ return [
         'minimalist' => true,
         'children' => [
             ['label' => 'Calendar', 'route' => 'bookings.calendar', 'permission' => 'bookings.view', 'minimalist' => true],
-            ['label' => 'Walk-ins', 'route' => 'bookings.walk-ins', 'permission' => 'bookings.view', 'minimalist' => true],
-            ['label' => 'Pending', 'route' => 'bookings.pending', 'permission' => 'bookings.view', 'minimalist' => true],
-            ['label' => 'Completed', 'route' => 'bookings.completed', 'permission' => 'bookings.view', 'minimalist' => true],
-            ['label' => 'Cancelled', 'route' => 'bookings.cancelled', 'permission' => 'bookings.view', 'minimalist' => true],
+            ['label' => 'All Bookings', 'route' => 'bookings.index', 'permission' => 'bookings.view', 'minimalist' => true],
         ],
     ],
     [
@@ -52,12 +49,9 @@ return [
     [
         'label' => 'Job Cards',
         'icon' => 'clipboard',
+        'route' => 'job-cards.index',
+        'permission' => 'job-cards.view',
         'minimalist' => true,
-        'children' => [
-            ['label' => 'Open Jobs', 'route' => 'job-cards.open', 'permission' => 'job-cards.view', 'minimalist' => true],
-            ['label' => 'In Progress', 'route' => 'job-cards.in-progress', 'permission' => 'job-cards.view', 'minimalist' => true],
-            ['label' => 'Completed', 'route' => 'job-cards.completed', 'permission' => 'job-cards.view', 'minimalist' => true],
-        ],
     ],
     [
         'label' => 'POS',
@@ -74,7 +68,6 @@ return [
             ['label' => 'Categories', 'route' => 'services.categories.index', 'permission' => 'services.view'],
             ['label' => 'Services', 'route' => 'services.index', 'permission' => 'services.view'],
             ['label' => 'Packages', 'route' => 'packages.index', 'permission' => 'services.view'],
-            ['label' => 'Pricing', 'route' => 'services.pricing', 'permission' => 'services.view'],
         ],
     ],
     [
@@ -130,17 +123,8 @@ return [
             ['label' => 'Revenue', 'route' => 'reports.revenue', 'permission' => 'reports.view'],
             ['label' => 'Customers', 'route' => 'reports.customers', 'permission' => 'reports.view'],
             ['label' => 'Staff', 'route' => 'reports.staff', 'permission' => 'reports.view'],
+            ['label' => 'Job Cards', 'route' => 'reports.job-cards', 'permission' => 'reports.view'],
             ['label' => 'Inventory', 'route' => 'reports.inventory', 'permission' => 'reports.view'],
-        ],
-    ],
-    [
-        'label' => 'Marketing',
-        'icon' => 'megaphone',
-        'children' => [
-            ['label' => 'SMS', 'route' => 'marketing.sms.index', 'permission' => 'marketing.view'],
-            ['label' => 'Email', 'route' => 'marketing.email.index', 'permission' => 'marketing.view'],
-            ['label' => 'Promotions', 'route' => 'promotions.index', 'permission' => 'marketing.view'],
-            ['label' => 'Loyalty', 'route' => 'marketing.loyalty', 'permission' => 'marketing.view'],
         ],
     ],
     ['section' => 'System'],
@@ -163,7 +147,6 @@ return [
             ['label' => 'Branches', 'route' => 'settings.branches.index', 'permission' => 'branches.view'],
             ['label' => 'Users', 'route' => 'settings.users.index', 'permission' => 'users.view'],
             ['label' => 'Roles', 'route' => 'settings.roles.index', 'permission' => 'settings.view'],
-            ['label' => 'Taxes', 'route' => 'settings.taxes.index', 'permission' => 'settings.view'],
             ['label' => 'Payment Methods', 'route' => 'settings.payment-methods.index', 'permission' => 'settings.view'],
             ['label' => 'Integrations', 'route' => 'settings.integrations.index', 'permission' => 'settings.view'],
         ],

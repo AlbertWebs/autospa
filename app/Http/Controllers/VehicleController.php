@@ -95,7 +95,12 @@ class VehicleController extends Controller
             ->with('success', 'Vehicle updated.');
     }
 
-    public function checkIn(Vehicle $vehicle): RedirectResponse
+    public function checkIn(): View
+    {
+        return $this->listByStatus(VehicleStatus::Active, 'vehicles.check-in');
+    }
+
+    public function processCheckIn(Vehicle $vehicle): RedirectResponse
     {
         $vehicle->update(['status' => VehicleStatus::CheckedIn]);
 

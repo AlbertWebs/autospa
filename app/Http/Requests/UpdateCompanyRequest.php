@@ -3,7 +3,9 @@
 namespace App\Http\Requests;
 
 use App\Models\Setting;
+use App\Support\CommissionSettings;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateCompanyRequest extends FormRequest
 {
@@ -11,6 +13,7 @@ class UpdateCompanyRequest extends FormRequest
     {
         $this->merge([
             'sms_notifications_enabled' => $this->boolean('sms_notifications_enabled'),
+            'commissions_enabled' => $this->boolean('commissions_enabled'),
         ]);
     }
 
@@ -31,6 +34,17 @@ class UpdateCompanyRequest extends FormRequest
             'email' => ['nullable', 'email', 'max:255'],
             'website' => ['nullable', 'url', 'max:255'],
             'sms_notifications_enabled' => ['nullable', 'boolean'],
+            'commissions_enabled' => ['nullable', 'boolean'],
+            'commission_default_rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'commission_trigger' => [
+                'nullable',
+                'string',
+                Rule::in([
+                    CommissionSettings::TRIGGER_JOB_COMPLETED,
+                    CommissionSettings::TRIGGER_POS_CHECKOUT,
+                    CommissionSettings::TRIGGER_BOTH,
+                ]),
+            ],
         ];
     }
 }

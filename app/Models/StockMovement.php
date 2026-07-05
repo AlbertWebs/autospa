@@ -16,6 +16,7 @@ class StockMovement extends Model
         'branch_id',
         'product_id',
         'user_id',
+        'moved_at',
         'type',
         'quantity',
         'balance_after',
@@ -27,6 +28,7 @@ class StockMovement extends Model
     protected function casts(): array
     {
         return [
+            'moved_at' => 'datetime',
             'quantity' => 'decimal:2',
             'balance_after' => 'decimal:2',
         ];

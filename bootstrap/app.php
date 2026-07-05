@@ -14,6 +14,14 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'branch' => \App\Http\Middleware\EnsureBranchSelected::class,
             'permission' => \App\Http\Middleware\EnsureUserHasPermission::class,
+            'installed' => \App\Http\Middleware\EnsureInstalled::class,
+            'not.installed' => \App\Http\Middleware\EnsureNotInstalled::class,
+        ]);
+
+        $middleware->priority([
+            \App\Http\Middleware\EnsureInstalled::class,
+            \App\Http\Middleware\EnsureNotInstalled::class,
+            \Illuminate\Auth\Middleware\Authenticate::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

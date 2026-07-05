@@ -47,6 +47,14 @@
             <x-ui.input id="password_confirmation" name="password_confirmation" type="password" />
         </x-ui.form-field>
 
+        <x-ui.form-field label="Sign-In PIN" for="pin" name="pin" hint="Optional 4–6 digit PIN for quick staff login.">
+            <x-ui.input id="pin" name="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="new-password" />
+        </x-ui.form-field>
+
+        <x-ui.form-field label="Confirm PIN" for="pin_confirmation" name="pin_confirmation">
+            <x-ui.input id="pin_confirmation" name="pin_confirmation" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="new-password" />
+        </x-ui.form-field>
+
         <x-ui.form-field label="Roles" name="roles" :col-span="2">
             <div class="asp-checkbox-group">
                 @foreach ($roles as $role)

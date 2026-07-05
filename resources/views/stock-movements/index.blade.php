@@ -15,7 +15,9 @@
             <x-ui.th>Product</x-ui.th>
             <x-ui.th>Type</x-ui.th>
             <x-ui.th>Quantity</x-ui.th>
-            <x-ui.th>Date</x-ui.th>
+            <x-ui.th>Balance After</x-ui.th>
+            <x-ui.th>Date & Time</x-ui.th>
+            <x-ui.th>Recorded By</x-ui.th>
             <x-ui.th align="right">Actions</x-ui.th>
         </x-slot>
 
@@ -25,8 +27,10 @@
                 <x-ui.td>
                     <x-ui.badge color="indigo">{{ ucfirst($movement->type) }}</x-ui.badge>
                 </x-ui.td>
-                <x-ui.td>{{ $movement->quantity }}</x-ui.td>
-                <x-ui.td muted>{{ $movement->created_at?->format('M j, Y') }}</x-ui.td>
+                <x-ui.td>{{ number_format($movement->quantity, 2) }}</x-ui.td>
+                <x-ui.td>{{ number_format($movement->balance_after, 2) }}</x-ui.td>
+                <x-ui.td muted>{{ $movement->moved_at?->format('M j, Y g:i A') ?? $movement->created_at?->format('M j, Y g:i A') }}</x-ui.td>
+                <x-ui.td muted>{{ $movement->user?->name ?? 'System' }}</x-ui.td>
                 <x-ui.td align="right">
                     <x-ui.table-actions :view="route('stock-movements.show', $movement)" />
                 </x-ui.td>

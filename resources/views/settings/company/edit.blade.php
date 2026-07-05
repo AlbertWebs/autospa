@@ -11,5 +11,9 @@
     @include('settings.company._form', [
         'company' => $company,
         'smsNotificationsEnabled' => $smsNotificationsEnabled,
+        'commissionsEnabled' => $commissionsEnabled,
+        'commissionDefaultRatePercent' => $commissionDefaultRatePercent,
+        'commissionTrigger' => $commissionTrigger,
+        'commissionTriggerOptions' => $commissionTriggerOptions,
     ])
 </x-ui.form-page>

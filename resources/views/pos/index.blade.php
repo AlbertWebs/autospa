@@ -152,7 +152,7 @@
                         </button>
                     </div>
 
-                    <form method="POST" action="{{ route('pos.store') }}" class="asp-pos-cart-body asp-form !space-y-4" @submit.prevent="handleCheckout">
+                    <form method="POST" action="{{ route('pos.store') }}" class="asp-pos-cart-body asp-form !space-y-4" @submit="handleCheckout">
                         @csrf
 
                         <input type="hidden" name="customer_id" x-model="customerId">
@@ -290,6 +290,74 @@
         </div>
 
         @include('partials.customers.quick-create-modal')
+
+        <div
+            x-show="showCashModal"
+            x-cloak
+            class="asp-modal-backdrop"
+            @keydown.escape.window="showCashModal && closeCashModal()"
+        >
+            <div
+                class="asp-modal"
+                @click.outside="closeCashModal()"
+                x-transition
+            >
+                <div class="asp-modal-header">
+                    <div>
+                        <p class="font-mono text-[10px] font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Cash Payment</p>
+                        <h3 class="asp-modal-title">Confirm Cash Received</h3>
+                    </div>
+                    <button type="button" class="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-brand-surface-high dark:hover:text-slate-200" @click="closeCashModal()">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+
+                <div class="asp-modal-body space-y-5">
+                    <div class="flex items-start gap-4 rounded-2xl border border-emerald-200/80 bg-emerald-50/80 px-4 py-4 dark:border-emerald-500/20 dark:bg-emerald-500/10">
+                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">
+                            <span class="material-symbols-outlined text-2xl">payments</span>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-medium text-slate-900 dark:text-white">
+                                Have you received the cash payment from the customer?
+                            </p>
+                            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                                Confirm only after the full amount has been collected at the counter.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="rounded-xl border border-slate-200/80 bg-slate-50 px-4 py-3 text-sm dark:border-brand-border/60 dark:bg-brand-surface-high">
+                        <div class="flex items-center justify-between gap-4">
+                            <span class="text-slate-500 dark:text-slate-400">Amount</span>
+                            <span class="font-mono text-lg font-semibold text-emerald-700 dark:text-emerald-300">KES <span x-text="formatMoney(total)"></span></span>
+                        </div>
+                        <div class="mt-2 flex items-center justify-between gap-4">
+                            <span class="text-slate-500 dark:text-slate-400">Customer</span>
+                            <span class="font-medium text-slate-900 dark:text-white" x-text="selectedCustomer?.display_name || selectedCustomer?.option_label || 'Selected customer'"></span>
+                        </div>
+                        <div class="mt-2 flex items-center justify-between gap-4" x-show="selectedCustomerVehicle" x-cloak>
+                            <span class="text-slate-500 dark:text-slate-400">Vehicle</span>
+                            <span class="font-mono text-slate-900 dark:text-white" x-text="selectedCustomerVehicle"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="asp-modal-footer">
+                    <button type="button" class="asp-btn asp-btn-ghost" @click="closeCashModal()" x-bind:disabled="checkoutSubmitting">
+                        Not yet
+                    </button>
+                    <button type="button" class="asp-btn asp-btn-primary min-w-[12rem]" @click="confirmCashReceived()" x-bind:disabled="checkoutSubmitting">
+                        <svg x-show="checkoutSubmitting" x-cloak class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        <span class="material-symbols-outlined text-lg" x-show="!checkoutSubmitting">check_circle</span>
+                        <span x-text="checkoutSubmitting ? 'Completing…' : 'Yes, cash received'"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <div
             x-show="showStkModal"

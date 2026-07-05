@@ -21,8 +21,20 @@ class JobCardController extends Controller
 
     public function index(): View
     {
+        $today = today();
+        $query = fn () => JobCard::query()->forDay($today)->with(['customer', 'vehicle', 'assignee'])->latest();
+        $countQuery = fn () => JobCard::query()->forDay($today);
+
         return view('job-cards.index', [
-            'jobCards' => JobCard::query()->with(['customer', 'vehicle', 'assignee'])->latest()->paginate(15),
+            'today' => $today,
+            'openJobCards' => $query()->where('status', JobCardStatus::Open)->get(),
+            'inProgressJobCards' => $query()->where('status', JobCardStatus::InProgress)->get(),
+            'completedJobCards' => $query()->where('status', JobCardStatus::Completed)->get(),
+            'counts' => [
+                'open' => $countQuery()->where('status', JobCardStatus::Open)->count(),
+                'in_progress' => $countQuery()->where('status', JobCardStatus::InProgress)->count(),
+                'completed' => $countQuery()->where('status', JobCardStatus::Completed)->count(),
+            ],
         ]);
     }
 
@@ -89,19 +101,27 @@ class JobCardController extends Controller
             ->with('success', 'Job card deleted.');
     }
 
-    public function open(): View
+    public function open(): RedirectResponse
     {
-        return $this->listByStatus(JobCardStatus::Open, 'job-cards.open');
+        return redirect()->route('job-cards.index', ['section' => 'open']);
     }
 
-    public function inProgress(): View
+    public function inProgress(): RedirectResponse
     {
-        return $this->listByStatus(JobCardStatus::InProgress, 'job-cards.in-progress');
+        return redirect()->route('job-cards.index', ['section' => 'in_progress']);
+    }
+
+    public function completed(): RedirectResponse
+    {
+        return redirect()->route('job-cards.index', ['section' => 'completed']);
     }
 
     public function live(): View
     {
+        $today = today();
+
         $jobCards = JobCard::query()
+            ->forDay($today)
             ->with(['customer', 'vehicle', 'assignee'])
             ->whereIn('status', [JobCardStatus::Open, JobCardStatus::InProgress])
             ->latest()
@@ -116,11 +136,6 @@ class JobCardController extends Controller
                 'unassigned' => $jobCards->whereNull('assigned_to')->count(),
             ],
         ]);
-    }
-
-    public function completed(): View
-    {
-        return $this->listByStatus(JobCardStatus::Completed, 'job-cards.completed');
     }
 
     public function updateLiveStatus(UpdateJobCardRequest $request, JobCard $jobCard): RedirectResponse|JsonResponse
@@ -142,17 +157,6 @@ class JobCardController extends Controller
         }
 
         return back()->with('success', 'Car washing status updated.');
-    }
-
-    protected function listByStatus(JobCardStatus $status, string $view): View
-    {
-        return view($view, [
-            'jobCards' => JobCard::query()
-                ->with(['customer', 'vehicle', 'assignee'])
-                ->where('status', $status)
-                ->latest()
-                ->paginate(15),
-        ]);
     }
 
     protected function assignableEmployees()

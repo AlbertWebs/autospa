@@ -40,8 +40,9 @@ class UserController extends Controller
     public function store(StoreUserRequest $request): RedirectResponse
     {
         $user = User::create([
-            ...$request->safe()->except('roles', 'password'),
+            ...$request->safe()->except('roles', 'password', 'password_confirmation', 'pin', 'pin_confirmation'),
             'password' => Hash::make($request->validated('password')),
+            'pin' => $request->filled('pin') ? $request->validated('pin') : null,
         ]);
 
         $user->roles()->sync($request->validated('roles', []));
@@ -76,10 +77,14 @@ class UserController extends Controller
 
     public function update(UpdateUserRequest $request, User $user): RedirectResponse
     {
-        $data = $request->safe()->except('roles', 'password');
+        $data = $request->safe()->except('roles', 'password', 'password_confirmation', 'pin', 'pin_confirmation');
 
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->validated('password'));
+        }
+
+        if ($request->filled('pin')) {
+            $data['pin'] = $request->validated('pin');
         }
 
         $user->update($data);

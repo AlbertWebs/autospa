@@ -64,16 +64,4 @@ class ServiceController extends Controller
         return redirect()->route('services.index')
             ->with('success', 'Service deleted.');
     }
-
-    public function pricing(): View
-    {
-        return view('services.pricing', [
-            'services' => Service::query()
-                ->with('category')
-                ->where('is_active', true)
-                ->orderBy('service_category_id')
-                ->orderBy('name')
-                ->get(),
-        ]);
-    }
 }

@@ -7,6 +7,7 @@ use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Models\Product;
 use App\Models\Supplier;
+use App\Support\RouteAccess;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -14,10 +15,15 @@ class ProductController extends Controller
 {
     use AssignsBranchId;
 
-    public function index(): View
+    public function index(RouteAccess $routeAccess): View
     {
         return view('products.index', [
             'products' => Product::query()->with('supplier')->latest()->paginate(15),
+            'canAddStock' => $routeAccess->allows(auth()->user(), 'stock-movements.store'),
+            'stockProducts' => Product::query()
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->get(['id', 'name', 'sku', 'quantity_on_hand', 'unit']),
         ]);
     }
 
@@ -39,7 +45,10 @@ class ProductController extends Controller
     public function show(Product $product): View
     {
         return view('products.show', [
-            'product' => $product->load(['supplier', 'stockMovements' => fn ($q) => $q->latest()->limit(10)]),
+            'product' => $product->load([
+                'supplier',
+                'stockMovements' => fn ($q) => $q->with('user')->orderByDesc('moved_at')->orderByDesc('id')->limit(10),
+            ]),
         ]);
     }
 

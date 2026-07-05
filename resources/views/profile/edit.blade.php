@@ -41,6 +41,19 @@
         <div class="asp-panel">
             <div class="asp-panel-header">
                 <div>
+                    <h2 class="asp-panel-title">Update PIN</h2>
+                    <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Set or change your quick sign-in PIN.</p>
+                </div>
+                <span class="material-symbols-outlined text-brand-primary-dim dark:text-brand-primary">pin</span>
+            </div>
+            <div class="asp-panel-body">
+                @include('profile.partials.update-pin-form')
+            </div>
+        </div>
+
+        <div class="asp-panel">
+            <div class="asp-panel-header">
+                <div>
                     <h2 class="asp-panel-title">Delete Account</h2>
                     <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Permanently remove your account and all data.</p>
                 </div>

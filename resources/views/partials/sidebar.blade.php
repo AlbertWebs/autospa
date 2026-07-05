@@ -191,7 +191,7 @@
     {{-- User + Logout --}}
     @auth
         <div class="shrink-0 border-t border-slate-800/80 bg-slate-900/50 p-3">
-            <form method="POST" action="{{ route('logout') }}">
+            <form method="POST" action="{{ route('logout') }}" data-turbo="false">
                 @csrf
                 <button
                     type="submit"

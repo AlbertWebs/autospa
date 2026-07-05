@@ -6,12 +6,10 @@ use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\Dashboard\DashboardController;
-use App\Http\Controllers\EmailCampaignController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\JobCardController;
 use App\Http\Controllers\ManifestController;
-use App\Http\Controllers\Marketing\SmsCampaignController;
 use App\Http\Controllers\ManualController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OnboardingController;
@@ -20,7 +18,6 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\RefundController;
@@ -33,19 +30,44 @@ use App\Http\Controllers\Settings\CompanyController;
 use App\Http\Controllers\Settings\IntegrationController;
 use App\Http\Controllers\Settings\PaymentMethodController;
 use App\Http\Controllers\Settings\RoleController;
-use App\Http\Controllers\Settings\TaxController;
 use App\Http\Controllers\Settings\UserController as SettingsUserController;
 use App\Http\Controllers\StockMovementController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Setup\SetupWizardController;
+use App\Services\InstallService;
 use Illuminate\Support\Facades\Route;
 
-Route::redirect('/', '/dashboard');
+Route::get('/', function () {
+    if (app(InstallService::class)->isInstalled()) {
+        return redirect()->route('dashboard');
+    }
+
+    return redirect()->route('setup.welcome');
+});
 
 Route::get('manifest.webmanifest', ManifestController::class)->name('manifest');
 
-Route::middleware(['auth', 'verified', 'branch'])->group(function () {
+Route::middleware(['guest', 'not.installed'])->prefix('setup')->name('setup.')->group(function () {
+    Route::redirect('/', '/setup/welcome');
+    Route::get('welcome', [SetupWizardController::class, 'welcome'])->name('welcome');
+    Route::post('welcome', [SetupWizardController::class, 'storeWelcome'])->name('welcome.store');
+    Route::get('business', [SetupWizardController::class, 'business'])->name('business');
+    Route::post('business', [SetupWizardController::class, 'storeBusiness'])->name('business.store');
+    Route::get('branch', [SetupWizardController::class, 'branch'])->name('branch');
+    Route::post('branch', [SetupWizardController::class, 'storeBranch'])->name('branch.store');
+    Route::get('admin', [SetupWizardController::class, 'admin'])->name('admin');
+    Route::post('admin', [SetupWizardController::class, 'storeAdmin'])->name('admin.store');
+    Route::get('team', [SetupWizardController::class, 'team'])->name('team');
+    Route::post('team', [SetupWizardController::class, 'storeTeam'])->name('team.store');
+    Route::post('team/skip', [SetupWizardController::class, 'skipTeam'])->name('team.skip');
+    Route::get('preferences', [SetupWizardController::class, 'preferences'])->name('preferences');
+    Route::post('preferences', [SetupWizardController::class, 'storePreferences'])->name('preferences.store');
+    Route::post('preferences/skip', [SetupWizardController::class, 'skipPreferences'])->name('preferences.skip');
+});
+
+Route::middleware(['installed', 'auth', 'verified', 'branch'])->group(function () {
     Route::middleware('permission:dashboard.view')->get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/branch/switch', [BranchController::class, 'switch'])->name('branch.switch');
 
@@ -53,7 +75,6 @@ Route::middleware(['auth', 'verified', 'branch'])->group(function () {
         Route::middleware('permission:settings.view')->group(function () {
             Route::get('company', [CompanyController::class, 'edit'])->name('company');
             Route::get('roles', [RoleController::class, 'index'])->name('roles.index');
-            Route::resource('taxes', TaxController::class)->only(['index', 'show']);
             Route::resource('payment-methods', PaymentMethodController::class)->only(['index', 'show']);
             Route::get('integrations', [IntegrationController::class, 'index'])->name('integrations.index');
             Route::get('business-hours', [BusinessHourController::class, 'edit'])->name('business-hours.edit');
@@ -63,7 +84,6 @@ Route::middleware(['auth', 'verified', 'branch'])->group(function () {
             Route::put('company', [CompanyController::class, 'update'])->name('company.update');
             Route::get('roles/{role}/edit', [RoleController::class, 'edit'])->name('roles.edit');
             Route::put('roles/{role}', [RoleController::class, 'update'])->name('roles.update');
-            Route::resource('taxes', TaxController::class)->except(['index', 'show']);
             Route::resource('payment-methods', PaymentMethodController::class)->except(['index', 'show']);
             Route::put('integrations', [IntegrationController::class, 'update'])->name('integrations.update');
             Route::put('business-hours', [BusinessHourController::class, 'update'])->name('business-hours.update');
@@ -79,39 +99,39 @@ Route::middleware(['auth', 'verified', 'branch'])->group(function () {
         Route::get('customers-feedback', [CustomerController::class, 'feedback'])->name('customers.feedback');
     });
 
+    Route::middleware('permission:vehicles.manage')->group(function () {
+        Route::get('vehicles/check-in', [VehicleController::class, 'checkIn'])->name('vehicles.check-in');
+        Route::post('vehicles/{vehicle}/check-in', [VehicleController::class, 'processCheckIn'])->name('vehicles.process-check-in');
+        Route::resource('vehicles', VehicleController::class)->only(['create', 'store', 'edit', 'update', 'destroy'])->whereNumber('vehicle');
+    });
     Route::middleware('permission:vehicles.view')->group(function () {
         Route::get('vehicles/active', [VehicleController::class, 'active'])->name('vehicles.active');
         Route::get('vehicles/ready', [VehicleController::class, 'ready'])->name('vehicles.ready');
         Route::get('vehicles/history', [VehicleController::class, 'history'])->name('vehicles.history');
-        Route::resource('vehicles', VehicleController::class)->only(['index', 'show']);
-    });
-    Route::middleware('permission:vehicles.manage')->group(function () {
-        Route::get('vehicles/check-in', [VehicleController::class, 'checkIn'])->name('vehicles.check-in');
-        Route::resource('vehicles', VehicleController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
+        Route::resource('vehicles', VehicleController::class)->only(['index', 'show'])->whereNumber('vehicle');
     });
 
-    Route::middleware('permission:services.view')->group(function () {
-        Route::resource('services/categories', ServiceCategoryController::class)->only(['index', 'show'])->names('services.categories');
-        Route::get('services/pricing', [ServiceController::class, 'pricing'])->name('services.pricing');
-        Route::resource('services', ServiceController::class)->only(['index', 'show']);
-        Route::resource('packages', PackageController::class)->only(['index', 'show']);
-    });
     Route::middleware('permission:services.manage')->group(function () {
         Route::resource('services/categories', ServiceCategoryController::class)->except(['index', 'show'])->names('services.categories');
-        Route::resource('services', ServiceController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
-        Route::resource('packages', PackageController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
+        Route::resource('services', ServiceController::class)->only(['create', 'store', 'edit', 'update', 'destroy'])->whereNumber('service');
+        Route::resource('packages', PackageController::class)->only(['create', 'store', 'edit', 'update', 'destroy'])->whereNumber('package');
+    });
+    Route::middleware('permission:services.view')->group(function () {
+        Route::resource('services/categories', ServiceCategoryController::class)->only(['index', 'show'])->names('services.categories');
+        Route::resource('services', ServiceController::class)->only(['index', 'show'])->whereNumber('service');
+        Route::resource('packages', PackageController::class)->only(['index', 'show'])->whereNumber('package');
     });
 
+    Route::middleware('permission:bookings.manage')->group(function () {
+        Route::resource('bookings', BookingController::class)->only(['create', 'store', 'edit', 'update', 'destroy'])->whereNumber('booking');
+    });
     Route::middleware('permission:bookings.view')->group(function () {
         Route::get('bookings/calendar', [BookingController::class, 'calendar'])->name('bookings.calendar');
         Route::get('bookings/walk-ins', [BookingController::class, 'walkIns'])->name('bookings.walk-ins');
         Route::get('bookings/pending', [BookingController::class, 'pending'])->name('bookings.pending');
         Route::get('bookings/completed', [BookingController::class, 'completed'])->name('bookings.completed');
         Route::get('bookings/cancelled', [BookingController::class, 'cancelled'])->name('bookings.cancelled');
-        Route::resource('bookings', BookingController::class)->only(['index', 'show']);
-    });
-    Route::middleware('permission:bookings.manage')->group(function () {
-        Route::resource('bookings', BookingController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
+        Route::resource('bookings', BookingController::class)->only(['index', 'show'])->whereNumber('booking');
     });
 
     Route::middleware('permission:job-cards.manage')->group(function () {
@@ -131,13 +151,13 @@ Route::middleware(['auth', 'verified', 'branch'])->group(function () {
         Route::resource('products', ProductController::class)->only(['index', 'show']);
         Route::resource('suppliers', SupplierController::class)->only(['index', 'show']);
         Route::resource('purchase-orders', PurchaseOrderController::class)->only(['index', 'show']);
-        Route::resource('stock-movements', StockMovementController::class)->only(['index', 'show']);
+        Route::resource('stock-movements', StockMovementController::class)->only(['index', 'show'])->whereNumber('stock_movement');
     });
     Route::middleware('permission:inventory.manage')->group(function () {
         Route::resource('products', ProductController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
         Route::resource('suppliers', SupplierController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
         Route::resource('purchase-orders', PurchaseOrderController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
-        Route::resource('stock-movements', StockMovementController::class)->only(['create', 'store']);
+        Route::resource('stock-movements', StockMovementController::class)->only(['create', 'store'])->whereNumber('stock_movement');
     });
 
     Route::middleware('permission:pos.access')->group(function () {
@@ -183,18 +203,7 @@ Route::middleware(['auth', 'verified', 'branch'])->group(function () {
         Route::get('reports/customers', [ReportController::class, 'customers'])->name('reports.customers');
         Route::get('reports/staff', [ReportController::class, 'staff'])->name('reports.staff');
         Route::get('reports/inventory', [ReportController::class, 'inventory'])->name('reports.inventory');
-    });
-
-    Route::middleware('permission:marketing.view')->group(function () {
-        Route::resource('promotions', PromotionController::class)->only(['index', 'show']);
-        Route::resource('marketing/sms', SmsCampaignController::class)->only(['index', 'show'])->names('marketing.sms');
-        Route::resource('marketing/email', EmailCampaignController::class)->only(['index', 'show'])->names('marketing.email');
-        Route::view('marketing/loyalty', 'marketing.loyalty')->name('marketing.loyalty');
-    });
-    Route::middleware('permission:marketing.manage')->group(function () {
-        Route::resource('promotions', PromotionController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
-        Route::resource('marketing/sms', SmsCampaignController::class)->only(['create', 'store', 'edit', 'update', 'destroy'])->names('marketing.sms');
-        Route::resource('marketing/email', EmailCampaignController::class)->only(['create', 'store', 'edit', 'update', 'destroy'])->names('marketing.email');
+        Route::get('reports/job-cards', [ReportController::class, 'jobCards'])->name('reports.job-cards');
     });
 
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');

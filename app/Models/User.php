@@ -29,12 +29,14 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'phone',
         'password',
+        'pin',
         'is_active',
         'onboarding_completed_at',
     ];
 
     protected $hidden = [
         'password',
+        'pin',
         'remember_token',
     ];
 
@@ -44,6 +46,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'onboarding_completed_at' => 'datetime',
             'password' => 'hashed',
+            'pin' => 'hashed',
             'is_active' => 'boolean',
         ];
     }

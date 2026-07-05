@@ -166,7 +166,7 @@ return [
                 ],
                 [
                     'heading' => 'Pricing',
-                    'body' => 'Manage price lists and adjustments across services and packages.',
+                    'body' => 'View and edit service prices from the Services list. Package prices are managed on the Packages screen.',
                 ],
             ],
         ],
@@ -254,21 +254,6 @@ return [
             ],
         ],
         [
-            'title' => 'Marketing',
-            'icon' => 'megaphone',
-            'summary' => 'Customer outreach and promotions.',
-            'topics' => [
-                [
-                    'heading' => 'SMS & email',
-                    'body' => 'Create campaigns to notify customers about offers, ready-for-pickup vehicles, or seasonal promotions.',
-                ],
-                [
-                    'heading' => 'Promotions & loyalty',
-                    'body' => 'Configure promotional rules and loyalty incentives that complement the customer module.',
-                ],
-            ],
-        ],
-        [
             'title' => 'Notifications',
             'icon' => 'bell',
             'summary' => 'In-app alerts.',
@@ -297,8 +282,8 @@ return [
                     'body' => 'Create user accounts, assign roles, and control access to each module through permissions.',
                 ],
                 [
-                    'heading' => 'Taxes & payment methods',
-                    'body' => 'Configure tax rates and enabled payment methods (cash, M-Pesa, etc.) for POS checkout.',
+                    'heading' => 'Payment methods',
+                    'body' => 'Configure enabled payment methods (cash, M-Pesa, etc.) for POS checkout.',
                 ],
                 [
                     'heading' => 'Integrations',

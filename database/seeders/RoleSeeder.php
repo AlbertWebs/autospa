@@ -45,8 +45,6 @@ class RoleSeeder extends Seeder
             ['name' => 'View Staff', 'slug' => 'staff.view', 'group' => 'staff'],
             ['name' => 'Manage Staff', 'slug' => 'staff.manage', 'group' => 'staff'],
             ['name' => 'View Reports', 'slug' => 'reports.view', 'group' => 'reports'],
-            ['name' => 'View Marketing', 'slug' => 'marketing.view', 'group' => 'marketing'],
-            ['name' => 'Manage Marketing', 'slug' => 'marketing.manage', 'group' => 'marketing'],
         ];
 
         foreach ($permissions as $permission) {
@@ -55,7 +53,7 @@ class RoleSeeder extends Seeder
 
         $rolePermissions = [
             RoleSlug::SuperAdmin->value => Permission::pluck('id')->all(),
-            RoleSlug::Manager->value => Permission::whereNotIn('slug', ['branches.delete', 'users.delete'])->pluck('id')->all(),
+            RoleSlug::Manager->value => Permission::whereNotIn('slug', ['branches.delete'])->pluck('id')->all(),
             RoleSlug::Cashier->value => Permission::whereIn('slug', [
                 'dashboard.view', 'customers.view', 'customers.create', 'pos.access',
                 'sales.view', 'sales.manage', 'payments.view', 'payments.manage',

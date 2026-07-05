@@ -2,46 +2,74 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class LoginRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if (! $this->filled('login_method')) {
+            $this->merge(['login_method' => 'password']);
+        }
+    }
+
     /**
-     * Get the validation rules that apply to the request.
-     *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
-        return [
+        $shared = [
+            'login_method' => ['required', 'in:password,pin'],
             'email' => ['required', 'string', 'email'],
+        ];
+
+        if ($this->string('login_method')->toString() === 'pin') {
+            return [
+                ...$shared,
+                'pin' => ['required', 'string', 'digits_between:4,6'],
+            ];
+        }
+
+        return [
+            ...$shared,
             'password' => ['required', 'string'],
         ];
     }
 
     /**
-     * Attempt to authenticate the request's credentials.
-     *
      * @throws ValidationException
      */
     public function authenticate(): void
     {
         $this->ensureIsNotRateLimited();
 
+        if ($this->string('login_method')->toString() === 'pin') {
+            $this->authenticateWithPin();
+
+            return;
+        }
+
+        $this->authenticateWithPassword();
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    protected function authenticateWithPassword(): void
+    {
         if (! Auth::attempt([
             'email' => $this->string('email')->toString(),
             'password' => $this->string('password')->toString(),
@@ -61,7 +89,7 @@ class LoginRequest extends FormRequest
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => 'Only Admin and Supervisor accounts can sign in.',
+                'email' => 'Only Admin and Supervisor accounts can sign in with a password.',
             ]);
         }
 
@@ -69,8 +97,29 @@ class LoginRequest extends FormRequest
     }
 
     /**
-     * Ensure the login request is not rate limited.
-     *
+     * @throws ValidationException
+     */
+    protected function authenticateWithPin(): void
+    {
+        $user = User::query()
+            ->where('email', $this->string('email')->toString())
+            ->where('is_active', true)
+            ->first();
+
+        if (! $user?->pin || ! Hash::check($this->string('pin')->toString(), $user->pin)) {
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => trans('auth.failed'),
+            ]);
+        }
+
+        Auth::login($user, $this->boolean('remember'));
+
+        RateLimiter::clear($this->throttleKey());
+    }
+
+    /**
      * @throws ValidationException
      */
     public function ensureIsNotRateLimited(): void
@@ -91,11 +140,10 @@ class LoginRequest extends FormRequest
         ]);
     }
 
-    /**
-     * Get the rate limiting throttle key for the request.
-     */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
+        return Str::transliterate(
+            Str::lower($this->string('email')).'|'.$this->string('login_method').'|'.$this->ip()
+        );
     }
 }

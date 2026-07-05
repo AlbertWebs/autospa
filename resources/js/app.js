@@ -1,5 +1,6 @@
 import './bootstrap';
 
+import * as Turbo from '@hotwired/turbo';
 import Alpine from 'alpinejs';
 import Chart from 'chart.js/auto';
 import flatpickr from 'flatpickr';
@@ -12,6 +13,107 @@ window.Alpine = Alpine;
 window.Chart = Chart;
 window.flatpickr = flatpickr;
 window.TomSelect = TomSelect;
+
+let revenueChartInstance = null;
+
+function initDashboardRevenueChart() {
+    const canvas = document.getElementById('revenueChart');
+    if (!canvas || !window.Chart) {
+        return;
+    }
+
+    if (revenueChartInstance) {
+        revenueChartInstance.destroy();
+        revenueChartInstance = null;
+    }
+
+    let chartData = { labels: [], data: [] };
+
+    try {
+        chartData = JSON.parse(canvas.dataset.chart || '{"labels":[],"data":[]}');
+    } catch {
+        chartData = { labels: [], data: [] };
+    }
+
+    const isDark = document.documentElement.classList.contains('dark');
+    const gridColor = isDark ? 'rgba(139, 144, 160, 0.15)' : 'rgba(148, 163, 184, 0.2)';
+    const tickColor = isDark ? '#8b90a0' : '#64748b';
+
+    revenueChartInstance = new Chart(canvas, {
+        type: 'line',
+        data: {
+            labels: chartData.labels,
+            datasets: [{
+                label: 'Revenue (KES)',
+                data: chartData.data,
+                borderColor: '#adc6ff',
+                backgroundColor: (ctx) => {
+                    const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 220);
+                    g.addColorStop(0, isDark ? 'rgba(173, 198, 255, 0.25)' : 'rgba(79, 70, 229, 0.15)');
+                    g.addColorStop(1, 'rgba(173, 198, 255, 0)');
+                    return g;
+                },
+                fill: true,
+                tension: 0.42,
+                borderWidth: 2.5,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                pointBackgroundColor: isDark ? '#0b1326' : '#fff',
+                pointBorderColor: '#adc6ff',
+                pointBorderWidth: 2,
+            }],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { intersect: false, mode: 'index' },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: isDark ? '#1e293b' : '#fff',
+                    titleColor: isDark ? '#dae2fd' : '#0f172a',
+                    bodyColor: isDark ? '#c1c6d7' : '#475569',
+                    borderColor: isDark ? '#334155' : '#e2e8f0',
+                    borderWidth: 1,
+                    padding: 12,
+                    callbacks: {
+                        label: (ctx) => ' KES ' + Number(ctx.raw).toLocaleString(),
+                    },
+                },
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: gridColor },
+                    ticks: {
+                        color: tickColor,
+                        callback: (v) => 'KES ' + Number(v).toLocaleString(),
+                        maxTicksLimit: 5,
+                    },
+                    border: { display: false },
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: tickColor },
+                    border: { display: false },
+                },
+            },
+        },
+    });
+}
+
+function destroyDashboardRevenueChart() {
+    if (!revenueChartInstance) {
+        return;
+    }
+
+    revenueChartInstance.destroy();
+    revenueChartInstance = null;
+}
+
+document.addEventListener('DOMContentLoaded', initDashboardRevenueChart);
+document.addEventListener('turbo:load', initDashboardRevenueChart);
+document.addEventListener('turbo:before-cache', destroyDashboardRevenueChart);
 
 Alpine.store('toast', {
     items: [],
@@ -44,14 +146,91 @@ Alpine.store('fullscreen', {
         && document.fullscreenEnabled
         && typeof document.documentElement.requestFullscreen === 'function',
     active: false,
+    userDismissed: false,
+    printing: false,
+    gestureRestoreAttached: false,
 
     init() {
-        this.sync();
-        document.addEventListener('fullscreenchange', () => this.sync());
+        this.active = !!document.fullscreenElement;
+        this.syncShellClass();
+
+        document.addEventListener('fullscreenchange', () => {
+            this.active = !!document.fullscreenElement;
+
+            if (document.fullscreenElement) {
+                this.setPreferred(true);
+                this.userDismissed = false;
+            } else if (this.userDismissed) {
+                this.setPreferred(false);
+                this.userDismissed = false;
+            }
+
+            this.syncShellClass();
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && document.fullscreenElement) {
+                this.userDismissed = true;
+            }
+        }, true);
+
+        this.prepareRestore();
+    },
+
+    preferred() {
+        return localStorage.getItem('fullscreenPreferred') === 'true';
+    },
+
+    setPreferred(preferred) {
+        localStorage.setItem('fullscreenPreferred', preferred ? 'true' : 'false');
+        this.syncShellClass();
+    },
+
+    syncShellClass() {
+        document.documentElement.classList.toggle('asp-app-fullscreen', this.preferred());
     },
 
     sync() {
         this.active = !!document.fullscreenElement;
+        this.syncShellClass();
+    },
+
+    prepareRestore() {
+        this.syncShellClass();
+        this.restoreIfPreferred();
+        this.attachGestureRestore();
+    },
+
+    attachGestureRestore() {
+        if (!this.preferred() || document.fullscreenElement || this.gestureRestoreAttached) {
+            return;
+        }
+
+        this.gestureRestoreAttached = true;
+
+        const restore = () => {
+            document.removeEventListener('pointerdown', restore, true);
+            document.removeEventListener('keydown', restore, true);
+            this.gestureRestoreAttached = false;
+            this.restoreIfPreferred();
+        };
+
+        document.addEventListener('pointerdown', restore, true);
+        document.addEventListener('keydown', restore, true);
+    },
+
+    async restoreIfPreferred() {
+        if (!this.supported || !this.preferred() || document.fullscreenElement) {
+            return;
+        }
+
+        try {
+            await document.documentElement.requestFullscreen();
+        } catch {
+            // Browsers may block until the user interacts with the page.
+        } finally {
+            this.sync();
+        }
     },
 
     async toggle() {
@@ -61,8 +240,10 @@ Alpine.store('fullscreen', {
 
         try {
             if (document.fullscreenElement) {
+                this.userDismissed = true;
                 await document.exitFullscreen();
             } else {
+                this.setPreferred(true);
                 await document.documentElement.requestFullscreen();
             }
         } catch {
@@ -70,6 +251,31 @@ Alpine.store('fullscreen', {
         } finally {
             this.sync();
         }
+    },
+
+    printDocument() {
+        const shouldRestore = this.preferred();
+        let finished = false;
+
+        const finishPrint = () => {
+            if (finished) {
+                return;
+            }
+
+            finished = true;
+            this.printing = false;
+            window.removeEventListener('afterprint', finishPrint);
+
+            if (shouldRestore) {
+                this.gestureRestoreAttached = false;
+                this.prepareRestore();
+            }
+        };
+
+        this.printing = true;
+        window.addEventListener('afterprint', finishPrint);
+        window.setTimeout(finishPrint, 2000);
+        window.print();
     },
 });
 
@@ -311,6 +517,104 @@ document.addEventListener('alpine:init', () => {
                 }
 
                 this.loading = false;
+            } catch {
+                Alpine.store('toast').show('Network error. Please try again.', 'error');
+                this.loading = false;
+            }
+        },
+    }));
+
+    Alpine.data('productStockModal', (config = {}) => ({
+        showModal: false,
+        loading: false,
+        errors: {},
+        products: config.products ?? [],
+        storeUrl: config.storeUrl ?? '/stock-movements',
+        defaultMovedAt: config.defaultMovedAt ?? '',
+        form: {
+            product_id: '',
+            type: 'in',
+            quantity: '',
+            moved_at: '',
+            notes: '',
+            return_to: 'products',
+        },
+
+        get selectedProduct() {
+            return this.products.find((product) => String(product.id) === String(this.form.product_id)) ?? null;
+        },
+
+        openAddStockModal(productId = '') {
+            this.errors = {};
+            this.form = {
+                product_id: productId ? String(productId) : '',
+                type: 'in',
+                quantity: '',
+                moved_at: this.defaultMovedAt,
+                notes: '',
+                return_to: 'products',
+            };
+            this.showModal = true;
+        },
+
+        closeModal() {
+            if (this.loading) {
+                return;
+            }
+
+            this.showModal = false;
+        },
+
+        async submitStock() {
+            this.loading = true;
+            this.errors = {};
+
+            const formData = new FormData();
+            Object.entries(this.form).forEach(([key, value]) => {
+                formData.append(key, value ?? '');
+            });
+
+            const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+            if (csrf) {
+                formData.append('_token', csrf);
+            }
+
+            try {
+                const response = await fetch(this.storeUrl, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        Accept: 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+
+                let data = {};
+                const contentType = response.headers.get('content-type');
+                if (contentType?.includes('application/json')) {
+                    data = await response.json();
+                }
+
+                if (!response.ok) {
+                    if (response.status === 422 && data.errors) {
+                        this.errors = data.errors;
+                    } else {
+                        Alpine.store('toast').show(data.message || 'Could not update stock.', 'error');
+                    }
+
+                    this.loading = false;
+                    return;
+                }
+
+                Alpine.store('toast').show(data.message ?? 'Stock added successfully.', 'success');
+                this.showModal = false;
+                this.loading = false;
+
+                if (data.redirect) {
+                    setTimeout(() => {
+                        window.location.href = data.redirect;
+                    }, 400);
+                }
             } catch {
                 Alpine.store('toast').show('Network error. Please try again.', 'error');
                 this.loading = false;
@@ -795,6 +1099,7 @@ document.addEventListener('alpine:init', () => {
             registration_number: '',
         },
         showStkModal: false,
+        showCashModal: false,
         stkPushLoading: false,
         stkPushErrors: {},
         stkPhoneDraft: '',
@@ -1043,14 +1348,36 @@ document.addEventListener('alpine:init', () => {
             this.showStkModal = false;
         },
 
+        openCashModal(form) {
+            this.checkoutForm = form;
+            this.showCashModal = true;
+        },
+
+        closeCashModal() {
+            if (this.checkoutSubmitting) {
+                return;
+            }
+
+            this.showCashModal = false;
+        },
+
         confirmCashReceived() {
-            return window.confirm(
-                `Have you received the cash payment of KES ${this.formatMoney(this.total)} from the customer?`,
-            );
+            if (!this.checkoutForm) {
+                return;
+            }
+
+            this.showCashModal = false;
+            this.submitCheckoutForm(this.checkoutForm);
         },
 
         handleCheckout(event) {
             const form = event.target;
+
+            if (this.checkoutSubmitting) {
+                return;
+            }
+
+            event.preventDefault();
 
             if (!this.canCheckout) {
                 return;
@@ -1061,7 +1388,8 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
 
-            if (this.isCashSelected && !this.confirmCashReceived()) {
+            if (this.isCashSelected) {
+                this.openCashModal(form);
                 return;
             }
 
@@ -1231,10 +1559,50 @@ document.addEventListener('alpine:init', () => {
             this.checkoutSubmitting = true;
 
             this.$nextTick(() => {
-                form.submit();
+                if (typeof form.requestSubmit === 'function') {
+                    form.requestSubmit();
+                } else {
+                    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+                }
             });
         },
     }));
+});
+
+document.addEventListener('turbo:load', () => {
+    Alpine.initTree(document.body);
+    Alpine.store('theme').sync();
+    Alpine.store('fullscreen').sync();
+    Alpine.store('fullscreen').gestureRestoreAttached = false;
+    Alpine.store('fullscreen').prepareRestore();
+
+    document.querySelectorAll('meta[name="flash-success"]').forEach((meta) => {
+        Alpine.store('toast').show(meta.content, 'success');
+        meta.remove();
+    });
+
+    document.querySelectorAll('meta[name="flash-error"]').forEach((meta) => {
+        Alpine.store('toast').show(meta.content, 'error');
+        meta.remove();
+    });
+});
+
+document.addEventListener('turbo:before-cache', () => {
+    document.querySelectorAll('select.tomselected').forEach((select) => {
+        if (select.tomselect) {
+            select.tomselect.destroy();
+        }
+    });
+});
+
+window.addEventListener('pageshow', () => {
+    if (!Alpine.store('fullscreen')) {
+        return;
+    }
+
+    Alpine.store('fullscreen').sync();
+    Alpine.store('fullscreen').gestureRestoreAttached = false;
+    Alpine.store('fullscreen').prepareRestore();
 });
 
 Alpine.start();

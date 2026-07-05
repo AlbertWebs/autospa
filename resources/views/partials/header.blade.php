@@ -17,7 +17,7 @@
 
         <div class="flex items-center gap-2 sm:gap-4" data-tour="header-tools">
             @if ($branches->count() > 0)
-                <form method="POST" action="{{ route('branch.switch') }}" class="hidden sm:block">
+                <form method="POST" action="{{ route('branch.switch') }}" class="hidden sm:block" data-turbo="false">
                     @csrf
                     <select name="branch_id" onchange="this.form.submit()"
                         class="rounded-xl border-slate-200 bg-slate-50 text-sm dark:border-slate-700 dark:bg-slate-800">
@@ -93,7 +93,7 @@
                 <x-slot name="content">
                     <x-dropdown-link :href="route('manual.index')">{{ __('User Manual') }}</x-dropdown-link>
                     <x-dropdown-link :href="route('profile.edit')">{{ __('Profile') }}</x-dropdown-link>
-                    <form method="POST" action="{{ route('logout') }}">
+                    <form method="POST" action="{{ route('logout') }}" data-turbo="false">
                         @csrf
                         <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">{{ __('Log Out') }}</x-dropdown-link>
                     </form>

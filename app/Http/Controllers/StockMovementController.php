@@ -6,39 +6,79 @@ use App\Http\Controllers\Concerns\AssignsBranchId;
 use App\Http\Requests\StoreStockMovementRequest;
 use App\Models\Product;
 use App\Models\StockMovement;
+use App\Services\StockMovementService;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class StockMovementController extends Controller
 {
     use AssignsBranchId;
 
+    public function __construct(
+        protected StockMovementService $stockMovementService,
+    ) {}
+
     public function index(): View
     {
         return view('stock-movements.index', [
             'movements' => StockMovement::query()
                 ->with(['product', 'user'])
-                ->latest()
+                ->orderByDesc('moved_at')
+                ->orderByDesc('id')
                 ->paginate(20),
         ]);
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
+        $type = in_array($request->query('type'), ['in', 'out', 'adjustment'], true)
+            ? $request->query('type')
+            : 'in';
+
         return view('stock-movements.create', [
             'products' => Product::query()->where('is_active', true)->orderBy('name')->get(),
+            'defaultType' => $type,
+            'defaultProductId' => $request->integer('product_id') ?: null,
+            'returnTo' => $request->query('return') === 'products' ? 'products' : 'stock-movements',
+            'isStockIn' => $type === 'in',
+            'defaultMovedAt' => now()->format('Y-m-d\TH:i'),
         ]);
     }
 
     public function store(StoreStockMovementRequest $request): RedirectResponse
     {
-        StockMovement::create([
-            ...$this->withBranchId($request->validated()),
-            'user_id' => $request->user()->id,
-        ]);
+        $validated = $request->validated();
+        $returnTo = $request->input('return_to') === 'products' ? 'products.index' : 'stock-movements.index';
 
-        return redirect()->route('stock-movements.index')
-            ->with('success', 'Stock movement recorded.');
+        unset($validated['return_to']);
+
+        $validated['moved_at'] = Carbon::parse($validated['moved_at']);
+
+        $this->stockMovementService->recordMovement(
+            $this->withBranchId($validated),
+            $request->user()->id,
+        );
+
+        $message = $validated['type'] === 'in'
+            ? 'Stock added successfully.'
+            : 'Stock movement recorded.';
+
+        if ($request->expectsJson()) {
+            $product = Product::query()->findOrFail($validated['product_id']);
+
+            return response()->json([
+                'message' => $message,
+                'redirect' => route($returnTo),
+                'product' => [
+                    'id' => $product->id,
+                    'quantity_on_hand' => (float) $product->quantity_on_hand,
+                ],
+            ]);
+        }
+
+        return redirect()->route($returnTo)->with('success', $message);
     }
 
     public function show(StockMovement $stockMovement): View

@@ -20,19 +20,57 @@ class BookingController extends Controller
 {
     use AssignsBranchId;
 
-    public function index(): View
+    public function index(Request $request): View
     {
+        $query = Booking::query()->with(['customer', 'vehicle'])->latest('scheduled_at');
+
+        if ($request->filled('date')) {
+            $query->whereDate('scheduled_at', $request->date('date'));
+        }
+
+        if ($request->filled('status')) {
+            $status = BookingStatus::tryFrom($request->string('status')->toString());
+
+            if ($status) {
+                $query->where('status', $status);
+            }
+        }
+
+        if ($request->filled('type')) {
+            $type = BookingType::tryFrom($request->string('type')->toString());
+
+            if ($type) {
+                $query->where('type', $type);
+            }
+        }
+
         return view('bookings.index', [
-            'bookings' => Booking::query()->with(['customer', 'vehicle'])->latest('scheduled_at')->paginate(15),
+            'bookings' => $query->paginate(15)->withQueryString(),
+            'filters' => [
+                'date' => $request->input('date'),
+                'status' => $request->input('status'),
+                'type' => $request->input('type'),
+            ],
         ]);
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
+        $scheduledAt = null;
+
+        if ($request->filled('scheduled_at')) {
+            try {
+                $scheduledAt = Carbon::parse($request->query('scheduled_at'))->format('Y-m-d\TH:i');
+            } catch (\Throwable) {
+                $scheduledAt = null;
+            }
+        }
+
         return view('bookings.create', [
             'customers' => Customer::query()->orderBy('full_name')->get(),
             'vehicles' => Vehicle::query()->with('customer')->get(),
             'services' => Service::query()->where('is_active', true)->get(),
+            'scheduledAt' => $scheduledAt,
         ]);
     }
 
@@ -137,34 +175,23 @@ class BookingController extends Controller
         ]);
     }
 
-    public function walkIns(): View
+    public function walkIns(): RedirectResponse
     {
-        return $this->listFiltered(['type' => BookingType::WalkIn], 'bookings.walk-ins');
+        return redirect()->route('bookings.index', ['type' => BookingType::WalkIn->value]);
     }
 
-    public function pending(): View
+    public function pending(): RedirectResponse
     {
-        return $this->listFiltered(['status' => BookingStatus::Pending], 'bookings.pending');
+        return redirect()->route('bookings.index', ['status' => BookingStatus::Pending->value]);
     }
 
-    public function completed(): View
+    public function completed(): RedirectResponse
     {
-        return $this->listFiltered(['status' => BookingStatus::Completed], 'bookings.completed');
+        return redirect()->route('bookings.index', ['status' => BookingStatus::Completed->value]);
     }
 
-    public function cancelled(): View
+    public function cancelled(): RedirectResponse
     {
-        return $this->listFiltered(['status' => BookingStatus::Cancelled], 'bookings.cancelled');
-    }
-
-    protected function listFiltered(array $filters, string $view): View
-    {
-        $query = Booking::query()->with(['customer', 'vehicle'])->latest('scheduled_at');
-
-        foreach ($filters as $column => $value) {
-            $query->where($column, $value);
-        }
-
-        return view($view, ['bookings' => $query->paginate(15)]);
+        return redirect()->route('bookings.index', ['status' => BookingStatus::Cancelled->value]);
     }
 }

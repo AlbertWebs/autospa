@@ -72,7 +72,6 @@ class RouteAccess
             Str::startsWith($routeName, 'settings.users.') => $this->resourceRequirement($this->resourceAction($routeName), 'users.view', 'users.create', 'users.update', 'users.delete'),
             $routeName === 'settings.roles.index' => $this->needs('settings.view'),
             in_array($routeName, ['settings.roles.edit', 'settings.roles.update'], true) => $this->needs('settings.update'),
-            Str::startsWith($routeName, 'settings.taxes.') => $this->resourceRequirement($this->resourceAction($routeName), 'settings.view', 'settings.update', 'settings.update', 'settings.update'),
             Str::startsWith($routeName, 'settings.payment-methods.') => $this->resourceRequirement($this->resourceAction($routeName), 'settings.view', 'settings.update', 'settings.update', 'settings.update'),
             $routeName === 'settings.integrations.index' => $this->needs('settings.view'),
             $routeName === 'settings.integrations.update' => $this->needs('settings.update'),
@@ -89,7 +88,6 @@ class RouteAccess
             $routeName === 'job-cards.live-status' => $this->needs('job-cards.manage'),
             Str::startsWith($routeName, 'job-cards.') => $this->resourceRequirement($this->resourceAction($routeName), 'job-cards.view', 'job-cards.manage'),
             Str::startsWith($routeName, 'services.categories.') => $this->resourceRequirement($this->resourceAction($routeName), 'services.view', 'services.manage'),
-            $routeName === 'services.pricing' => $this->needs('services.view'),
             Str::startsWith($routeName, 'services.') => $this->resourceRequirement($this->resourceAction($routeName), 'services.view', 'services.manage'),
             Str::startsWith($routeName, 'packages.') => $this->resourceRequirement($this->resourceAction($routeName), 'services.view', 'services.manage'),
             $routeName === 'products.low-stock' => $this->needs('inventory.view'),
@@ -110,10 +108,6 @@ class RouteAccess
             Str::startsWith($routeName, 'commissions.') => $this->needs('staff.view'),
             Str::startsWith($routeName, 'performance.') => $this->needs('staff.view'),
             Str::startsWith($routeName, 'reports.') => $this->needs('reports.view'),
-            Str::startsWith($routeName, 'promotions.') => $this->resourceRequirement($this->resourceAction($routeName), 'marketing.view', 'marketing.manage'),
-            Str::startsWith($routeName, 'marketing.sms.') => $this->resourceRequirement($this->resourceAction($routeName), 'marketing.view', 'marketing.manage'),
-            Str::startsWith($routeName, 'marketing.email.') => $this->resourceRequirement($this->resourceAction($routeName), 'marketing.view', 'marketing.manage'),
-            $routeName === 'marketing.loyalty' => $this->needs('marketing.view'),
             default => null,
         };
     }
