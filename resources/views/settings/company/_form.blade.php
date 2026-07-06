@@ -7,6 +7,7 @@
     $commissionTriggerOptions = $commissionTriggerOptions ?? [];
     $loyaltyEnabled = $loyaltyEnabled ?? true;
     $loyaltyWashesBeforeFree = $loyaltyWashesBeforeFree ?? 10;
+    $attendanceEnabled = $attendanceEnabled ?? false;
 @endphp
 
 <x-ui.form-section title="Company Information" description="Legal identity, contact details, and registration information.">
@@ -118,6 +119,21 @@
                 max="100"
                 :value="old('loyalty_washes_before_free', $loyaltyWashesBeforeFree)"
             />
+        </x-ui.form-field>
+    </div>
+</x-ui.form-section>
+
+<x-ui.form-section title="Staff Attendance" description="Track employee clock-in and clock-out when enabled.">
+    <div class="asp-form-grid">
+        <x-ui.form-field :col-span="2" name="attendance_enabled">
+            <div class="asp-checkbox-group">
+                <x-ui.checkbox
+                    name="attendance_enabled"
+                    :checked="old('attendance_enabled', $attendanceEnabled)"
+                >
+                    Enable staff attendance tracking
+                </x-ui.checkbox>
+            </div>
         </x-ui.form-field>
     </div>
 </x-ui.form-section>

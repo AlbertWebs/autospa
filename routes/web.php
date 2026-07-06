@@ -24,6 +24,7 @@ use App\Http\Controllers\RefundController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ServiceCategoryController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\StockMovementController;
 use App\Http\Controllers\Settings\BranchController as SettingsBranchController;
 use App\Http\Controllers\Settings\BusinessHourController;
 use App\Http\Controllers\Settings\CompanyController;
@@ -190,15 +191,17 @@ Route::middleware(['installed', 'auth', 'verified', 'branch'])->group(function (
         Route::resource('payments', PaymentController::class)->only(['index', 'show']);
     });
 
-    Route::middleware('permission:staff.manage')->group(function () {
+    Route::middleware(['permission:staff.manage', 'attendance.enabled'])->group(function () {
         Route::resource('employees', EmployeeController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
         Route::resource('attendance', AttendanceController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
     });
     Route::middleware('permission:staff.view')->group(function () {
         Route::resource('employees', EmployeeController::class)->only(['index', 'show']);
-        Route::resource('attendance', AttendanceController::class)->only(['index', 'show']);
         Route::resource('commissions', CommissionController::class)->only(['index']);
         Route::resource('performance', PerformanceController::class)->only(['index']);
+    });
+    Route::middleware(['permission:staff.view', 'attendance.enabled'])->group(function () {
+        Route::resource('attendance', AttendanceController::class)->only(['index', 'show']);
     });
 
     Route::middleware('permission:reports.view')->group(function () {

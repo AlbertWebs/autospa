@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Setting;
+use App\Support\AttendanceSettings;
 use App\Support\CommissionSettings;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -15,6 +16,7 @@ class UpdateCompanyRequest extends FormRequest
             'sms_notifications_enabled' => $this->boolean('sms_notifications_enabled'),
             'commissions_enabled' => $this->boolean('commissions_enabled'),
             'loyalty_enabled' => $this->boolean('loyalty_enabled'),
+            'attendance_enabled' => $this->boolean('attendance_enabled'),
         ]);
     }
 
@@ -48,6 +50,7 @@ class UpdateCompanyRequest extends FormRequest
             ],
             'loyalty_enabled' => ['nullable', 'boolean'],
             'loyalty_washes_before_free' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'attendance_enabled' => ['nullable', 'boolean'],
         ];
     }
 }

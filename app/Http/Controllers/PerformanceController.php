@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PerformanceMetric;
+use App\Support\AttendanceSettings;
 use Illuminate\View\View;
 
 class PerformanceController extends Controller
@@ -14,6 +15,7 @@ class PerformanceController extends Controller
                 ->with('employee')
                 ->latest('period_end')
                 ->paginate(20),
+            'attendanceEnabled' => AttendanceSettings::enabled(),
         ]);
     }
 

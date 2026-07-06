@@ -7,6 +7,7 @@ use App\Http\Requests\StoreEmployeeRequest;
 use App\Http\Requests\UpdateEmployeeRequest;
 use App\Models\Employee;
 use App\Models\User;
+use App\Support\AttendanceSettings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -38,8 +39,14 @@ class EmployeeController extends Controller
 
     public function show(Employee $employee): View
     {
+        $relations = ['user', 'commissions'];
+
+        if (AttendanceSettings::enabled()) {
+            $relations[] = 'attendance';
+        }
+
         return view('employees.show', [
-            'employee' => $employee->load(['user', 'attendance', 'commissions']),
+            'employee' => $employee->load($relations),
         ]);
     }
 

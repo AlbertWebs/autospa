@@ -17,5 +17,6 @@
         'commissionTriggerOptions' => $commissionTriggerOptions,
         'loyaltyEnabled' => $loyaltyEnabled,
         'loyaltyWashesBeforeFree' => $loyaltyWashesBeforeFree,
+        'attendanceEnabled' => $attendanceEnabled,
     ])
 </x-ui.form-page>

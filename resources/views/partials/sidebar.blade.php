@@ -1,4 +1,6 @@
 @php
+    use App\Support\AttendanceSettings;
+
     $branchService = app(\App\Services\BranchService::class);
     $currentBranch = auth()->check() ? $branchService->currentBranch() : null;
     $user = auth()->user();
@@ -27,6 +29,7 @@
             $item['children'] = array_values(array_filter(
                 $item['children'],
                 fn (array $child) => $hasAccess($child['permission'] ?? null)
+                    && AttendanceSettings::navigationVisible($child['feature'] ?? null)
             ));
 
             if ($item['children'] === []) {

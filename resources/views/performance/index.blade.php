@@ -1,13 +1,15 @@
 <x-ui.index-page
     eyebrow="Staff"
     title="Staff Performance"
-    subtitle="Overview of team productivity, revenue, and attendance."
+    :subtitle="($attendanceEnabled ?? false) ? 'Overview of team productivity, revenue, and attendance.' : 'Overview of team productivity and revenue.'"
 >
-    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="grid gap-6 sm:grid-cols-2 {{ ($attendanceEnabled ?? false) ? 'lg:grid-cols-4' : 'lg:grid-cols-3' }}">
         <x-ui.stat-card label="Jobs Completed" :value="$metrics['jobs_completed'] ?? 0" />
         <x-ui.stat-card label="Revenue Generated" :value="number_format($metrics['revenue'] ?? 0, 2)" />
         <x-ui.stat-card label="Avg. Rating" :value="$metrics['avg_rating'] ?? 'N/A'" />
-        <x-ui.stat-card label="Attendance Rate" :value="($metrics['attendance_rate'] ?? 0).'%'" />
+        @if ($attendanceEnabled ?? false)
+            <x-ui.stat-card label="Attendance Rate" :value="($metrics['attendance_rate'] ?? 0).'%'" />
+        @endif
     </div>
 
     <x-ui.data-table

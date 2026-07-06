@@ -104,6 +104,10 @@ class MobileNavigation
                         continue;
                     }
 
+                    if (! AttendanceSettings::navigationVisible($child['feature'] ?? null)) {
+                        continue;
+                    }
+
                     if ($child['route'] === 'pos.index' && ($item['minimalist_only'] ?? false)) {
                         continue;
                     }

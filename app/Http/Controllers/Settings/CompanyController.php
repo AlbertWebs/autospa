@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateCompanyRequest;
 use App\Models\Company;
 use App\Models\Setting;
+use App\Support\AttendanceSettings;
 use App\Support\CommissionSettings;
 use App\Support\LoyaltySettings;
 use Illuminate\Http\RedirectResponse;
@@ -29,6 +30,7 @@ class CompanyController extends Controller
             'commissionTriggerOptions' => CommissionSettings::triggerOptions(),
             'loyaltyEnabled' => LoyaltySettings::enabled(),
             'loyaltyWashesBeforeFree' => LoyaltySettings::washesBeforeFree(),
+            'attendanceEnabled' => AttendanceSettings::enabled(),
         ]);
     }
 
@@ -41,6 +43,7 @@ class CompanyController extends Controller
         $commissionTrigger = $validated['commission_trigger'] ?? CommissionSettings::TRIGGER_POS_CHECKOUT;
         $loyaltyEnabled = $request->boolean('loyalty_enabled');
         $loyaltyWashesBeforeFree = max(1, (int) ($validated['loyalty_washes_before_free'] ?? LoyaltySettings::DEFAULT_WASHES_BEFORE_FREE));
+        $attendanceEnabled = $request->boolean('attendance_enabled');
 
         unset(
             $validated['sms_notifications_enabled'],
@@ -49,6 +52,7 @@ class CompanyController extends Controller
             $validated['commission_trigger'],
             $validated['loyalty_enabled'],
             $validated['loyalty_washes_before_free'],
+            $validated['attendance_enabled'],
         );
 
         Company::query()->firstOrFail()->update($validated);
@@ -58,6 +62,7 @@ class CompanyController extends Controller
         Setting::setValue('commission', 'trigger', $commissionTrigger, null, 'string');
         Setting::setValue('loyalty', 'enabled', $loyaltyEnabled, null, 'boolean');
         Setting::setValue('loyalty', 'washes_before_free', $loyaltyWashesBeforeFree, null, 'integer');
+        Setting::setValue('attendance', 'enabled', $attendanceEnabled, null, 'boolean');
 
         return back()->with('success', 'Company details updated.');
     }

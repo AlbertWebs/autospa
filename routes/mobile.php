@@ -94,9 +94,12 @@ Route::middleware('permission:inventory.view')->group(function () {
 
 Route::middleware('permission:staff.view')->group(function () {
     Route::get('/employees', [MobileEmployeeController::class, 'index'])->name('employees.index');
-    Route::get('/attendance', [MobileAttendanceController::class, 'index'])->name('attendance.index');
     Route::get('/commissions', [MobileCommissionController::class, 'index'])->name('commissions.index');
     Route::get('/performance', [MobilePerformanceController::class, 'index'])->name('performance.index');
+});
+
+Route::middleware(['permission:staff.view', 'attendance.enabled'])->group(function () {
+    Route::get('/attendance', [MobileAttendanceController::class, 'index'])->name('attendance.index');
 });
 
 Route::middleware('permission:services.view')->group(function () {

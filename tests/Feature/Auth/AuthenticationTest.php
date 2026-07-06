@@ -104,6 +104,22 @@ class AuthenticationTest extends TestCase
         ]);
     }
 
+    public function test_password_login_goes_to_desktop_dashboard_even_after_visiting_mobile(): void
+    {
+        $user = $this->makeUserWithRole(RoleSlug::SuperAdmin);
+
+        $this->get(route('mobile.index'));
+
+        $response = $this->post('/login', [
+            'login_method' => 'password',
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $this->assertAuthenticated();
+        $response->assertRedirect(route('dashboard', absolute: false));
+    }
+
     public function test_staff_user_can_authenticate_with_pin(): void
     {
         $user = $this->makeUserWithRole(RoleSlug::Cashier, [
@@ -117,7 +133,7 @@ class AuthenticationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response->assertRedirect(route('mobile.index', absolute: false));
     }
 
     public function test_staff_user_cannot_authenticate_with_invalid_pin(): void

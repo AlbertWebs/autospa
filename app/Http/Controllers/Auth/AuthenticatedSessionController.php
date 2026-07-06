@@ -28,7 +28,11 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        if ($request->string('login_method')->toString() === 'pin') {
+            return redirect()->route('mobile.index');
+        }
+
+        return redirect()->route('dashboard');
     }
 
     /**

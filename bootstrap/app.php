@@ -12,6 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
+            'attendance.enabled' => \App\Http\Middleware\EnsureAttendanceEnabled::class,
             'branch' => \App\Http\Middleware\EnsureBranchSelected::class,
             'permission' => \App\Http\Middleware\EnsureUserHasPermission::class,
             'installed' => \App\Http\Middleware\EnsureInstalled::class,

@@ -75,7 +75,7 @@ return [
         'icon' => 'user-group',
         'children' => [
             ['label' => 'Employees', 'route' => 'employees.index', 'permission' => 'staff.view'],
-            ['label' => 'Attendance', 'route' => 'attendance.index', 'permission' => 'staff.view'],
+            ['label' => 'Attendance', 'route' => 'attendance.index', 'permission' => 'staff.view', 'feature' => 'attendance'],
             ['label' => 'Performance', 'route' => 'performance.index', 'permission' => 'staff.view'],
             ['label' => 'Commissions', 'route' => 'commissions.index', 'permission' => 'staff.view'],
         ],

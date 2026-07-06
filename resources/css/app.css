@@ -53,11 +53,11 @@
 
     /* ── Panels ── */
     .asp-panel {
-        @apply relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-soft dark:border-brand-border/60 dark:bg-gradient-to-br dark:from-brand-surface-high dark:to-brand-surface dark:shadow-panel;
+        @apply relative overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-soft dark:border-brand-border/60 dark:bg-gradient-to-br dark:from-brand-surface-high dark:to-brand-surface dark:shadow-panel;
     }
 
     .asp-panel-header {
-        @apply flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-brand-border-subtle/80;
+        @apply flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-brand-border-subtle/80;
     }
 
     .asp-panel-title {
@@ -86,7 +86,7 @@
     }
 
     .asp-stat--revenue {
-        @apply border-emerald-200/60 bg-gradient-to-br from-emerald-50 to-white dark:border-emerald-500/20 dark:from-emerald-500/10 dark:to-brand-surface;
+        @apply border-emerald-300/80 bg-gradient-to-br from-emerald-50 to-white dark:border-emerald-500/20 dark:from-emerald-500/10 dark:to-brand-surface;
     }
 
     .asp-stat--revenue .asp-stat-icon {
@@ -94,7 +94,7 @@
     }
 
     .asp-stat--bookings {
-        @apply border-sky-200/60 bg-gradient-to-br from-sky-50 to-white dark:border-sky-500/20 dark:from-sky-500/10 dark:to-brand-surface;
+        @apply border-sky-300/80 bg-gradient-to-br from-sky-50 to-white dark:border-sky-500/20 dark:from-sky-500/10 dark:to-brand-surface;
     }
 
     .asp-stat--bookings .asp-stat-icon {
@@ -102,7 +102,7 @@
     }
 
     .asp-stat--service {
-        @apply border-amber-200/60 bg-gradient-to-br from-amber-50 to-white dark:border-amber-500/20 dark:from-amber-500/10 dark:to-brand-surface;
+        @apply border-amber-300/80 bg-gradient-to-br from-amber-50 to-white dark:border-amber-500/20 dark:from-amber-500/10 dark:to-brand-surface;
     }
 
     .asp-stat--service .asp-stat-icon {
@@ -118,7 +118,7 @@
     }
 
     .asp-stat--payments {
-        @apply border-rose-200/60 bg-gradient-to-br from-rose-50 to-white dark:border-rose-500/20 dark:from-rose-500/10 dark:to-brand-surface;
+        @apply border-rose-300/80 bg-gradient-to-br from-rose-50 to-white dark:border-rose-500/20 dark:from-rose-500/10 dark:to-brand-surface;
     }
 
     .asp-stat--payments .asp-stat-icon {
@@ -126,7 +126,7 @@
     }
 
     .asp-stat--stock {
-        @apply border-orange-200/60 bg-gradient-to-br from-orange-50 to-white dark:border-orange-500/20 dark:from-orange-500/10 dark:to-brand-surface;
+        @apply border-orange-300/80 bg-gradient-to-br from-orange-50 to-white dark:border-orange-500/20 dark:from-orange-500/10 dark:to-brand-surface;
     }
 
     .asp-stat--stock .asp-stat-icon {
@@ -135,7 +135,7 @@
 
     /* ── Quick actions ── */
     .asp-action {
-        @apply flex items-center gap-3 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-3.5 transition-all duration-200 hover:border-brand-primary/40 hover:bg-brand-primary/5 hover:shadow-glow-sm dark:border-brand-border/60 dark:bg-brand-surface/50 dark:hover:border-brand-primary/30 dark:hover:bg-brand-primary/10;
+        @apply flex items-center gap-3 rounded-xl border border-slate-300 bg-slate-50/80 px-4 py-3.5 transition-all duration-200 hover:border-brand-primary/40 hover:bg-brand-primary/5 hover:shadow-glow-sm dark:border-brand-border/60 dark:bg-brand-surface/50 dark:hover:border-brand-primary/30 dark:hover:bg-brand-primary/10;
     }
 
     .asp-action-icon {
@@ -179,7 +179,7 @@
     }
 
     .asp-table-head {
-        @apply border-b border-slate-200/80 bg-slate-50/90 dark:border-brand-border/60 dark:bg-brand-surface/80;
+        @apply border-b border-slate-300 bg-slate-50/90 dark:border-brand-border/60 dark:bg-brand-surface/80;
     }
 
     .asp-table-head .asp-th {
@@ -239,7 +239,7 @@
     }
 
     .asp-table-footer {
-        @apply flex flex-col gap-4 border-t border-slate-200/80 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-brand-border/60;
+        @apply flex flex-col gap-4 border-t border-slate-300 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-brand-border/60;
     }
 
     .asp-table-count {
@@ -252,15 +252,15 @@
     }
 
     .asp-cal-nav-btn {
-        @apply inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200/80 bg-white text-slate-600 transition hover:border-brand-primary/40 hover:bg-brand-primary/5 hover:text-brand-primary-dim dark:border-brand-border/60 dark:bg-brand-surface-high dark:text-slate-300 dark:hover:border-brand-primary/30 dark:hover:bg-brand-primary/10 dark:hover:text-brand-primary;
+        @apply inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-600 transition hover:border-brand-primary/40 hover:bg-brand-primary/5 hover:text-brand-primary-dim dark:border-brand-border/60 dark:bg-brand-surface-high dark:text-slate-300 dark:hover:border-brand-primary/30 dark:hover:bg-brand-primary/10 dark:hover:text-brand-primary;
     }
 
     .asp-cal-weekday {
-        @apply border-b border-slate-200/80 bg-slate-50/80 px-2 py-2.5 text-center font-mono text-[10px] font-semibold uppercase tracking-widest text-slate-500 dark:border-brand-border/60 dark:bg-brand-surface/80 dark:text-slate-400;
+        @apply border-b border-slate-300 bg-slate-50/80 px-2 py-2.5 text-center font-mono text-[10px] font-semibold uppercase tracking-widest text-slate-500 dark:border-brand-border/60 dark:bg-brand-surface/80 dark:text-slate-400;
     }
 
     .asp-cal-cell {
-        @apply relative min-h-[7.5rem] border-b border-r border-slate-200/60 p-1.5 transition-colors sm:min-h-[6.5rem] sm:p-2 lg:min-h-[7.25rem] dark:border-brand-border/40;
+        @apply relative min-h-[7.5rem] border-b border-r border-slate-300/80 p-1.5 transition-colors sm:min-h-[6.5rem] sm:p-2 lg:min-h-[7.25rem] dark:border-brand-border/40;
     }
 
     .asp-cal-cell--muted {
@@ -316,7 +316,7 @@
     }
 
     .asp-cal-detail-item {
-        @apply flex gap-3 rounded-xl border border-slate-200/80 bg-slate-50/50 p-3 transition hover:border-brand-primary/30 hover:bg-brand-primary/5 dark:border-brand-border/60 dark:bg-brand-surface/50 dark:hover:border-brand-primary/20 dark:hover:bg-brand-primary/10;
+        @apply flex gap-3 rounded-xl border border-slate-300 bg-slate-50/50 p-3 transition hover:border-brand-primary/30 hover:bg-brand-primary/5 dark:border-brand-border/60 dark:bg-brand-surface/50 dark:hover:border-brand-primary/20 dark:hover:bg-brand-primary/10;
     }
 
     /* ── Forms ── */
@@ -329,7 +329,7 @@
     }
 
     .asp-form-section-header {
-        @apply border-b border-slate-200/80 pb-3 dark:border-brand-border/60;
+        @apply border-b border-slate-300 pb-3 dark:border-brand-border/60;
     }
 
     .asp-form-section-title {
@@ -360,7 +360,7 @@
     .asp-input,
     .asp-select,
     .asp-textarea {
-        @apply block w-full rounded-xl border border-slate-200/80 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-brand-primary/60 focus:outline-none focus:ring-2 focus:ring-brand-primary/25 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:opacity-60 dark:border-brand-border/60 dark:bg-brand-surface-high dark:text-white dark:placeholder:text-slate-500 dark:disabled:bg-brand-surface;
+        @apply block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-brand-primary/60 focus:outline-none focus:ring-2 focus:ring-brand-primary/25 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:opacity-60 dark:border-brand-border/60 dark:bg-brand-surface-high dark:text-white dark:placeholder:text-slate-500 dark:disabled:bg-brand-surface;
     }
 
     .asp-select {
@@ -391,7 +391,7 @@
     }
 
     .asp-form-actions {
-        @apply flex flex-wrap items-center gap-3 border-t border-slate-200/80 pt-6 dark:border-brand-border/60;
+        @apply flex flex-wrap items-center gap-3 border-t border-slate-300 pt-6 dark:border-brand-border/60;
     }
 
     .asp-btn {
@@ -403,7 +403,7 @@
     }
 
     .asp-btn-secondary {
-        @apply border border-slate-200/80 bg-white text-slate-700 hover:border-brand-primary/40 hover:bg-brand-primary/5 dark:border-brand-border/60 dark:bg-brand-surface-high dark:text-slate-200 dark:hover:border-brand-primary/30 dark:hover:bg-brand-primary/10;
+        @apply border border-slate-300 bg-white text-slate-700 hover:border-brand-primary/40 hover:bg-brand-primary/5 dark:border-brand-border/60 dark:bg-brand-surface-high dark:text-slate-200 dark:hover:border-brand-primary/30 dark:hover:bg-brand-primary/10;
     }
 
     .asp-btn-ghost {
@@ -427,7 +427,7 @@
     }
 
     .asp-checkbox-card {
-        @apply flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200/80 px-3 py-2 transition hover:border-brand-primary/40 dark:border-brand-border/60 dark:hover:border-brand-primary/30;
+        @apply flex cursor-pointer items-center gap-2 rounded-xl border border-slate-300 px-3 py-2 transition hover:border-brand-primary/40 dark:border-brand-border/60 dark:hover:border-brand-primary/30;
     }
 
     .asp-checkbox-group {
@@ -456,7 +456,7 @@
     }
 
     .asp-pos-tabs {
-        @apply inline-flex rounded-xl border border-slate-200/80 bg-slate-50/80 p-1 dark:border-brand-border/60 dark:bg-brand-surface/80;
+        @apply inline-flex rounded-xl border border-slate-300 bg-slate-50/80 p-1 dark:border-brand-border/60 dark:bg-brand-surface/80;
     }
 
     .asp-pos-tab {
@@ -484,7 +484,7 @@
     }
 
     .asp-pos-tile {
-        @apply relative flex flex-col rounded-xl border border-slate-200/80 bg-white p-4 text-left transition hover:border-brand-primary/40 hover:shadow-glow-sm dark:border-brand-border/60 dark:bg-brand-surface-high/50 dark:hover:border-brand-primary/30;
+        @apply relative flex flex-col rounded-xl border border-slate-300 bg-white p-4 text-left transition hover:border-brand-primary/40 hover:shadow-glow-sm dark:border-brand-border/60 dark:bg-brand-surface-high/50 dark:hover:border-brand-primary/30;
     }
 
     .asp-pos-tile-type {
@@ -524,7 +524,7 @@
     }
 
     .asp-pos-cart-header {
-        @apply flex items-center justify-between border-b border-slate-200/80 px-5 py-4 dark:border-brand-border/60;
+        @apply flex items-center justify-between border-b border-slate-300 px-5 py-4 dark:border-brand-border/60;
     }
 
     .asp-pos-cart-body {
@@ -536,7 +536,7 @@
     }
 
     .asp-pos-line {
-        @apply flex items-start gap-3 rounded-xl border border-slate-200/80 bg-slate-50/80 p-3 dark:border-brand-border/60 dark:bg-brand-surface/50;
+        @apply flex items-start gap-3 rounded-xl border border-slate-300 bg-slate-50/80 p-3 dark:border-brand-border/60 dark:bg-brand-surface/50;
     }
 
     .asp-pos-line-info {
@@ -552,7 +552,7 @@
     }
 
     .asp-pos-qty {
-        @apply flex items-center gap-1 rounded-lg border border-slate-200/80 bg-white dark:border-brand-border/60 dark:bg-brand-surface-high;
+        @apply flex items-center gap-1 rounded-lg border border-slate-300 bg-white dark:border-brand-border/60 dark:bg-brand-surface-high;
     }
 
     .asp-pos-qty-btn {
@@ -564,7 +564,7 @@
     }
 
     .asp-pos-totals {
-        @apply space-y-2 rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 dark:border-brand-border/60 dark:bg-brand-surface/50;
+        @apply space-y-2 rounded-xl border border-slate-300 bg-slate-50/50 p-4 dark:border-brand-border/60 dark:bg-brand-surface/50;
     }
 
     .asp-pos-total-row {
@@ -572,11 +572,11 @@
     }
 
     .asp-pos-total-row--grand {
-        @apply border-t border-slate-200/80 pt-2 text-base font-bold text-slate-900 dark:border-brand-border/60 dark:text-white;
+        @apply border-t border-slate-300 pt-2 text-base font-bold text-slate-900 dark:border-brand-border/60 dark:text-white;
     }
 
     .asp-pos-empty {
-        @apply flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200/80 py-10 text-center dark:border-brand-border/60;
+        @apply flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 py-10 text-center dark:border-brand-border/60;
     }
 
     /* ── Detail / show pages ── */
@@ -641,7 +641,7 @@
     }
 
     .asp-service-row {
-        @apply flex items-center justify-between gap-4 rounded-xl border border-slate-200/80 bg-slate-50/50 px-4 py-3 transition hover:border-brand-primary/30 dark:border-brand-border/60 dark:bg-brand-surface/40 dark:hover:border-brand-primary/20;
+        @apply flex items-center justify-between gap-4 rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 transition hover:border-brand-primary/30 dark:border-brand-border/60 dark:bg-brand-surface/40 dark:hover:border-brand-primary/20;
     }
 
     .asp-service-row-icon {
@@ -661,11 +661,11 @@
     }
 
     .asp-modal {
-        @apply relative w-full max-w-lg rounded-2xl border border-slate-200/80 bg-white shadow-xl dark:border-brand-border/60 dark:bg-gradient-to-br dark:from-brand-surface-high dark:to-brand-surface;
+        @apply relative w-full max-w-lg rounded-2xl border border-slate-300 bg-white shadow-xl dark:border-brand-border/60 dark:bg-gradient-to-br dark:from-brand-surface-high dark:to-brand-surface;
     }
 
     .asp-modal-header {
-        @apply flex items-center justify-between border-b border-slate-200/80 px-6 py-4 dark:border-brand-border/60;
+        @apply flex items-center justify-between border-b border-slate-300 px-6 py-4 dark:border-brand-border/60;
     }
 
     .asp-modal-title {
@@ -677,7 +677,7 @@
     }
 
     .asp-modal-footer {
-        @apply flex flex-wrap items-center justify-end gap-3 border-t border-slate-200/80 px-6 py-4 dark:border-brand-border/60;
+        @apply flex flex-wrap items-center justify-end gap-3 border-t border-slate-300 px-6 py-4 dark:border-brand-border/60;
     }
 
     .asp-field-addon {
@@ -717,7 +717,7 @@
     }
 
     .asp-tour-card {
-        @apply z-[102] rounded-2xl border border-slate-200/80 bg-white p-6 shadow-2xl dark:border-brand-border/60 dark:bg-brand-surface-high;
+        @apply z-[102] rounded-2xl border border-slate-300 bg-white p-6 shadow-2xl dark:border-brand-border/60 dark:bg-brand-surface-high;
     }
 
     html.asp-app-fullscreen,
@@ -738,7 +738,7 @@
     }
 
     .asp-mobile-header {
-        @apply sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-md dark:border-brand-border-subtle/80 dark:bg-brand-bg/90;
+        @apply sticky top-0 z-40 border-b border-slate-300 bg-white/90 backdrop-blur-md dark:border-brand-border-subtle/80 dark:bg-brand-bg/90;
         padding-top: env(safe-area-inset-top);
     }
 
@@ -771,7 +771,7 @@
     }
 
     .asp-mobile-tabbar {
-        @apply fixed bottom-0 left-0 right-0 z-40 flex border-t border-slate-200/80 bg-white/95 backdrop-blur-md dark:border-brand-border-subtle/80 dark:bg-brand-bg/95;
+        @apply fixed bottom-0 left-0 right-0 z-40 flex border-t border-slate-300 bg-white/95 backdrop-blur-md dark:border-brand-border-subtle/80 dark:bg-brand-bg/95;
         padding-bottom: env(safe-area-inset-bottom);
     }
 
@@ -804,7 +804,7 @@
     }
 
     .asp-mobile-stat {
-        @apply rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm dark:border-brand-border/60 dark:bg-brand-surface;
+        @apply rounded-2xl border border-slate-300 bg-white p-4 shadow-soft dark:border-brand-border/60 dark:bg-brand-surface dark:shadow-none;
     }
 
     .asp-mobile-stat--revenue {
@@ -836,7 +836,7 @@
     }
 
     .asp-mobile-list-card {
-        @apply flex min-h-[3.25rem] items-center gap-3 rounded-2xl border border-slate-200/80 bg-white px-4 py-3 shadow-sm transition active:scale-[0.99] dark:border-brand-border/60 dark:bg-brand-surface;
+        @apply flex min-h-[3.25rem] items-center gap-3 rounded-2xl border border-slate-300 bg-white px-4 py-3 shadow-soft transition active:scale-[0.99] dark:border-brand-border/60 dark:bg-brand-surface dark:shadow-none;
     }
 
     .asp-mobile-status {
@@ -852,11 +852,11 @@
     }
 
     .asp-mobile-card {
-        @apply rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm dark:border-brand-border/60 dark:bg-brand-surface;
+        @apply rounded-2xl border border-slate-300 bg-white p-4 shadow-soft dark:border-brand-border/60 dark:bg-brand-surface dark:shadow-none;
     }
 
     .asp-mobile-menu-tile {
-        @apply flex min-h-[5.5rem] flex-col items-center justify-center gap-2 rounded-2xl border border-slate-200/80 bg-white p-3 text-center shadow-sm transition active:scale-[0.98] dark:border-brand-border/60 dark:bg-brand-surface;
+        @apply flex min-h-[5.5rem] flex-col items-center justify-center gap-2 rounded-2xl border border-slate-300 bg-white p-3 text-center shadow-soft transition active:scale-[0.98] dark:border-brand-border/60 dark:bg-brand-surface dark:shadow-none;
     }
 
     .asp-mobile-menu-tile-icon {
@@ -930,5 +930,20 @@
         color: inherit !important;
         border-color: #e2e8f0 !important;
         background: #f8fafc !important;
+    }
+}
+
+/* Light mode: strengthen borders on inline Tailwind classes in Blade views */
+@layer components {
+    html:not(.dark) [class*='border-slate-200/80'] {
+        border-color: rgb(203 213 225);
+    }
+
+    html:not(.dark) [class*='border-slate-200/60'] {
+        border-color: rgb(203 213 225 / 0.85);
+    }
+
+    html:not(.dark) [class*='border-slate-100'] {
+        border-color: rgb(226 232 240);
     }
 }
