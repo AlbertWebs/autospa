@@ -39,7 +39,6 @@ class PwaTest extends TestCase
 
     public function test_pwa_icons_are_publicly_accessible(): void
     {
-        $this->assertFileExists(public_path('icons/icon-192.png'));
-        $this->assertFileExists(public_path('icons/icon-512.png'));
+        $this->assertFileExists(public_path('logo.png'));
     }
 }

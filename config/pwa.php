@@ -8,6 +8,6 @@ return [
     'background_color' => '#0f172a',
     'display' => 'standalone',
     'orientation' => 'any',
-    'start_url' => '/dashboard',
+    'start_url' => '/mobile',
     'scope' => '/',
 ];

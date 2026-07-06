@@ -104,6 +104,51 @@ class DashboardService
             ->get();
     }
 
+    public function operationsSnapshot(?int $branchId = null): array
+    {
+        $branchId = $branchId ?? $this->branchService->currentBranchId();
+
+        if (! $branchId) {
+            return [
+                'job_cards_open' => 0,
+                'job_cards_in_progress' => 0,
+                'job_cards_completed' => 0,
+                'bookings_pending' => 0,
+                'bookings_confirmed' => 0,
+            ];
+        }
+
+        $today = now()->startOfDay();
+
+        return [
+            'job_cards_open' => JobCard::query()
+                ->where('branch_id', $branchId)
+                ->forDay($today)
+                ->where('status', JobCardStatus::Open)
+                ->count(),
+            'job_cards_in_progress' => JobCard::query()
+                ->where('branch_id', $branchId)
+                ->forDay($today)
+                ->where('status', JobCardStatus::InProgress)
+                ->count(),
+            'job_cards_completed' => JobCard::query()
+                ->where('branch_id', $branchId)
+                ->forDay($today)
+                ->where('status', JobCardStatus::Completed)
+                ->count(),
+            'bookings_pending' => Booking::query()
+                ->where('branch_id', $branchId)
+                ->whereDate('scheduled_at', $today)
+                ->where('status', BookingStatus::Pending)
+                ->count(),
+            'bookings_confirmed' => Booking::query()
+                ->where('branch_id', $branchId)
+                ->whereDate('scheduled_at', $today)
+                ->where('status', BookingStatus::Confirmed)
+                ->count(),
+        ];
+    }
+
     public function recentActivity(?int $branchId = null, int $limit = 10): Collection
     {
         $branchId = $branchId ?? $this->branchService->currentBranchId();

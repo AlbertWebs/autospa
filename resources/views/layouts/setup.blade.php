@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'Setup' }} | AutoSpa Pro</title>
+    @include('partials.pwa-head')
     @vite(['resources/css/auth.css'])
 </head>
 <body class="auth-body">
     <header class="auth-header">
         <div class="auth-brand">
-            <span class="material-symbols-outlined auth-brand-icon">directions_car</span>
+            @include('partials.brand-logo', ['size' => 'sm', 'class' => 'auth-brand-logo h-10 w-10'])
             <span class="auth-brand-name">AutoSpa Pro</span>
         </div>
         <span class="setup-header-badge">First-time setup</span>

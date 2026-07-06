@@ -91,6 +91,9 @@
                     </button>
                 </x-slot>
                 <x-slot name="content">
+                    @can('permission', 'dashboard.view')
+                        <x-dropdown-link :href="route('mobile.index')">{{ __('Mobile View') }}</x-dropdown-link>
+                    @endcan
                     <x-dropdown-link :href="route('manual.index')">{{ __('User Manual') }}</x-dropdown-link>
                     <x-dropdown-link :href="route('profile.edit')">{{ __('Profile') }}</x-dropdown-link>
                     <form method="POST" action="{{ route('logout') }}" data-turbo="false">

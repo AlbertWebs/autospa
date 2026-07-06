@@ -439,6 +439,14 @@
         @apply grid gap-6 lg:grid-cols-3 lg:items-start;
     }
 
+    .asp-pos-layout--mobile {
+        @apply grid-cols-1 md:grid-cols-2 lg:grid-cols-2;
+    }
+
+    .asp-pos-layout--mobile .asp-pos-catalog {
+        @apply md:col-span-1;
+    }
+
     .asp-pos-catalog {
         @apply lg:col-span-2 space-y-4;
     }
@@ -504,7 +512,11 @@
     }
 
     .asp-pos-tile-add {
-        @apply absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-lg bg-brand-primary/10 text-brand-primary-dim opacity-0 transition group-hover:opacity-100 dark:text-brand-primary;
+        @apply absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-lg bg-brand-primary/10 text-brand-primary-dim opacity-0 transition dark:text-brand-primary;
+    }
+
+    .asp-pos-tile:hover .asp-pos-tile-add {
+        @apply opacity-100;
     }
 
     .asp-pos-cart {
@@ -719,6 +731,152 @@
 
     html.asp-app-fullscreen main {
         @apply overflow-y-auto;
+    }
+
+    .asp-mobile-shell {
+        @apply flex min-h-screen min-h-[100dvh] flex-col;
+    }
+
+    .asp-mobile-header {
+        @apply sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-md dark:border-brand-border-subtle/80 dark:bg-brand-bg/90;
+        padding-top: env(safe-area-inset-top);
+    }
+
+    .asp-mobile-header-inner {
+        @apply flex h-14 items-center justify-between gap-3 px-4;
+    }
+
+    .asp-mobile-brand {
+        @apply flex min-w-0 flex-1 items-center gap-2.5;
+    }
+
+    .asp-mobile-brand-name {
+        @apply truncate text-sm font-semibold leading-none text-slate-900 dark:text-white;
+    }
+
+    .asp-mobile-icon-btn {
+        @apply inline-flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800;
+    }
+
+    .asp-mobile-content {
+        @apply flex-1 overflow-y-auto px-4 py-4;
+    }
+
+    .asp-mobile-content--with-tabbar {
+        padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+    }
+
+    .asp-mobile-tabbar {
+        @apply fixed bottom-0 left-0 right-0 z-40 flex border-t border-slate-200/80 bg-white/95 backdrop-blur-md dark:border-brand-border-subtle/80 dark:bg-brand-bg/95;
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .asp-mobile-tab {
+        @apply flex min-h-[3.25rem] min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-[10px] font-semibold text-slate-500 transition dark:text-slate-400;
+    }
+
+    .asp-mobile-tab--active {
+        @apply text-brand-primary dark:text-brand-primary;
+    }
+
+    .asp-mobile-tab-icon {
+        @apply text-[22px];
+    }
+
+    .asp-mobile-tab-label {
+        @apply truncate;
+    }
+
+    .asp-mobile-page-header {
+        @apply mb-4;
+    }
+
+    .asp-mobile-back-btn {
+        @apply inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800;
+    }
+
+    .asp-mobile-action-btn {
+        @apply inline-flex shrink-0 items-center rounded-xl bg-brand-primary px-3 py-2 text-xs font-semibold text-brand-on-primary;
+    }
+
+    .asp-mobile-stat {
+        @apply rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm dark:border-brand-border/60 dark:bg-brand-surface;
+    }
+
+    .asp-mobile-stat--revenue {
+        @apply border-emerald-500/20 bg-emerald-500/5;
+    }
+
+    .asp-mobile-stat--bookings {
+        @apply border-sky-500/20 bg-sky-500/5;
+    }
+
+    .asp-mobile-stat--service {
+        @apply border-amber-500/20 bg-amber-500/5;
+    }
+
+    .asp-mobile-stat--ready {
+        @apply border-green-500/20 bg-green-500/5;
+    }
+
+    .asp-mobile-stat--payments {
+        @apply border-violet-500/20 bg-violet-500/5;
+    }
+
+    .asp-mobile-stat--stock {
+        @apply border-rose-500/20 bg-rose-500/5;
+    }
+
+    .asp-mobile-list {
+        @apply space-y-2;
+    }
+
+    .asp-mobile-list-card {
+        @apply flex min-h-[3.25rem] items-center gap-3 rounded-2xl border border-slate-200/80 bg-white px-4 py-3 shadow-sm transition active:scale-[0.99] dark:border-brand-border/60 dark:bg-brand-surface;
+    }
+
+    .asp-mobile-status {
+        @apply rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide;
+    }
+
+    .asp-mobile-chip {
+        @apply inline-flex min-h-[2.75rem] items-center rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200;
+    }
+
+    .asp-mobile-chip--active {
+        @apply border-brand-primary bg-brand-primary/10 text-brand-primary;
+    }
+
+    .asp-mobile-card {
+        @apply rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm dark:border-brand-border/60 dark:bg-brand-surface;
+    }
+
+    .asp-mobile-menu-tile {
+        @apply flex min-h-[5.5rem] flex-col items-center justify-center gap-2 rounded-2xl border border-slate-200/80 bg-white p-3 text-center shadow-sm transition active:scale-[0.98] dark:border-brand-border/60 dark:bg-brand-surface;
+    }
+
+    .asp-mobile-menu-tile-icon {
+        @apply text-[26px] text-brand-primary;
+    }
+
+    .asp-mobile-menu-tile-label {
+        @apply text-xs font-semibold leading-tight text-slate-700 dark:text-slate-200;
+    }
+
+    .asp-mobile-kpi-grid {
+        @apply grid grid-cols-2 gap-3 md:grid-cols-3;
+    }
+
+    .asp-mobile-section-title {
+        @apply mb-3 text-sm font-bold text-slate-900 dark:text-white;
+    }
+
+    .asp-mobile-pos-shell {
+        @apply -mx-4 -mt-4 flex min-h-0 flex-1 flex-col;
+    }
+
+    .asp-mobile-pos-shell .asp-pos-layout {
+        @apply min-h-0 flex-1;
     }
 }
 

@@ -64,6 +64,14 @@ class RouteAccess
 
     protected function requirementFor(string $routeName): ?array
     {
+        if (str_starts_with($routeName, 'mobile.')) {
+            if ($routeName === 'mobile.menu') {
+                return null;
+            }
+
+            return $this->requirementFor($this->desktopRouteName($routeName));
+        }
+
         return match (true) {
             $routeName === 'dashboard' => $this->needs('dashboard.view'),
             $routeName === 'settings.company' => $this->needs('settings.view'),
@@ -147,5 +155,23 @@ class RouteAccess
             'mode' => 'all',
             'permissions' => $permissions,
         ];
+    }
+
+    protected function desktopRouteName(string $mobileRouteName): string
+    {
+        return match ($mobileRouteName) {
+            'mobile.index' => 'dashboard',
+            'mobile.services.categories.index' => 'services.categories.index',
+            'mobile.packages.index' => 'packages.index',
+            'mobile.settings.branches.index' => 'settings.branches.index',
+            'mobile.settings.users.index' => 'settings.users.index',
+            'mobile.settings.roles.index' => 'settings.roles.index',
+            'mobile.settings.payment-methods.index' => 'settings.payment-methods.index',
+            'mobile.settings.integrations.index' => 'settings.integrations.index',
+            'mobile.settings.company' => 'settings.company',
+            'mobile.purchase-orders.index' => 'purchase-orders.index',
+            'mobile.stock-movements.index' => 'stock-movements.index',
+            default => substr($mobileRouteName, strlen('mobile.')),
+        };
     }
 }

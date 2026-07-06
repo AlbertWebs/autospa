@@ -69,6 +69,9 @@ Route::middleware(['guest', 'not.installed'])->prefix('setup')->name('setup.')->
 
 Route::middleware(['installed', 'auth', 'verified', 'branch'])->group(function () {
     Route::middleware('permission:dashboard.view')->get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::prefix('mobile')->name('mobile.')->group(base_path('routes/mobile.php'));
+
     Route::post('/branch/switch', [BranchController::class, 'switch'])->name('branch.switch');
 
     Route::prefix('settings')->name('settings.')->group(function () {

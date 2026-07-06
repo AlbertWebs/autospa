@@ -52,10 +52,7 @@
 
     {{-- Brand --}}
     <div class="flex h-16 shrink-0 items-center gap-3 border-b border-slate-800/80 px-5">
-        <div class="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-sm font-bold text-white shadow-lg shadow-indigo-500/25">
-            AS
-            <span class="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-slate-900 bg-emerald-400"></span>
-        </div>
+        @include('partials.brand-logo', ['size' => 'md'])
         <div class="min-w-0 flex-1">
             <p class="truncate text-sm font-semibold text-white">AutoSpa</p>
             <p class="truncate text-xs text-slate-400">{{ $currentBranch?->name ?? 'Management System' }}</p>

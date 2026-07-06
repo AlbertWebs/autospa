@@ -22,19 +22,19 @@ class ManifestController extends Controller
             'background_color' => $config['background_color'],
             'icons' => [
                 [
-                    'src' => asset('icons/icon-192.png'),
+                    'src' => asset('logo.png'),
                     'sizes' => '192x192',
                     'type' => 'image/png',
                     'purpose' => 'any',
                 ],
                 [
-                    'src' => asset('icons/icon-512.png'),
+                    'src' => asset('logo.png'),
                     'sizes' => '512x512',
                     'type' => 'image/png',
                     'purpose' => 'any',
                 ],
                 [
-                    'src' => asset('icons/icon-512.png'),
+                    'src' => asset('logo.png'),
                     'sizes' => '512x512',
                     'type' => 'image/png',
                     'purpose' => 'maskable',
