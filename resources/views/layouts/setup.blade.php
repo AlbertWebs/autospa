@@ -11,7 +11,7 @@
 <body class="auth-body">
     <header class="auth-header">
         <div class="auth-brand">
-            @include('partials.brand-logo', ['size' => 'sm', 'class' => 'auth-brand-logo h-10 w-10'])
+            @include('partials.brand-logo', ['class' => 'auth-brand-logo'])
             <span class="auth-brand-name">AutoSpa Pro</span>
         </div>
         <span class="setup-header-badge">First-time setup</span>

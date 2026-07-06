@@ -64,8 +64,12 @@
 }
 
 .auth-brand-logo {
+    width: 2.5rem;
+    height: 2.5rem;
     border-radius: 0.625rem;
     object-fit: contain;
+    flex-shrink: 0;
+    display: block;
 }
 
 .auth-brand-name {
