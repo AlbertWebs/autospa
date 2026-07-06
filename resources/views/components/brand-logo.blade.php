@@ -7,9 +7,9 @@
 @php
     [$classes, $width, $height] = match (true) {
         $variant === 'auth' => ['auth-brand-logo', 48, 48],
-        $size === 'sm' => ['shrink-0 rounded-xl object-contain h-10 w-10', 40, 40],
-        $size === 'lg' => ['shrink-0 rounded-xl object-contain h-12 w-12', 48, 48],
-        default => ['shrink-0 rounded-xl object-contain h-10 w-10', 40, 40],
+        $size === 'sm' => ['shrink-0 rounded-xl object-contain h-10 w-10 ring-2 ring-white', 40, 40],
+        $size === 'lg' => ['shrink-0 rounded-xl object-contain h-12 w-12 ring-2 ring-white', 48, 48],
+        default => ['shrink-0 rounded-xl object-contain h-10 w-10 ring-2 ring-white', 40, 40],
     };
 @endphp
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Mobile;
 use App\Enums\JobCardStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Concerns\AssignsBranchId;
+use App\Http\Controllers\Concerns\SyncsJobCardServices;
 use App\Http\Requests\StoreJobCardRequest;
 use App\Http\Requests\UpdateJobCardRequest;
 use App\Models\Booking;
@@ -19,7 +20,7 @@ use Illuminate\View\View;
 
 class MobileJobCardController extends Controller
 {
-    use AssignsBranchId;
+    use AssignsBranchId, SyncsJobCardServices;
 
     public function index(Request $request): View
     {
@@ -56,7 +57,7 @@ class MobileJobCardController extends Controller
 
         $jobCards = JobCard::query()
             ->forDay($today)
-            ->with(['customer', 'vehicle', 'assignee'])
+            ->with(['customer', 'vehicle', 'assignee', 'services.service'])
             ->whereIn('status', [JobCardStatus::Open, JobCardStatus::InProgress])
             ->latest()
             ->get();
@@ -76,7 +77,7 @@ class MobileJobCardController extends Controller
     public function show(JobCard $jobCard): View
     {
         return view('mobile.job-cards.show', [
-            'jobCard' => $jobCard->load(['customer', 'vehicle', 'assignee', 'services', 'products']),
+            'jobCard' => $jobCard->load(['customer', 'vehicle', 'assignee', 'services.service', 'products']),
         ]);
     }
 
@@ -87,12 +88,18 @@ class MobileJobCardController extends Controller
             'vehicles' => Vehicle::query()->with('customer')->get(),
             'bookings' => Booking::query()->with('customer')->latest()->limit(50)->get(),
             'employees' => $this->assignableEmployees(),
+            'services' => $this->availableServices(),
         ]);
     }
 
     public function store(StoreJobCardRequest $request): RedirectResponse|JsonResponse
     {
-        $jobCard = JobCard::create($this->withBranchId($request->validated()));
+        $validated = $request->validated();
+        $serviceIds = $validated['service_ids'];
+        unset($validated['service_ids']);
+
+        $jobCard = JobCard::create($this->withBranchId($validated));
+        $this->syncJobCardServices($jobCard, $serviceIds);
 
         if ($request->wantsJson()) {
             return response()->json([

@@ -9,6 +9,7 @@
 @endphp
 
 <input
+    @if ($name) name="{{ $name }}" @endif
     {{ $attributes->merge(['class' => $classes]) }}
     @if ($name && $ajax)
         :class="{ 'asp-input--error': errors['{{ $name }}'] }"

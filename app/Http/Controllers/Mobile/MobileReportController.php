@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Mobile;
 
 use App\Http\Controllers\Controller;
 use App\Services\ReportService;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class MobileReportController extends Controller
@@ -41,27 +42,63 @@ class MobileReportController extends Controller
         ]);
     }
 
-    public function revenue(): View
+    public function revenue(Request $request): View
     {
+        $from = $request->date('from')?->startOfDay() ?? now()->copy()->startOfMonth()->startOfDay();
+        $to = $request->date('to')?->endOfDay() ?? now()->copy()->endOfDay();
+
+        if ($from->gt($to)) {
+            [$from, $to] = [$to->copy()->startOfDay(), $from->copy()->endOfDay()];
+        }
+
         return view('mobile.reports.show', [
             'title' => 'Revenue Report',
-            'data' => $this->reportService->revenue(),
+            'data' => $this->reportService->revenue(null, $from, $to),
+            'filterRoute' => route('mobile.reports.revenue'),
+            'filters' => [
+                'from' => $from->toDateString(),
+                'to' => $to->toDateString(),
+            ],
         ]);
     }
 
-    public function customers(): View
+    public function customers(Request $request): View
     {
-        return view('mobile.reports.show', [
+        $from = $request->date('from')?->startOfDay() ?? now()->copy()->startOfMonth()->startOfDay();
+        $to = $request->date('to')?->endOfDay() ?? now()->copy()->endOfDay();
+
+        if ($from->gt($to)) {
+            [$from, $to] = [$to->copy()->startOfDay(), $from->copy()->endOfDay()];
+        }
+
+        return view('mobile.reports.customers', [
             'title' => 'Customer Report',
-            'data' => $this->reportService->customers(),
+            'report' => $this->reportService->customers(null, $from, $to),
+            'filterRoute' => route('mobile.reports.customers'),
+            'filters' => [
+                'from' => $from->toDateString(),
+                'to' => $to->toDateString(),
+            ],
         ]);
     }
 
-    public function staff(): View
+    public function staff(Request $request): View
     {
-        return view('mobile.reports.show', [
+        $from = $request->date('from')?->startOfDay() ?? now()->copy()->startOfMonth()->startOfDay();
+        $to = $request->date('to')?->endOfDay() ?? now()->copy()->endOfDay();
+
+        if ($from->gt($to)) {
+            [$from, $to] = [$to->copy()->startOfDay(), $from->copy()->endOfDay()];
+        }
+
+        return view('mobile.reports.staff', [
             'title' => 'Staff Report',
-            'data' => $this->reportService->staff(),
+            'report' => $this->reportService->staff(null, $from, $to),
+            'filterRoute' => route('mobile.reports.staff'),
+            'filters' => [
+                'from' => $from->toDateString(),
+                'to' => $to->toDateString(),
+            ],
         ]);
     }
 

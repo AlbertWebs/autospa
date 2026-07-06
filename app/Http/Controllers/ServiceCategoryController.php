@@ -29,7 +29,7 @@ class ServiceCategoryController extends Controller
     {
         $category = ServiceCategory::create($this->withBranchId($request->validated()));
 
-        return redirect()->route('service-categories.index')
+        return redirect()->route('services.categories.index')
             ->with('success', 'Category created.');
     }
 
@@ -49,7 +49,7 @@ class ServiceCategoryController extends Controller
     {
         $serviceCategory->update($request->validated());
 
-        return redirect()->route('service-categories.index')
+        return redirect()->route('services.categories.index')
             ->with('success', 'Category updated.');
     }
 
@@ -57,7 +57,7 @@ class ServiceCategoryController extends Controller
     {
         $serviceCategory->delete();
 
-        return redirect()->route('service-categories.index')
+        return redirect()->route('services.categories.index')
             ->with('success', 'Category deleted.');
     }
 }

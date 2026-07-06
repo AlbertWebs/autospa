@@ -31,10 +31,10 @@
             <div class="asp-mobile-card">
                 <h3 class="mb-2 font-semibold">Services</h3>
                 <ul class="space-y-2 text-sm">
-                    @foreach ($jobCard->services as $service)
+                    @foreach ($jobCard->services as $line)
                         <li class="flex justify-between">
-                            <span>{{ $service->name }}</span>
-                            <span>KES {{ number_format($service->pivot->price ?? $service->price, 0) }}</span>
+                            <span>{{ $line->service?->name ?? 'Service' }}</span>
+                            <span>KES {{ number_format($line->price, 0) }}</span>
                         </li>
                     @endforeach
                 </ul>

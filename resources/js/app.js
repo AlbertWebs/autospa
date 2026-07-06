@@ -1037,6 +1037,18 @@ document.addEventListener('alpine:init', () => {
                 formData.set('vehicle_id', this.vehicleId);
             }
 
+            const serviceIds = [...form.querySelectorAll('input[name="service_ids[]"]:checked')]
+                .map((input) => input.value);
+
+            if (serviceIds.length === 0) {
+                this.errors = { service_ids: ['Select at least one service.'] };
+                this.loading = false;
+                return;
+            }
+
+            formData.delete('service_ids[]');
+            serviceIds.forEach((serviceId) => formData.append('service_ids[]', serviceId));
+
             try {
                 if (!isOnline()) {
                     const uuid = newUuid();
@@ -1046,6 +1058,7 @@ document.addEventListener('alpine:init', () => {
                         assigned_to: formData.get('assigned_to') || null,
                         status: formData.get('status') || 'open',
                         notes: formData.get('notes') || null,
+                        service_ids: serviceIds.map((id) => Number(id)),
                         uuid,
                     }, uuid);
 

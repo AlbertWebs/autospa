@@ -9,6 +9,7 @@
 @endphp
 
 <textarea
+    @if ($name) name="{{ $name }}" @endif
     {{ $attributes->merge(['class' => $classes]) }}
     @if ($name && $ajax)
         :class="{ 'asp-textarea--error': errors['{{ $name }}'] }"

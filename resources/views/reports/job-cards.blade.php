@@ -23,7 +23,7 @@
         <x-ui.stat-card label="Open Today" :value="$report['today']['open'] ?? 0" icon="hourglass_top" variant="bookings" />
         <x-ui.stat-card label="In Progress Today" :value="$report['today']['in_progress'] ?? 0" icon="autorenew" variant="service" />
         <x-ui.stat-card label="Completed Today" :value="$report['today']['completed'] ?? 0" icon="task_alt" variant="ready" />
-        <x-ui.stat-card label="Total Today" :value="$report['today']['total'] ?? 0" icon="clipboard" />
+        <x-ui.stat-card label="Total Today" :value="$report['today']['total'] ?? 0" icon="assignment" />
     </div>
 
     <div class="mb-6 grid gap-6 lg:grid-cols-2">

@@ -16,7 +16,67 @@
         'model' => $vehicle->model,
         'color' => $vehicle->color,
     ])->values();
+
+    $selectedServiceIds = old('service_ids', $selectedServiceIds ?? ($jobCard?->services->pluck('service_id')->all() ?? []));
 @endphp
+
+<x-ui.form-section
+    title="Services"
+    description="Select the wash or detailing services for this job."
+>
+    <x-ui.form-field
+        label="Services"
+        name="service_ids"
+        :required="true"
+        :col-span="2"
+        :ajax="$ajax"
+        hint="Choose at least one service."
+    >
+        @if (($services ?? collect())->isEmpty())
+            <p class="text-sm text-amber-600 dark:text-amber-400">
+                No active services found for this branch.
+                <a href="{{ route('services.create') }}" class="font-medium underline">Add services</a> first.
+            </p>
+        @else
+            <div class="grid gap-2 sm:grid-cols-2">
+                @foreach ($services as $service)
+                    <label class="asp-checkbox-card">
+                        <input
+                            type="checkbox"
+                            name="service_ids[]"
+                            value="{{ $service->id }}"
+                            @checked(in_array($service->id, $selectedServiceIds, false))
+                            x-bind:class="{ 'asp-input--error': errors?.service_ids }"
+                        >
+                        <span class="min-w-0 flex-1">
+                            <span class="block text-sm font-medium text-slate-900 dark:text-white">{{ $service->name }}</span>
+                            <span class="block font-mono text-xs text-slate-500">KES {{ number_format($service->price, 0) }}</span>
+                        </span>
+                    </label>
+                @endforeach
+            </div>
+            @if ($ajax)
+                <p class="asp-field-error" x-show="errors?.service_ids" x-cloak>
+                    <span class="material-symbols-outlined text-sm">error</span>
+                    <span x-text="errors?.service_ids?.[0]"></span>
+                </p>
+            @else
+                @error('service_ids')
+                    <p class="asp-field-error">
+                        <span class="material-symbols-outlined text-sm">error</span>
+                        {{ $message }}
+                    </p>
+                @enderror
+                @error('service_ids.*')
+                    <p class="asp-field-error">
+                        <span class="material-symbols-outlined text-sm">error</span>
+                        {{ $message }}
+                    </p>
+                @enderror
+            @endif
+        @endif
+    </x-ui.form-field>
+</x-ui.form-section>
 
 <x-ui.form-section
     title="Vehicle & Customer"

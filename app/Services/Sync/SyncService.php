@@ -318,7 +318,39 @@ class SyncService
             'notes' => $payload['notes'] ?? null,
         ]);
 
+        $serviceIds = $payload['service_ids'] ?? [];
+
+        if ($serviceIds === []) {
+            throw new InvalidArgumentException('Job card create requires at least one service.');
+        }
+
+        $this->attachJobCardServices($jobCard, $serviceIds);
+
         return $this->jobCardResult($jobCard, $idMap, $uuid);
+    }
+
+    /**
+     * @param  array<int, int|string>  $serviceIds
+     */
+    protected function attachJobCardServices(JobCard $jobCard, array $serviceIds): void
+    {
+        foreach (array_values(array_unique(array_map('intval', $serviceIds))) as $serviceId) {
+            $service = Service::query()
+                ->where('branch_id', $jobCard->branch_id)
+                ->where('id', $serviceId)
+                ->where('is_active', true)
+                ->first();
+
+            if (! $service) {
+                throw new InvalidArgumentException("Service [{$serviceId}] is not available for this branch.");
+            }
+
+            $jobCard->services()->create([
+                'service_id' => $service->id,
+                'price' => $service->price,
+                'status' => 'pending',
+            ]);
+        }
     }
 
     /**

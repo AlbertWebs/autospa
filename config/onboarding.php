@@ -38,7 +38,7 @@ return [
     ],
     [
         'title' => 'Reports',
-        'body' => 'Run daily, weekly, and monthly reports for revenue, customers, staff, inventory, and job cards.',
+        'body' => 'Run daily, weekly, and monthly reports. Revenue, customer, and staff reports support date filters and detailed analytics. Job cards and inventory reports help with floor and stock oversight.',
         'target' => null,
     ],
     [

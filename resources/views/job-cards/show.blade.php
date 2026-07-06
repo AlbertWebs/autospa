@@ -20,4 +20,18 @@
             <div class="flex justify-between gap-4"><dt class="text-slate-500">Notes</dt><dd>{{ $jobCard->notes ?? 'N/A' }}</dd></div>
         </dl>
     </x-ui.card>
+
+    @if ($jobCard->services->isNotEmpty())
+        <x-ui.card class="mt-6">
+            <h2 class="mb-3 font-display text-base font-semibold text-slate-900 dark:text-white">Services</h2>
+            <ul class="space-y-2 text-sm">
+                @foreach ($jobCard->services as $line)
+                    <li class="flex justify-between gap-4">
+                        <span>{{ $line->service?->name ?? 'Service' }}</span>
+                        <span class="font-mono">KES {{ number_format($line->price, 0) }}</span>
+                    </li>
+                @endforeach
+            </ul>
+        </x-ui.card>
+    @endif
 </x-layouts.app>

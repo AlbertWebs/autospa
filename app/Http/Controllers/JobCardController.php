@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\AssignsBranchId;
+use App\Http\Controllers\Concerns\SyncsJobCardServices;
 use App\Http\Requests\StoreJobCardRequest;
 use App\Http\Requests\UpdateJobCardRequest;
 use App\Enums\JobCardStatus;
@@ -17,7 +18,7 @@ use Illuminate\View\View;
 
 class JobCardController extends Controller
 {
-    use AssignsBranchId;
+    use AssignsBranchId, SyncsJobCardServices;
 
     public function index(): View
     {
@@ -47,12 +48,18 @@ class JobCardController extends Controller
             'vehicles' => $vehicles,
             'bookings' => Booking::query()->with('customer')->latest()->limit(50)->get(),
             'employees' => $this->assignableEmployees(),
+            'services' => $this->availableServices(),
         ]);
     }
 
     public function store(StoreJobCardRequest $request): RedirectResponse|JsonResponse
     {
-        $jobCard = JobCard::create($this->withBranchId($request->validated()));
+        $validated = $request->validated();
+        $serviceIds = $validated['service_ids'];
+        unset($validated['service_ids']);
+
+        $jobCard = JobCard::create($this->withBranchId($validated));
+        $this->syncJobCardServices($jobCard, $serviceIds);
 
         if ($request->wantsJson()) {
             return response()->json([
@@ -68,7 +75,7 @@ class JobCardController extends Controller
     public function show(JobCard $jobCard): View
     {
         return view('job-cards.show', [
-            'jobCard' => $jobCard->load(['customer', 'vehicle', 'assignee', 'services', 'products', 'checklistItems']),
+            'jobCard' => $jobCard->load(['customer', 'vehicle', 'assignee', 'services.service', 'products', 'checklistItems']),
         ]);
     }
 
@@ -82,12 +89,22 @@ class JobCardController extends Controller
             'vehicles' => $vehicles,
             'bookings' => Booking::query()->with('customer')->latest()->limit(50)->get(),
             'employees' => $this->assignableEmployees(),
+            'services' => $this->availableServices(),
+            'selectedServiceIds' => $jobCard->services()->pluck('service_id')->all(),
         ]);
     }
 
     public function update(UpdateJobCardRequest $request, JobCard $jobCard): RedirectResponse
     {
-        $jobCard->update($this->statusAwarePayload($jobCard, $request->validated()));
+        $validated = $request->validated();
+        $serviceIds = $validated['service_ids'] ?? null;
+        unset($validated['service_ids']);
+
+        $jobCard->update($this->statusAwarePayload($jobCard, $validated));
+
+        if (is_array($serviceIds)) {
+            $this->syncJobCardServices($jobCard, $serviceIds);
+        }
 
         return redirect()->route('job-cards.show', $jobCard)
             ->with('success', 'Job card updated.');
@@ -122,7 +139,7 @@ class JobCardController extends Controller
 
         $jobCards = JobCard::query()
             ->forDay($today)
-            ->with(['customer', 'vehicle', 'assignee'])
+            ->with(['customer', 'vehicle', 'assignee', 'services.service'])
             ->whereIn('status', [JobCardStatus::Open, JobCardStatus::InProgress])
             ->latest()
             ->get();

@@ -9,6 +9,7 @@
 @endphp
 
 <select
+    @if ($name) name="{{ $name }}" @endif
     {{ $attributes->merge(['class' => $classes]) }}
     @if ($name && $ajax)
         :class="{ 'asp-select--error': errors['{{ $name }}'] }"

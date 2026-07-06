@@ -101,6 +101,20 @@ class SyncPushTest extends TestCase
     public function test_push_resolves_customer_vehicle_and_job_card_dependencies_in_order(): void
     {
         $user = $this->makeUserWithRole(RoleSlug::Manager);
+        $branch = Branch::query()->firstOrFail();
+        $category = ServiceCategory::query()->create([
+            'branch_id' => $branch->id,
+            'name' => 'Wash',
+            'is_active' => true,
+        ]);
+        $service = Service::query()->create([
+            'branch_id' => $branch->id,
+            'service_category_id' => $category->id,
+            'name' => 'Body Wash',
+            'price' => 400,
+            'duration_minutes' => 30,
+            'is_active' => true,
+        ]);
         $customerUuid = (string) Str::uuid();
         $vehicleUuid = (string) Str::uuid();
         $jobCardUuid = (string) Str::uuid();
@@ -138,6 +152,7 @@ class SyncPushTest extends TestCase
                         'customer_id' => "client:{$customerUuid}",
                         'vehicle_id' => "client:{$vehicleUuid}",
                         'status' => JobCardStatus::Open->value,
+                        'service_ids' => [$service->id],
                     ],
                     'created_at' => now()->toIso8601String(),
                 ],
@@ -156,6 +171,10 @@ class SyncPushTest extends TestCase
         $this->assertSame($customer->id, $vehicle->customer_id);
         $this->assertSame($customer->id, $jobCard->customer_id);
         $this->assertSame($vehicle->id, $jobCard->vehicle_id);
+        $this->assertDatabaseHas('job_card_services', [
+            'job_card_id' => $jobCard->id,
+            'service_id' => $service->id,
+        ]);
     }
 
     public function test_push_applies_pos_checkout_mutation(): void

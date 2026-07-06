@@ -99,7 +99,7 @@ class SetupWizardTest extends TestCase
 
         $this->assertDatabaseHas('services', [
             'branch_id' => $branch->id,
-            'name' => 'ENGINE WASH',
+            'name' => 'Engine Wash',
             'price' => 500,
         ]);
         $this->assertSame(10, Service::query()->where('branch_id', $branch->id)->count());

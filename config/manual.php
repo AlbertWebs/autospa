@@ -23,6 +23,10 @@ return [
                     'heading' => 'Permissions',
                     'body' => 'Each module is protected by permissions assigned through roles. If you see an access denied message, contact an administrator to adjust your role.',
                 ],
+                [
+                    'heading' => 'Working offline',
+                    'body' => 'AutoSpa can keep working when the internet drops. A banner appears at the top when you are offline. POS checkout, job card creation, and quick customer/vehicle creation queue changes locally and sync automatically when connectivity returns. The pending-sync badge in the header shows how many changes are waiting to upload. M-Pesa STK push is disabled offline—use cash or sync later. Install the app to your home screen (PWA) for faster load times and better offline support.',
+                ],
             ],
         ],
         [
@@ -51,11 +55,15 @@ return [
             'topics' => [
                 [
                     'heading' => 'Live board',
-                    'body' => 'The Live screen shows job cards currently moving through the wash bay. Use it to see what is queued, in progress, and nearing completion.',
+                    'body' => 'The Live screen shows job cards currently moving through the wash bay. Use it to see what is queued, in progress, and nearing completion. Each card displays the customer, vehicle, and selected services.',
                 ],
                 [
                     'heading' => 'Job cards',
                     'body' => 'Open Jobs lists new work. In Progress shows active jobs. Completed archives finished jobs. Job cards tie customers, vehicles, and services together.',
+                ],
+                [
+                    'heading' => 'Creating & editing job cards',
+                    'body' => 'When you create or edit a job card, select one or more services from the active branch catalog. At least one service is required. Selected services appear on the live board and job card detail pages. Offline creation is supported—changes sync when you are back online.',
                 ],
             ],
         ],
@@ -86,6 +94,10 @@ return [
                 [
                     'heading' => 'Check in',
                     'body' => 'Record a vehicle arrival, link it to a customer, and start the service workflow.',
+                ],
+                [
+                    'heading' => 'Registration numbers',
+                    'body' => 'Vehicle registration numbers are stored and displayed in uppercase (e.g. KDJ 902K) for consistency across search, job cards, and reports.',
                 ],
                 [
                     'heading' => 'Active vehicles',
@@ -145,6 +157,10 @@ return [
                     'heading' => 'Receipts',
                     'body' => 'After checkout you are redirected to the receipt page where you can print or start a new sale.',
                 ],
+                [
+                    'heading' => 'Offline checkout',
+                    'body' => 'Cash sales can be completed offline. The sale is saved locally and uploaded when connectivity returns. M-Pesa is not available offline. Pending receipts show a waiting-to-sync state until the server confirms the sale.',
+                ],
             ],
         ],
         [
@@ -185,7 +201,7 @@ return [
                 ],
                 [
                     'heading' => 'Performance & commissions',
-                    'body' => 'Review productivity metrics and commission calculations for incentivized roles.',
+                    'body' => 'Review productivity metrics and commission calculations for incentivized roles. Commission rules are configured under Settings → Company.',
                 ],
             ],
         ],
@@ -241,15 +257,31 @@ return [
         [
             'title' => 'Reports',
             'icon' => 'chart-bar',
-            'summary' => 'Business intelligence.',
+            'summary' => 'Business intelligence and operational analytics.',
             'topics' => [
                 [
                     'heading' => 'Time-based reports',
-                    'body' => 'Daily, weekly, and monthly summaries show trends over time.',
+                    'body' => 'Daily, weekly, and monthly summaries show trends over time. Use the date picker on the Job Cards report to view activity for a specific day.',
                 ],
                 [
-                    'heading' => 'Domain reports',
-                    'body' => 'Revenue, customer, staff, and inventory reports answer specific management questions.',
+                    'heading' => 'Revenue report',
+                    'body' => 'Filter by From and To dates to see period revenue alongside today, this week, this month, and outstanding balances. Click This Month to reset to the current month. Revenue is based on paid invoice amounts in the selected range.',
+                ],
+                [
+                    'heading' => 'Customer report',
+                    'body' => 'Analytical dashboard with date filters. Review new customers in the period, active customers, period revenue, repeat rate, visit-frequency segments, fleet size breakdown, a six-month acquisition trend, top spenders, new registrations, and at-risk customers (no visit in 60 days).',
+                ],
+                [
+                    'heading' => 'Staff report',
+                    'body' => 'Team performance for a selected date range: jobs completed, in-progress workload, assigned revenue, average jobs per staff member, completion times, and commissions (when enabled). Includes job activity breakdown, completions by position, weekly trend, a staff leaderboard, and underutilized staff with no completions in the period.',
+                ],
+                [
+                    'heading' => 'Job cards report',
+                    'body' => 'Pick a report date to see open, in progress, completed, and total job cards for that day, plus week and month summaries and a detailed list of cards with activity on the selected date.',
+                ],
+                [
+                    'heading' => 'Inventory report',
+                    'body' => 'Set stock position as-of datetime and a movements date range to audit on-hand quantities, low stock, stock value, and recent stock ins.',
                 ],
             ],
         ],
@@ -288,6 +320,10 @@ return [
                 [
                     'heading' => 'Integrations',
                     'body' => 'Connect M-Pesa, SMS, email, and other external providers. Integration drivers can be stubbed for testing.',
+                ],
+                [
+                    'heading' => 'Email notifications',
+                    'body' => 'System email delivery can be enabled or disabled by administrators on the server using php artisan notifications:email enable|disable|status. When disabled, outbound emails are suppressed without changing other settings.',
                 ],
             ],
         ],

@@ -21,7 +21,7 @@ class CarWashServiceSeeder extends Seeder
      */
     protected array $services = [
         [
-            'name' => 'ENGINE WASH',
+            'name' => 'Engine Wash',
             'price' => 500,
             'commission_rate' => 20,
             'target_revenue' => 1000,
@@ -29,7 +29,7 @@ class CarWashServiceSeeder extends Seeder
             'duration_minutes' => 45,
         ],
         [
-            'name' => 'VACUUM CLEANING',
+            'name' => 'Vacuum Cleaning',
             'price' => 500,
             'commission_rate' => 20,
             'target_revenue' => 500,
@@ -37,7 +37,7 @@ class CarWashServiceSeeder extends Seeder
             'duration_minutes' => 30,
         ],
         [
-            'name' => 'BODY WASH-SALOON',
+            'name' => 'Body Wash-Saloon',
             'price' => 400,
             'commission_rate' => 20,
             'target_revenue' => 400,
@@ -45,7 +45,7 @@ class CarWashServiceSeeder extends Seeder
             'duration_minutes' => 30,
         ],
         [
-            'name' => 'MOTORBIKE WASH',
+            'name' => 'Motorbike Wash',
             'price' => 200,
             'commission_rate' => 20,
             'target_revenue' => 200,
@@ -53,7 +53,7 @@ class CarWashServiceSeeder extends Seeder
             'duration_minutes' => 20,
         ],
         [
-            'name' => 'SIMPLE INTERIOR / SHAMPOO-SALOON',
+            'name' => 'Simple Interior / Shampoo-Saloon',
             'price' => 2500,
             'commission_rate' => 20,
             'target_revenue' => 0,
@@ -61,7 +61,7 @@ class CarWashServiceSeeder extends Seeder
             'duration_minutes' => 120,
         ],
         [
-            'name' => 'BODY WASH-UBER',
+            'name' => 'Body Wash-Uber',
             'price' => 300,
             'commission_rate' => 20,
             'target_revenue' => 0,
@@ -69,7 +69,7 @@ class CarWashServiceSeeder extends Seeder
             'duration_minutes' => 25,
         ],
         [
-            'name' => 'DASH BOARD SPRAY',
+            'name' => 'Dash Board Spray',
             'price' => 500,
             'commission_rate' => 20,
             'target_revenue' => 0,
@@ -77,7 +77,7 @@ class CarWashServiceSeeder extends Seeder
             'duration_minutes' => 15,
         ],
         [
-            'name' => 'BODY WASH- SUV AND 4 X 4',
+            'name' => 'Body Wash-SUV and 4 X 4',
             'price' => 500,
             'commission_rate' => 20,
             'target_revenue' => 1000,
@@ -85,7 +85,7 @@ class CarWashServiceSeeder extends Seeder
             'duration_minutes' => 40,
         ],
         [
-            'name' => 'BUFFING-SALOON',
+            'name' => 'Buffing-Saloon',
             'price' => 4500,
             'commission_rate' => 25,
             'target_revenue' => 0,
@@ -93,13 +93,27 @@ class CarWashServiceSeeder extends Seeder
             'duration_minutes' => 180,
         ],
         [
-            'name' => 'BUFFING-SUV AND 4 X 4',
+            'name' => 'Buffing-SUV and 4 X 4',
             'price' => 5500,
             'commission_rate' => 25,
             'target_revenue' => 0,
             'commission_at_target' => 0,
             'duration_minutes' => 210,
         ],
+    ];
+
+    /** @var array<string, string> New title-case name => legacy uppercase name */
+    protected array $legacyNames = [
+        'Engine Wash' => 'ENGINE WASH',
+        'Vacuum Cleaning' => 'VACUUM CLEANING',
+        'Body Wash-Saloon' => 'BODY WASH-SALOON',
+        'Motorbike Wash' => 'MOTORBIKE WASH',
+        'Simple Interior / Shampoo-Saloon' => 'SIMPLE INTERIOR / SHAMPOO-SALOON',
+        'Body Wash-Uber' => 'BODY WASH-UBER',
+        'Dash Board Spray' => 'DASH BOARD SPRAY',
+        'Body Wash-SUV and 4 X 4' => 'BODY WASH- SUV AND 4 X 4',
+        'Buffing-Saloon' => 'BUFFING-SALOON',
+        'Buffing-SUV and 4 X 4' => 'BUFFING-SUV AND 4 X 4',
     ];
 
     public function run(): void
@@ -126,19 +140,36 @@ class CarWashServiceSeeder extends Seeder
             );
 
             foreach ($this->services as $index => $service) {
-                Service::query()->updateOrCreate(
-                    [
-                        'branch_id' => $branch->id,
-                        'name' => $service['name'],
-                    ],
-                    [
-                        'service_category_id' => $category->id,
-                        'description' => $this->buildDescription($service),
-                        'price' => $service['price'],
-                        'duration_minutes' => $service['duration_minutes'],
-                        'is_active' => true,
-                    ],
-                );
+                $legacyName = $this->legacyNames[$service['name']] ?? null;
+
+                $existing = Service::query()
+                    ->where('branch_id', $branch->id)
+                    ->where(function ($query) use ($service, $legacyName) {
+                        $query->where('name', $service['name']);
+
+                        if ($legacyName) {
+                            $query->orWhere('name', $legacyName);
+                        }
+                    })
+                    ->first();
+
+                $attributes = [
+                    'service_category_id' => $category->id,
+                    'description' => $this->buildDescription($service),
+                    'price' => $service['price'],
+                    'duration_minutes' => $service['duration_minutes'],
+                    'is_active' => true,
+                    'name' => $service['name'],
+                ];
+
+                if ($existing) {
+                    $existing->update($attributes);
+                } else {
+                    Service::query()->create(array_merge(
+                        ['branch_id' => $branch->id],
+                        $attributes,
+                    ));
+                }
             }
 
             $this->command?->info("Seeded {$branch->name}: ".count($this->services).' services.');

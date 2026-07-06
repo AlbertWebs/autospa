@@ -45,24 +45,57 @@ class ReportController extends Controller
         ]);
     }
 
-    public function revenue(): View
+    public function revenue(Request $request): View
     {
+        $from = $request->date('from')?->startOfDay() ?? now()->copy()->startOfMonth()->startOfDay();
+        $to = $request->date('to')?->endOfDay() ?? now()->copy()->endOfDay();
+
+        if ($from->gt($to)) {
+            [$from, $to] = [$to->copy()->startOfDay(), $from->copy()->endOfDay()];
+        }
+
         return view('reports.revenue', [
-            'report' => $this->reportService->revenue($this->branchService->currentBranchId()),
+            'report' => $this->reportService->revenue(
+                $this->branchService->currentBranchId(),
+                $from,
+                $to,
+            ),
         ]);
     }
 
-    public function customers(): View
+    public function customers(Request $request): View
     {
+        $from = $request->date('from')?->startOfDay() ?? now()->copy()->startOfMonth()->startOfDay();
+        $to = $request->date('to')?->endOfDay() ?? now()->copy()->endOfDay();
+
+        if ($from->gt($to)) {
+            [$from, $to] = [$to->copy()->startOfDay(), $from->copy()->endOfDay()];
+        }
+
         return view('reports.customers', [
-            'report' => $this->reportService->customers($this->branchService->currentBranchId()),
+            'report' => $this->reportService->customers(
+                $this->branchService->currentBranchId(),
+                $from,
+                $to,
+            ),
         ]);
     }
 
-    public function staff(): View
+    public function staff(Request $request): View
     {
+        $from = $request->date('from')?->startOfDay() ?? now()->copy()->startOfMonth()->startOfDay();
+        $to = $request->date('to')?->endOfDay() ?? now()->copy()->endOfDay();
+
+        if ($from->gt($to)) {
+            [$from, $to] = [$to->copy()->startOfDay(), $from->copy()->endOfDay()];
+        }
+
         return view('reports.staff', [
-            'report' => $this->reportService->staff($this->branchService->currentBranchId()),
+            'report' => $this->reportService->staff(
+                $this->branchService->currentBranchId(),
+                $from,
+                $to,
+            ),
         ]);
     }
 

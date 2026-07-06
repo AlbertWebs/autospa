@@ -9,6 +9,10 @@
         'assignee_name' => $jobCard->assignee?->displayName() ?? 'Unassigned',
         'status' => $jobCard->status?->value ?? JobCardStatus::Open->value,
         'started_at_human' => $jobCard->started_at?->diffForHumans(),
+        'services_summary' => $jobCard->services
+            ->map(fn ($line) => $line->service?->name)
+            ->filter()
+            ->join(', ') ?: 'No services selected',
         'view_url' => route('mobile.job-cards.show', $jobCard),
         'update_url' => route('mobile.job-cards.live-status', $jobCard),
     ])->values();
@@ -59,6 +63,7 @@
                             <p class="font-mono text-[10px] uppercase text-slate-400" x-text="`Job #${jobCard.id}`"></p>
                             <h2 class="text-lg font-bold text-slate-900 dark:text-white" x-text="jobCard.registration_number"></h2>
                             <p class="text-sm text-slate-500" x-text="jobCard.customer_name"></p>
+                            <p class="text-xs font-medium text-brand-primary-dim dark:text-brand-primary" x-text="jobCard.services_summary"></p>
                         </div>
                         <span class="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-sky-800 dark:bg-sky-900 dark:text-sky-200" x-text="labelFor(jobCard.status)"></span>
                     </div>
