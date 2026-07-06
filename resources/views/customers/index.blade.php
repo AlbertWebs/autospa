@@ -27,6 +27,9 @@
                     <x-ui.table-actions
                         :view="route('customers.show', $customer)"
                         :edit="route('customers.edit', $customer)"
+                        :delete="route('customers.destroy', $customer)"
+                        :delete-visible="auth()->user()->can('delete', $customer)"
+                        delete-confirm="Delete this customer permanently?"
                     />
                 </x-ui.td>
             </tr>
