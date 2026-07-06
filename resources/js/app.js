@@ -5,6 +5,18 @@ import Alpine from 'alpinejs';
 import Chart from 'chart.js/auto';
 import flatpickr from 'flatpickr';
 import TomSelect from 'tom-select';
+import {
+    clientRef,
+    enqueueMutation,
+    getBootstrap,
+    getPendingMutationCount,
+    initConnectivity,
+    isOnline,
+    newUuid,
+    onConnectivityChange,
+    pullBootstrap,
+    syncPendingMutations,
+} from './offline';
 
 import 'flatpickr/dist/flatpickr.min.css';
 import 'tom-select/dist/css/tom-select.css';
@@ -297,6 +309,91 @@ Alpine.store('navMode', {
         }
 
         return this.mode === 'beast' || minimalist;
+    },
+});
+
+Alpine.store('offline', {
+    online: isOnline(),
+    pending: 0,
+    syncing: false,
+    bootstrapped: false,
+    _initialized: false,
+
+    async refreshPending() {
+        this.pending = await getPendingMutationCount();
+    },
+
+    async bootstrap() {
+        if (!this.online || this.bootstrapped) {
+            return getBootstrap();
+        }
+
+        try {
+            await pullBootstrap();
+            this.bootstrapped = true;
+        } catch {
+            // Keep working with any cached bootstrap data.
+        }
+
+        return getBootstrap();
+    },
+
+    async syncNow() {
+        if (!this.online || this.syncing) {
+            return;
+        }
+
+        this.syncing = true;
+
+        try {
+            const result = await syncPendingMutations();
+
+            if (result.synced > 0) {
+                Alpine.store('toast').show(
+                    `${result.synced} offline change${result.synced === 1 ? '' : 's'} synced.`,
+                    'success',
+                );
+            }
+
+            if (result.failed > 0) {
+                Alpine.store('toast').show(
+                    `${result.failed} change${result.failed === 1 ? '' : 's'} could not be synced.`,
+                    'error',
+                );
+            }
+        } catch (error) {
+            Alpine.store('toast').show(error.message ?? 'Sync failed.', 'error');
+        } finally {
+            this.syncing = false;
+            await this.refreshPending();
+        }
+    },
+
+    init() {
+        if (this._initialized) {
+            this.refreshPending();
+            return;
+        }
+
+        this._initialized = true;
+        initConnectivity();
+
+        onConnectivityChange(async (online) => {
+            this.online = online;
+
+            if (online) {
+                await this.bootstrap();
+                await this.syncNow();
+            }
+
+            await this.refreshPending();
+        });
+
+        this.refreshPending();
+
+        if (this.online) {
+            this.bootstrap();
+        }
     },
 });
 
@@ -718,6 +815,45 @@ document.addEventListener('alpine:init', () => {
             }
 
             try {
+                if (!isOnline()) {
+                    const uuid = newUuid();
+                    await enqueueMutation('customer.create', {
+                        full_name: this.customerForm.full_name,
+                        phone: this.customerForm.phone,
+                        email: this.customerForm.email || null,
+                        registration_number: this.customerForm.registration_number || null,
+                        uuid,
+                    }, uuid);
+
+                    this.customers.push({
+                        id: clientRef(uuid),
+                        full_name: this.customerForm.full_name,
+                    });
+                    this.customers.sort((a, b) => a.full_name.localeCompare(b.full_name));
+                    this.customerId = clientRef(uuid);
+                    if (this.customerForm.registration_number) {
+                        const vehicleUuid = newUuid();
+                        await enqueueMutation('vehicle.create', {
+                            customer_id: clientRef(uuid),
+                            registration_number: this.customerForm.registration_number,
+                            uuid: vehicleUuid,
+                        }, vehicleUuid);
+                        this.vehicles.push({
+                            id: clientRef(vehicleUuid),
+                            customer_id: clientRef(uuid),
+                            registration_number: this.customerForm.registration_number,
+                        });
+                        this.vehicleId = clientRef(vehicleUuid);
+                    } else {
+                        this.vehicleId = '';
+                    }
+                    this.showCustomerModal = false;
+                    this.customerSaving = false;
+                    Alpine.store('offline').refreshPending();
+                    Alpine.store('toast').show('Customer queued for sync.', 'success');
+                    return;
+                }
+
                 const response = await fetch(this.customerStoreUrl, {
                     method: 'POST',
                     body: formData,
@@ -811,6 +947,34 @@ document.addEventListener('alpine:init', () => {
             }
 
             try {
+                if (!isOnline()) {
+                    const uuid = newUuid();
+
+                    await enqueueMutation('vehicle.create', {
+                        customer_id: this.customerId,
+                        registration_number: this.vehicleForm.registration_number,
+                        make: this.vehicleForm.make || null,
+                        model: this.vehicleForm.model || null,
+                        color: this.vehicleForm.color || null,
+                        uuid,
+                    }, uuid);
+
+                    this.vehicles.push({
+                        id: clientRef(uuid),
+                        customer_id: this.customerId,
+                        registration_number: this.vehicleForm.registration_number,
+                        make: this.vehicleForm.make,
+                        model: this.vehicleForm.model,
+                        color: this.vehicleForm.color,
+                    });
+                    this.vehicleId = clientRef(uuid);
+                    this.showVehicleModal = false;
+                    this.vehicleSaving = false;
+                    Alpine.store('offline').refreshPending();
+                    Alpine.store('toast').show('Vehicle queued for sync.', 'success');
+                    return;
+                }
+
                 const response = await fetch(this.vehicleStoreUrl, {
                     method: 'POST',
                     body: formData,
@@ -867,6 +1031,26 @@ document.addEventListener('alpine:init', () => {
             }
 
             try {
+                if (!isOnline()) {
+                    const uuid = newUuid();
+                    await enqueueMutation('job_card.create', {
+                        customer_id: this.customerId,
+                        vehicle_id: this.vehicleId,
+                        assigned_to: formData.get('assigned_to') || null,
+                        status: formData.get('status') || 'open',
+                        notes: formData.get('notes') || null,
+                        uuid,
+                    }, uuid);
+
+                    this.loading = false;
+                    Alpine.store('offline').refreshPending();
+                    Alpine.store('toast').show('Job card queued for sync.', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/job-cards/live';
+                    }, 400);
+                    return;
+                }
+
                 const response = await fetch(form.action, {
                     method: 'POST',
                     body: formData,
@@ -1037,6 +1221,28 @@ document.addEventListener('alpine:init', () => {
             }
 
             try {
+                if (!isOnline()) {
+                    await enqueueMutation('job_card.update_status', {
+                        job_card_id: jobCardId,
+                        status,
+                    });
+
+                    if (status === 'completed' || status === 'cancelled') {
+                        this.jobCards = this.jobCards.filter((entry) => entry.id !== jobCardId);
+                    } else {
+                        this.jobCards = this.jobCards.map((entry) => entry.id === jobCardId
+                            ? { ...entry, status }
+                            : entry);
+                    }
+
+                    Alpine.store('offline').refreshPending();
+                    Alpine.store('toast').show('Status change queued for sync.', 'success');
+                    const updating = { ...this.updating };
+                    delete updating[jobCardId];
+                    this.updating = updating;
+                    return;
+                }
+
                 const response = await fetch(jobCard.update_url, {
                     method: 'POST',
                     body: formData,
@@ -1108,8 +1314,9 @@ document.addEventListener('alpine:init', () => {
         stkStatus: '',
         checkoutSubmitting: false,
         checkoutForm: null,
+        pendingReceipt: null,
 
-        init() {
+        async init() {
             this.showCheckoutGuide = !this.checkoutGuideDismissed();
 
             if (Array.isArray(config.oldItems) && config.oldItems.length > 0) {
@@ -1137,6 +1344,61 @@ document.addEventListener('alpine:init', () => {
             this.$watch('paymentMethodId', () => {
                 this.clearStkState();
             });
+
+            await this.loadOfflineCatalog();
+        },
+
+        async loadOfflineCatalog() {
+            try {
+                const data = await Alpine.store('offline').bootstrap();
+
+                if (!data) {
+                    return;
+                }
+
+                if (Array.isArray(data.services) && data.services.length > 0) {
+                    this.services = data.services.map((service) => ({
+                        id: service.id,
+                        name: service.name,
+                        price: parseFloat(service.price),
+                        category: service.category?.name ?? null,
+                    }));
+                }
+
+                if (Array.isArray(data.products) && data.products.length > 0) {
+                    this.products = data.products.map((product) => ({
+                        id: product.id,
+                        name: product.name,
+                        price: parseFloat(product.selling_price ?? product.price),
+                        sku: product.sku ?? null,
+                    }));
+                }
+
+                if (Array.isArray(data.payment_methods) && data.payment_methods.length > 0) {
+                    this.paymentMethods = data.payment_methods.map((method) => ({
+                        id: method.id,
+                        name: method.name,
+                        slug: method.slug,
+                    }));
+                }
+
+                if (Array.isArray(data.customers) && data.customers.length > 0) {
+                    const merged = [...this.customers];
+
+                    data.customers.forEach((customer) => {
+                        const option = this.buildCustomerOption(customer);
+
+                        if (!merged.some((entry) => String(entry.id) === String(option.id))) {
+                            merged.push(option);
+                        }
+                    });
+
+                    this.customers = merged;
+                    this.sortCustomers();
+                }
+            } catch {
+                // Keep server-rendered catalog when bootstrap is unavailable.
+            }
         },
 
         checkoutGuideDismissed() {
@@ -1228,7 +1490,16 @@ document.addEventListener('alpine:init', () => {
 
         buildCustomerOption(customer) {
             const displayName = customer.display_name ?? customer.full_name ?? null;
-            const vehicleSummary = customer.vehicle_summary ?? null;
+            let vehicleSummary = customer.vehicle_summary ?? null;
+
+            if (!vehicleSummary && Array.isArray(customer.vehicles) && customer.vehicles.length > 0) {
+                const primaryVehicle = customer.vehicles[0]?.registration_number;
+                const additionalVehicleCount = Math.max(customer.vehicles.length - 1, 0);
+
+                vehicleSummary = primaryVehicle
+                    ? primaryVehicle + (additionalVehicleCount > 0 ? ` +${additionalVehicleCount} more` : '')
+                    : null;
+            }
 
             return {
                 id: customer.id,
@@ -1295,6 +1566,34 @@ document.addEventListener('alpine:init', () => {
             }
 
             try {
+                if (!isOnline()) {
+                    const uuid = newUuid();
+
+                    await enqueueMutation('customer.create', {
+                        full_name: this.customerForm.full_name,
+                        phone: this.customerForm.phone,
+                        email: this.customerForm.email || null,
+                        registration_number: this.customerForm.registration_number || null,
+                        uuid,
+                    }, uuid);
+
+                    const vehicleSummary = this.customerForm.registration_number || null;
+
+                    this.customers.push(this.buildCustomerOption({
+                        id: clientRef(uuid),
+                        full_name: this.customerForm.full_name,
+                        phone: this.customerForm.phone ?? '',
+                        vehicle_summary: vehicleSummary,
+                    }));
+                    this.sortCustomers();
+                    this.customerId = clientRef(uuid);
+                    this.showCustomerModal = false;
+                    this.customerSaving = false;
+                    Alpine.store('offline').refreshPending();
+                    Alpine.store('toast').show('Customer queued for sync.', 'success');
+                    return;
+                }
+
                 const response = await fetch(this.customerStoreUrl, {
                     method: 'POST',
                     body: formData,
@@ -1384,6 +1683,11 @@ document.addEventListener('alpine:init', () => {
             }
 
             if (this.isMpesaSelected) {
+                if (!isOnline()) {
+                    Alpine.store('toast').show('M-Pesa is unavailable while offline.', 'error');
+                    return;
+                }
+
                 this.openStkModal(form);
                 return;
             }
@@ -1554,7 +1858,12 @@ document.addEventListener('alpine:init', () => {
             });
         },
 
-        submitCheckoutForm(form) {
+        async submitCheckoutForm(form) {
+            if (!isOnline()) {
+                await this.enqueueOfflineCheckout();
+                return;
+            }
+
             this.syncCheckoutFields(form);
             this.checkoutSubmitting = true;
 
@@ -1566,6 +1875,58 @@ document.addEventListener('alpine:init', () => {
                 }
             });
         },
+
+        async enqueueOfflineCheckout() {
+            this.checkoutSubmitting = true;
+
+            const items = this.cart.map((item) => ({
+                item_type: item.itemType,
+                item_id: item.id,
+                description: item.name,
+                quantity: item.qty,
+                unit_price: item.price.toFixed(2),
+                total: (item.price * item.qty).toFixed(2),
+            }));
+
+            try {
+                await enqueueMutation('pos.checkout', {
+                    customer_id: this.customerId,
+                    payment_method_id: this.paymentMethodId,
+                    method: this.selectedMethodSlug,
+                    subtotal: this.subtotal.toFixed(2),
+                    discount_amount: '0',
+                    tax_amount: '0',
+                    total_amount: this.total.toFixed(2),
+                    items,
+                });
+
+                const methodName = this.paymentMethods.find(
+                    (method) => String(method.id) === String(this.paymentMethodId),
+                )?.name ?? 'Payment';
+
+                this.pendingReceipt = {
+                    total: this.total,
+                    itemCount: this.itemCount,
+                    methodName,
+                    queuedAt: new Date().toISOString(),
+                };
+
+                this.cart = [];
+                this.customerId = '';
+                this.paymentMethodId = '';
+                this.clearStkState();
+                Alpine.store('offline').refreshPending();
+                Alpine.store('toast').show('Sale queued for sync. Receipt will be issued when online.', 'success');
+            } catch {
+                Alpine.store('toast').show('Could not queue sale for sync.', 'error');
+            } finally {
+                this.checkoutSubmitting = false;
+            }
+        },
+
+        dismissPendingReceipt() {
+            this.pendingReceipt = null;
+        },
     }));
 });
 
@@ -1575,6 +1936,10 @@ document.addEventListener('turbo:load', () => {
     Alpine.store('fullscreen').sync();
     Alpine.store('fullscreen').gestureRestoreAttached = false;
     Alpine.store('fullscreen').prepareRestore();
+
+    if (document.querySelector('meta[name="csrf-token"]')) {
+        Alpine.store('offline').init();
+    }
 
     document.querySelectorAll('meta[name="flash-success"]').forEach((meta) => {
         Alpine.store('toast').show(meta.content, 'success');

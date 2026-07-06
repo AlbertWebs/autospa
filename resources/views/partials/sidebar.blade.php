@@ -52,9 +52,10 @@
 
     {{-- Brand --}}
     <div class="flex h-16 shrink-0 items-center gap-3 border-b border-slate-800/80 px-5">
-        <x-brand-logo size="md" />
+        @php($companyName = app(\App\Services\CompanyService::class)->displayName())
+        <x-brand-logo size="md" :alt="$companyName" />
         <div class="min-w-0 flex-1">
-            <p class="truncate text-sm font-semibold text-white">AutoSpa</p>
+            <p class="truncate text-sm font-semibold text-white">{{ $companyName }}</p>
             <p class="truncate text-xs text-slate-400">{{ $currentBranch?->name ?? 'Management System' }}</p>
         </div>
     </div>
@@ -79,20 +80,16 @@
             <ul class="space-y-0.5">
                 @foreach ($navigation as $index => $item)
                     @if (isset($item['section']))
-                        @php
-                            $isMinimalist = $item['minimalist'] ?? false;
-                            $minimalistOnly = $item['minimalist_only'] ?? false;
-                        @endphp
+                        @php($isMinimalist = $item['minimalist'] ?? false)
+                        @php($minimalistOnly = $item['minimalist_only'] ?? false)
                         <li class="px-3 pb-1 pt-4 first:pt-1" x-show="$store.navMode.visible({{ $isMinimalist ? 'true' : 'false' }}, {{ $minimalistOnly ? 'true' : 'false' }}) && query === ''">
                             <span class="text-[10px] font-semibold uppercase tracking-widest text-slate-500">{{ $item['section'] }}</span>
                         </li>
                     @elseif (isset($item['children']))
-                        @php
-                            $isGroupActive = collect($item['children'])->contains(fn ($c) => request()->routeIs($c['route'].'*'));
-                            $hasMinimalistChild = collect($item['children'])->contains(fn ($c) => ($c['minimalist'] ?? false));
-                            $groupMinimalist = ($item['minimalist'] ?? false) || $hasMinimalistChild;
-                            $groupMinimalistOnly = $item['minimalist_only'] ?? false;
-                        @endphp
+                        @php($isGroupActive = collect($item['children'])->contains(fn ($c) => request()->routeIs($c['route'].'*')))
+                        @php($hasMinimalistChild = collect($item['children'])->contains(fn ($c) => ($c['minimalist'] ?? false)))
+                        @php($groupMinimalist = ($item['minimalist'] ?? false) || $hasMinimalistChild)
+                        @php($groupMinimalistOnly = $item['minimalist_only'] ?? false)
                         <li
                             data-nav-item
                             x-data="{ open: {{ $isGroupActive ? 'true' : 'false' }} }"
@@ -132,10 +129,8 @@
                                 x-cloak
                             >
                                 @foreach ($item['children'] as $child)
-                                    @php
-                                        $childMinimalist = $child['minimalist'] ?? false;
-                                        $childMinimalistOnly = $child['minimalist_only'] ?? false;
-                                    @endphp
+                                    @php($childMinimalist = $child['minimalist'] ?? false)
+                                    @php($childMinimalistOnly = $child['minimalist_only'] ?? false)
                                     <li x-show="$store.navMode.visible({{ $childMinimalist ? 'true' : 'false' }}, {{ $childMinimalistOnly ? 'true' : 'false' }}) && (query === '' || '{{ strtolower($child['label']) }}'.includes(query.toLowerCase()))">
                                         <a
                                             href="{{ Route::has($child['route']) ? route($child['route']) : '#' }}"
@@ -152,10 +147,8 @@
                             </ul>
                         </li>
                     @else
-                        @php
-                            $isMinimalist = $item['minimalist'] ?? false;
-                            $minimalistOnly = $item['minimalist_only'] ?? false;
-                        @endphp
+                        @php($isMinimalist = $item['minimalist'] ?? false)
+                        @php($minimalistOnly = $item['minimalist_only'] ?? false)
                         <li
                             data-nav-item
                             x-show="$store.navMode.visible({{ $isMinimalist ? 'true' : 'false' }}, {{ $minimalistOnly ? 'true' : 'false' }}) && (query === '' || '{{ strtolower($item['label']) }}'.includes(query.toLowerCase()))"

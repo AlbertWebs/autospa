@@ -22,11 +22,15 @@ class PosController extends Controller
         return view('pos.index', $this->posService->checkoutData());
     }
 
-    public function store(PosCheckoutRequest $request): RedirectResponse
+    public function store(PosCheckoutRequest $request): RedirectResponse|JsonResponse
     {
         $branchId = $this->branchService->currentBranchId();
 
         if ($branchId === null) {
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Select a branch before completing checkout.'], 422);
+            }
+
             return redirect()->route('pos.index')
                 ->with('error', 'Select a branch before completing checkout.');
         }
@@ -36,6 +40,18 @@ class PosController extends Controller
             $request->user()->id,
             $request->validated(),
         );
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Sale completed and receipt issued.',
+                'receipt' => [
+                    'id' => $receipt->id,
+                    'receipt_number' => $receipt->receipt_number,
+                    'amount' => $receipt->amount,
+                ],
+                'redirect' => route('receipts.show', $receipt),
+            ]);
+        }
 
         return redirect()->route('receipts.show', $receipt)
             ->with('success', 'Sale completed and receipt issued.');

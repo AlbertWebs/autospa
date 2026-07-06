@@ -98,19 +98,12 @@ class SetupWizardTest extends TestCase
             'supervisor_email' => 'supervisor@teamspa.test',
             'supervisor_password' => 'Password123!',
             'supervisor_password_confirmation' => 'Password123!',
-            'create_cashier' => true,
-            'cashier_name' => 'POS Cashier',
-            'cashier_email' => 'cashier@teamspa.test',
-            'cashier_password' => 'Password123!',
-            'cashier_password_confirmation' => 'Password123!',
-            'cashier_pin' => '1234',
-            'cashier_pin_confirmation' => '1234',
         ])->assertRedirect(route('setup.preferences'));
 
         $this->post(route('setup.preferences.store'), [
             'sms_notifications_enabled' => true,
             'commissions_enabled' => true,
-            'commission_default_rate' => 12.5,
+            'commission_default_rate' => 30,
             'commission_trigger' => 'both',
         ])->assertRedirect(route('login'));
 
@@ -120,12 +113,11 @@ class SetupWizardTest extends TestCase
         $this->assertTrue($supervisor->roles()->where('slug', RoleSlug::Manager->value)->exists());
         $this->assertSame($branch->id, $supervisor->branch_id);
 
-        $cashier = User::query()->where('email', 'cashier@teamspa.test')->firstOrFail();
-        $this->assertTrue($cashier->roles()->where('slug', RoleSlug::Cashier->value)->exists());
-        $this->assertNotNull($cashier->pin);
-
         $this->assertTrue(filter_var(Setting::getValue('sms', 'enabled'), FILTER_VALIDATE_BOOLEAN));
         $this->assertTrue(filter_var(Setting::getValue('commission', 'enabled'), FILTER_VALIDATE_BOOLEAN));
+        $this->assertEqualsWithDelta(0.30, (float) Setting::getValue('commission', 'default_rate'), 0.001);
+        $this->assertTrue(filter_var(Setting::getValue('loyalty', 'enabled'), FILTER_VALIDATE_BOOLEAN));
+        $this->assertSame('10', Setting::getValue('loyalty', 'washes_before_free'));
     }
 
     public function test_seeded_database_is_treated_as_installed(): void

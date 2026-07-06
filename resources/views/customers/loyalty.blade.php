@@ -1,7 +1,7 @@
 <x-ui.index-page
     eyebrow="Customers"
-    title="Loyalty Points"
-    subtitle="Track customer loyalty point earnings and redemptions."
+    title="Loyalty Program"
+    :subtitle="$loyaltyEnabled ? $loyaltySummary : 'Loyalty program is currently disabled. Enable it under Settings → Company.'"
 >
     <x-ui.data-table
         :paginator="$transactions"

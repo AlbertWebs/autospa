@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\CustomerNote;
 use App\Models\LoyaltyTransaction;
+use App\Support\LoyaltySettings;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -48,6 +49,8 @@ class MobileCustomerController extends Controller
                 ->with('customer')
                 ->latest()
                 ->paginate(20),
+            'loyaltyEnabled' => LoyaltySettings::enabled(),
+            'loyaltySummary' => LoyaltySettings::summary(),
         ]);
     }
 

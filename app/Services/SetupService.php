@@ -9,6 +9,7 @@ use App\Models\Role;
 use App\Models\Setting;
 use App\Models\User;
 use App\Support\CommissionSettings;
+use App\Support\LoyaltySettings;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -62,7 +63,6 @@ class SetupService
             ])->roles()->sync([$superAdminRole->id]);
 
             $this->createTeamUser($teamData, 'supervisor', RoleSlug::Manager, $branch);
-            $this->createTeamUser($teamData, 'cashier', RoleSlug::Cashier, $branch);
 
             $this->applyPreferences($preferences);
             $this->applyCompanyDefaults($company->name);
@@ -74,9 +74,7 @@ class SetupService
     /** @param  array<string, mixed>  $teamData */
     protected function createTeamUser(array $teamData, string $prefix, RoleSlug $roleSlug, Branch $branch): void
     {
-        $flag = $prefix === 'supervisor' ? 'create_supervisor' : 'create_cashier';
-
-        if (! filter_var($teamData[$flag] ?? false, FILTER_VALIDATE_BOOLEAN)) {
+        if (! filter_var($teamData['create_supervisor'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
             return;
         }
 
@@ -86,21 +84,15 @@ class SetupService
             return;
         }
 
-        $userData = [
-            'name' => $teamData["{$prefix}_name"],
-            'email' => $teamData["{$prefix}_email"],
-            'password' => Hash::make($teamData["{$prefix}_password"]),
+        User::query()->create([
+            'name' => $teamData['supervisor_name'],
+            'email' => $teamData['supervisor_email'],
+            'password' => Hash::make($teamData['supervisor_password']),
             'branch_id' => $branch->id,
             'is_active' => true,
             'email_verified_at' => now(),
             'onboarding_completed_at' => now(),
-        ];
-
-        if ($prefix === 'cashier' && ! empty($teamData['cashier_pin'])) {
-            $userData['pin'] = $teamData['cashier_pin'];
-        }
-
-        User::query()->create($userData)->roles()->sync([$role->id]);
+        ])->roles()->sync([$role->id]);
     }
 
     /** @param  array<string, mixed>  $preferences */
@@ -125,7 +117,7 @@ class SetupService
         Setting::setValue(
             'commission',
             'default_rate',
-            ((float) ($preferences['commission_default_rate'] ?? 0)) / 100,
+            ((float) ($preferences['commission_default_rate'] ?? 30)) / 100,
             null,
             'decimal'
         );
@@ -136,6 +128,22 @@ class SetupService
             $preferences['commission_trigger'] ?? CommissionSettings::TRIGGER_POS_CHECKOUT,
             null,
             'string'
+        );
+
+        Setting::setValue(
+            'loyalty',
+            'enabled',
+            filter_var($preferences['loyalty_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN),
+            null,
+            'boolean'
+        );
+
+        Setting::setValue(
+            'loyalty',
+            'washes_before_free',
+            max(1, (int) ($preferences['loyalty_washes_before_free'] ?? LoyaltySettings::DEFAULT_WASHES_BEFORE_FREE)),
+            null,
+            'integer'
         );
     }
 

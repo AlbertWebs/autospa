@@ -14,6 +14,7 @@ class UpdateCompanyRequest extends FormRequest
         $this->merge([
             'sms_notifications_enabled' => $this->boolean('sms_notifications_enabled'),
             'commissions_enabled' => $this->boolean('commissions_enabled'),
+            'loyalty_enabled' => $this->boolean('loyalty_enabled'),
         ]);
     }
 
@@ -45,6 +46,8 @@ class UpdateCompanyRequest extends FormRequest
                     CommissionSettings::TRIGGER_BOTH,
                 ]),
             ],
+            'loyalty_enabled' => ['nullable', 'boolean'],
+            'loyalty_washes_before_free' => ['nullable', 'integer', 'min:1', 'max:100'],
         ];
     }
 }

@@ -5,6 +5,8 @@
 @endphp
 
 <header class="sticky top-0 z-30 border-b border-slate-200/80 bg-white/80 backdrop-blur-md dark:border-brand-border-subtle/80 dark:bg-brand-bg/80">
+    @include('partials.offline-banner')
+
     <div class="flex h-16 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <div class="flex items-center gap-3">
             <button type="button" @click="sidebarOpen = !sidebarOpen" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 lg:hidden dark:hover:bg-slate-800">

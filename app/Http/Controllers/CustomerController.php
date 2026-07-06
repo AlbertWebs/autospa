@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateCustomerRequest;
 use App\Models\Customer;
 use App\Models\CustomerNote;
 use App\Models\LoyaltyTransaction;
+use App\Support\LoyaltySettings;
 use App\Models\Vehicle;
 use App\Services\VehicleSmsNotificationService;
 use Illuminate\Http\JsonResponse;
@@ -139,6 +140,8 @@ class CustomerController extends Controller
                 ->with('customer')
                 ->latest()
                 ->paginate(20),
+            'loyaltyEnabled' => LoyaltySettings::enabled(),
+            'loyaltySummary' => LoyaltySettings::summary(),
         ]);
     }
 

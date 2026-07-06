@@ -6,8 +6,8 @@
             <x-ui.input id="full_name" name="full_name" :value="old('full_name', $customer->full_name ?? '')" required />
         </x-ui.form-field>
 
-        <x-ui.form-field label="Phone" for="phone" name="phone" :required="true">
-            <x-ui.input id="phone" name="phone" type="tel" :value="old('phone', $customer->phone ?? '')" required />
+        <x-ui.form-field label="Phone" for="phone" name="phone" hint="Optional">
+            <x-ui.input id="phone" name="phone" type="tel" :value="old('phone', $customer->phone ?? '')" />
         </x-ui.form-field>
 
         <x-ui.form-field label="Email" for="email" name="email">

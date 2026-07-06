@@ -15,5 +15,7 @@
         'commissionDefaultRatePercent' => $commissionDefaultRatePercent,
         'commissionTrigger' => $commissionTrigger,
         'commissionTriggerOptions' => $commissionTriggerOptions,
+        'loyaltyEnabled' => $loyaltyEnabled,
+        'loyaltyWashesBeforeFree' => $loyaltyWashesBeforeFree,
     ])
 </x-ui.form-page>

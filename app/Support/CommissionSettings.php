@@ -22,7 +22,7 @@ class CommissionSettings
 
     public static function defaultRate(): float
     {
-        return (float) Setting::getValue('commission', 'default_rate', 0);
+        return (float) Setting::getValue('commission', 'default_rate', 0.30);
     }
 
     public static function trigger(): string

@@ -21,6 +21,7 @@
     "dependencies": {
         "@hotwired/turbo": "^8.0.23",
         "chart.js": "^4.5.1",
+        "dexie": "^4.4.4",
         "flatpickr": "^4.6.13",
         "tom-select": "^2.6.1"
     }

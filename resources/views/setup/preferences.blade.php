@@ -18,13 +18,13 @@
 
                         <label class="setup-checkbox-row">
                             <input type="checkbox" name="commissions_enabled" value="1" @checked(old('commissions_enabled', $data['commissions_enabled'] ?? false))>
-                            <span>Enable staff commissions</span>
+                            <span>Enable supervisor commissions</span>
                         </label>
 
                         <div class="setup-form-grid">
                             <div class="auth-field">
                                 <label for="commission_default_rate">Default commission rate (%)</label>
-                                <input id="commission_default_rate" name="commission_default_rate" type="number" step="0.01" min="0" max="100" class="auth-input setup-input-plain" value="{{ old('commission_default_rate', $data['commission_default_rate'] ?? 10) }}">
+                                <input id="commission_default_rate" name="commission_default_rate" type="number" step="0.01" min="0" max="100" class="auth-input setup-input-plain" value="{{ old('commission_default_rate', $data['commission_default_rate'] ?? 30) }}">
                                 @error('commission_default_rate')<p class="auth-error">{{ $message }}</p>@enderror
                             </div>
 

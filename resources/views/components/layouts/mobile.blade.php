@@ -26,8 +26,9 @@
         <header class="asp-mobile-header">
             <div class="asp-mobile-header-inner">
                 <div class="asp-mobile-brand">
-                    <x-brand-logo size="sm" />
-                    <span class="asp-mobile-brand-name">AutoSpa Pro</span>
+                    @php($companyName = app(\App\Services\CompanyService::class)->displayName())
+                    <x-brand-logo size="sm" :alt="$companyName" />
+                    <span class="asp-mobile-brand-name">{{ $companyName }}</span>
                 </div>
 
                 <div class="flex shrink-0 items-center gap-1">
@@ -58,6 +59,8 @@
                 </div>
             </div>
         </header>
+
+        @include('partials.offline-banner')
 
         <main class="asp-mobile-content {{ $hideTabBar ? '' : 'asp-mobile-content--with-tabbar' }}">
             @if (session('success'))

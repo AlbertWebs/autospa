@@ -112,7 +112,7 @@ return [
                 ],
                 [
                     'heading' => 'Loyalty program',
-                    'body' => 'Track loyalty points and reward repeat visitors.',
+                    'body' => 'After a set number of paid washes, the next wash is free. Admins can configure the program under Settings → Company (default: 10 washes, 11th free).',
                 ],
                 [
                     'heading' => 'Customer feedback',

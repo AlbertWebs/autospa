@@ -5,6 +5,8 @@
     $commissionDefaultRatePercent = $commissionDefaultRatePercent ?? 0;
     $commissionTrigger = $commissionTrigger ?? 'pos_checkout';
     $commissionTriggerOptions = $commissionTriggerOptions ?? [];
+    $loyaltyEnabled = $loyaltyEnabled ?? true;
+    $loyaltyWashesBeforeFree = $loyaltyWashesBeforeFree ?? 10;
 @endphp
 
 <x-ui.form-section title="Company Information" description="Legal identity, contact details, and registration information.">
@@ -54,7 +56,7 @@
     </div>
 </x-ui.form-section>
 
-<x-ui.form-section title="Commission Settings" description="Configure how staff commissions are calculated and when they are earned.">
+<x-ui.form-section title="Commission Settings" description="Supervisors earn commission on each wash. Configure the rate and when it is earned.">
     <div class="asp-form-grid">
         <x-ui.form-field :col-span="2" name="commissions_enabled">
             <div class="asp-checkbox-group">
@@ -62,7 +64,7 @@
                     name="commissions_enabled"
                     :checked="old('commissions_enabled', $commissionsEnabled)"
                 >
-                    Enable staff commissions
+                    Enable supervisor commissions
                 </x-ui.checkbox>
             </div>
         </x-ui.form-field>
@@ -85,6 +87,37 @@
                     <option value="{{ $value }}" @selected(old('commission_trigger', $commissionTrigger) === $value)>{{ $label }}</option>
                 @endforeach
             </x-ui.select>
+        </x-ui.form-field>
+    </div>
+</x-ui.form-section>
+
+<x-ui.form-section title="Loyalty Program" description="Reward repeat customers. After the configured number of paid washes, the next wash is free.">
+    <div class="asp-form-grid">
+        <x-ui.form-field :col-span="2" name="loyalty_enabled">
+            <div class="asp-checkbox-group">
+                <x-ui.checkbox
+                    name="loyalty_enabled"
+                    :checked="old('loyalty_enabled', $loyaltyEnabled)"
+                >
+                    Enable loyalty program
+                </x-ui.checkbox>
+            </div>
+        </x-ui.form-field>
+
+        <x-ui.form-field
+            label="Paid washes before free wash"
+            for="loyalty_washes_before_free"
+            name="loyalty_washes_before_free"
+            hint="Default: 10 paid washes, then the 11th wash is free."
+        >
+            <x-ui.input
+                id="loyalty_washes_before_free"
+                name="loyalty_washes_before_free"
+                type="number"
+                min="1"
+                max="100"
+                :value="old('loyalty_washes_before_free', $loyaltyWashesBeforeFree)"
+            />
         </x-ui.form-field>
     </div>
 </x-ui.form-section>

@@ -1,6 +1,12 @@
 <x-layouts.mobile title="Loyalty">
     <x-mobile.page-header title="Loyalty" :back="route('mobile.customers.index')" />
 
+    @if ($loyaltyEnabled ?? false)
+        <p class="mb-4 text-sm text-slate-500">{{ $loyaltySummary }}</p>
+    @else
+        <p class="mb-4 text-sm text-slate-500">Loyalty program is currently disabled.</p>
+    @endif
+
     <div class="asp-mobile-list">
         @forelse ($transactions as $transaction)
             <div class="asp-mobile-card text-sm">

@@ -47,14 +47,13 @@
                     </p>
                 </x-ui.form-field>
 
-                <x-ui.form-field label="Phone" for="quick_customer_phone" required>
+                <x-ui.form-field label="Phone" for="quick_customer_phone" hint="Optional">
                     <x-ui.input
                         id="quick_customer_phone"
                         type="tel"
                         x-model="customerForm.phone"
                         x-bind:class="{ 'asp-input--error': customerErrors.phone }"
                         placeholder="+254 7XX XXX XXX"
-                        required
                     />
                     <p class="asp-field-error" x-show="customerErrors.phone" x-cloak>
                         <span class="material-symbols-outlined text-sm">error</span>

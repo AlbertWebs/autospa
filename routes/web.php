@@ -31,7 +31,7 @@ use App\Http\Controllers\Settings\IntegrationController;
 use App\Http\Controllers\Settings\PaymentMethodController;
 use App\Http\Controllers\Settings\RoleController;
 use App\Http\Controllers\Settings\UserController as SettingsUserController;
-use App\Http\Controllers\StockMovementController;
+use App\Http\Controllers\SyncController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\ProfileController;
@@ -69,6 +69,9 @@ Route::middleware(['guest', 'not.installed'])->prefix('setup')->name('setup.')->
 
 Route::middleware(['installed', 'auth', 'verified', 'branch'])->group(function () {
     Route::middleware('permission:dashboard.view')->get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/sync/bootstrap', [SyncController::class, 'bootstrap'])->name('sync.bootstrap');
+    Route::post('/sync/push', [SyncController::class, 'push'])->name('sync.push');
 
     Route::prefix('mobile')->name('mobile.')->group(base_path('routes/mobile.php'));
 

@@ -250,19 +250,48 @@
                     <x-ui.form-field label="Payment Method" for="payment_method">
                         <x-ui.select id="payment_method" x-model="paymentMethodId" required>
                             <option value="">Select method…</option>
-                            @foreach ($paymentMethods as $method)
-                                <option value="{{ $method->id }}">{{ $method->name }}</option>
-                            @endforeach
+                            <template x-for="method in paymentMethods" :key="method.id">
+                                <option
+                                    :value="method.id"
+                                    :disabled="!$store.offline.online && method.slug === 'mpesa'"
+                                    x-text="method.name + (!$store.offline.online && method.slug === 'mpesa' ? ' (offline unavailable)' : '')"
+                                ></option>
+                            </template>
                         </x-ui.select>
+                        <p
+                            x-show="!$store.offline.online && isMpesaSelected"
+                            x-cloak
+                            class="mt-1 text-xs text-amber-600 dark:text-amber-400"
+                        >
+                            M-Pesa STK push requires an internet connection.
+                        </p>
                     </x-ui.form-field>
+
+                    <div
+                        x-show="pendingReceipt"
+                        x-cloak
+                        class="rounded-2xl border border-amber-200/80 bg-amber-50 px-4 py-4 dark:border-amber-500/20 dark:bg-amber-500/10"
+                    >
+                        <p class="font-mono text-[10px] font-semibold uppercase tracking-widest text-amber-700 dark:text-amber-300">Pending Sync</p>
+                        <p class="mt-2 text-sm font-medium text-slate-900 dark:text-white">
+                            Sale recorded locally — receipt will be issued when synced.
+                        </p>
+                        <div class="mt-2 space-y-1 text-sm text-slate-600 dark:text-slate-300">
+                            <p><span x-text="pendingReceipt?.itemCount"></span> item(s) · KES <span x-text="formatMoney(pendingReceipt?.total ?? 0)"></span></p>
+                            <p>Payment: <span x-text="pendingReceipt?.methodName"></span></p>
+                        </div>
+                        <button type="button" class="asp-btn asp-btn-ghost mt-3 !px-3 !py-1.5 text-xs" @click="dismissPendingReceipt()">
+                            Dismiss
+                        </button>
+                    </div>
 
                     <button
                         type="submit"
                         class="asp-btn asp-btn-primary w-full justify-center !py-3"
-                        x-bind:disabled="!canCheckout || checkoutSubmitting"
+                        x-bind:disabled="!canCheckout || checkoutSubmitting || (!$store.offline.online && isMpesaSelected)"
                     >
                         <span class="material-symbols-outlined text-lg">payments</span>
-                        <span x-text="isMpesaSelected ? 'Send STK Push & Issue Receipt' : 'Complete Sale'"></span>
+                        <span x-text="!$store.offline.online && isMpesaSelected ? 'M-Pesa unavailable offline' : (isMpesaSelected ? 'Send STK Push & Issue Receipt' : ($store.offline.online ? 'Complete Sale' : 'Complete Sale (sync later)'))"></span>
                     </button>
                 </form>
             </div>
