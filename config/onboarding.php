@@ -48,7 +48,7 @@ return [
     ],
     [
         'title' => 'Settings & user manual',
-        'body' => 'Configure company details, branches, users, roles, payment methods, and integrations under Settings. The User Manual explains every module in detail.',
+        'body' => 'Configure company details, branches, users, roles, and integrations under Settings. The User Manual explains every module in detail.',
         'target' => 'user-manual',
     ],
     [

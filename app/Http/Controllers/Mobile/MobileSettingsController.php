@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Mobile;
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use App\Models\Company;
-use App\Models\PaymentMethod;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\View\View;
@@ -37,13 +36,6 @@ class MobileSettingsController extends Controller
     {
         return view('mobile.settings.roles', [
             'roles' => Role::query()->orderBy('name')->get(),
-        ]);
-    }
-
-    public function paymentMethods(): View
-    {
-        return view('mobile.settings.payment-methods', [
-            'paymentMethods' => PaymentMethod::query()->orderBy('name')->get(),
         ]);
     }
 

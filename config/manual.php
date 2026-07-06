@@ -314,10 +314,6 @@ return [
                     'body' => 'Create user accounts, assign roles, and control access to each module through permissions.',
                 ],
                 [
-                    'heading' => 'Payment methods',
-                    'body' => 'Configure enabled payment methods (cash, M-Pesa, etc.) for POS checkout.',
-                ],
-                [
                     'heading' => 'Integrations',
                     'body' => 'Connect M-Pesa, SMS, email, and other external providers. Integration drivers can be stubbed for testing.',
                 ],

@@ -12,7 +12,6 @@ use App\Models\Booking;
 use App\Models\Customer;
 use App\Models\Employee;
 use App\Models\JobCard;
-use App\Models\JobCard;
 use App\Models\Vehicle;
 use App\Services\PosService;
 use Illuminate\Http\JsonResponse;

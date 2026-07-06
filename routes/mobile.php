@@ -125,6 +125,5 @@ Route::middleware('permission:settings.view')->prefix('settings')->name('setting
     Route::get('/branches', [MobileSettingsController::class, 'branches'])->name('branches.index');
     Route::get('/users', [MobileSettingsController::class, 'users'])->name('users.index');
     Route::get('/roles', [MobileSettingsController::class, 'roles'])->name('roles.index');
-    Route::get('/payment-methods', [MobileSettingsController::class, 'paymentMethods'])->name('payment-methods.index');
     Route::get('/integrations', [MobileSettingsController::class, 'integrations'])->name('integrations.index');
 });

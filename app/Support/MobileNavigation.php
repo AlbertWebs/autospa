@@ -58,7 +58,6 @@ class MobileNavigation
         'settings.branches.index' => 'mobile.settings.branches.index',
         'settings.users.index' => 'mobile.settings.users.index',
         'settings.roles.index' => 'mobile.settings.roles.index',
-        'settings.payment-methods.index' => 'mobile.settings.payment-methods.index',
         'settings.integrations.index' => 'mobile.settings.integrations.index',
         'manual.index' => 'manual.index',
         'notifications.index' => 'notifications.index',

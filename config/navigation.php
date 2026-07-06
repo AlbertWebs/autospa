@@ -147,7 +147,6 @@ return [
             ['label' => 'Branches', 'route' => 'settings.branches.index', 'permission' => 'branches.view'],
             ['label' => 'Users', 'route' => 'settings.users.index', 'permission' => 'users.view'],
             ['label' => 'Roles', 'route' => 'settings.roles.index', 'permission' => 'settings.view'],
-            ['label' => 'Payment Methods', 'route' => 'settings.payment-methods.index', 'permission' => 'settings.view'],
             ['label' => 'Integrations', 'route' => 'settings.integrations.index', 'permission' => 'settings.view'],
             ['label' => 'Test Ground', 'route' => 'settings.test-ground.index', 'permission' => 'settings.view'],
         ],

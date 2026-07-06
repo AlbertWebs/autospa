@@ -1,8 +1,9 @@
-<x-layouts.app>
-    <x-slot name="header"><span class="hidden sm:inline">Settings</span></x-slot>
-
-    <x-ui.section-header class="mb-6" eyebrow="Settings" />
-
+<x-ui.index-page
+    eyebrow="Settings"
+    title="Integration Test Ground"
+    subtitle="Send test emails, SMS, WhatsApp messages, and M-Pesa STK pushes to verify configuration."
+    :create-visible="false"
+>
     @if ($details = session('test_result.details'))
         <x-ui.card class="mb-6">
             <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Last test details</h2>
@@ -126,4 +127,4 @@
             </form>
         </x-ui.card>
     </div>
-</x-layouts.app>
+</x-ui.index-page>

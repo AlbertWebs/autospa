@@ -29,7 +29,6 @@ use App\Http\Controllers\Settings\BranchController as SettingsBranchController;
 use App\Http\Controllers\Settings\BusinessHourController;
 use App\Http\Controllers\Settings\CompanyController;
 use App\Http\Controllers\Settings\IntegrationController;
-use App\Http\Controllers\Settings\PaymentMethodController;
 use App\Http\Controllers\Settings\RoleController;
 use App\Http\Controllers\Settings\TestGroundController;
 use App\Http\Controllers\Settings\UserController as SettingsUserController;
@@ -84,7 +83,6 @@ Route::middleware(['installed', 'auth', 'verified', 'branch'])->group(function (
             Route::put('company', [CompanyController::class, 'update'])->name('company.update');
             Route::get('roles/{role}/edit', [RoleController::class, 'edit'])->name('roles.edit');
             Route::put('roles/{role}', [RoleController::class, 'update'])->name('roles.update');
-            Route::resource('payment-methods', PaymentMethodController::class)->except(['index', 'show']);
             Route::put('integrations', [IntegrationController::class, 'update'])->name('integrations.update');
             Route::post('test-ground', [TestGroundController::class, 'send'])->name('test-ground.send');
             Route::put('business-hours', [BusinessHourController::class, 'update'])->name('business-hours.update');
@@ -93,7 +91,6 @@ Route::middleware(['installed', 'auth', 'verified', 'branch'])->group(function (
         Route::middleware('permission:settings.view')->group(function () {
             Route::get('company', [CompanyController::class, 'edit'])->name('company');
             Route::get('roles', [RoleController::class, 'index'])->name('roles.index');
-            Route::resource('payment-methods', PaymentMethodController::class)->only(['index', 'show']);
             Route::get('integrations', [IntegrationController::class, 'index'])->name('integrations.index');
             Route::get('test-ground', [TestGroundController::class, 'index'])->name('test-ground.index');
             Route::get('business-hours', [BusinessHourController::class, 'edit'])->name('business-hours.edit');
