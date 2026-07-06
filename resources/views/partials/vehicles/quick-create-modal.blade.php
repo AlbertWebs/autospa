@@ -40,7 +40,9 @@
                     <x-ui.input
                         id="quick_vehicle_registration"
                         type="text"
+                        class="uppercase"
                         x-model="vehicleForm.registration_number"
+                        @input="vehicleForm.registration_number = $event.target.value.toUpperCase()"
                         x-bind:class="{ 'asp-input--error': vehicleErrors.registration_number }"
                         placeholder="KDA 123A"
                         required

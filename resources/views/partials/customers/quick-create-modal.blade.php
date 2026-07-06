@@ -79,7 +79,9 @@
                     <x-ui.input
                         id="quick_customer_registration_number"
                         type="text"
+                        class="uppercase"
                         x-model="customerForm.registration_number"
+                        @input="customerForm.registration_number = $event.target.value.toUpperCase()"
                         x-bind:class="{ 'asp-input--error': customerErrors.registration_number }"
                         placeholder="KDA 123A"
                     />

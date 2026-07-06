@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Enums\VehicleStatus;
 use App\Models\Concerns\BelongsToBranch;
 use App\Models\Concerns\HasUuid;
+use App\Support\RegistrationNumber;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -63,5 +65,12 @@ class Vehicle extends Model
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    protected function registrationNumber(): Attribute
+    {
+        return Attribute::make(
+            set: fn (?string $value) => RegistrationNumber::normalize($value),
+        );
     }
 }

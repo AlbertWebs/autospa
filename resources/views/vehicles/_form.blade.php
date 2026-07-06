@@ -15,7 +15,7 @@
         </x-ui.form-field>
 
         <x-ui.form-field label="Registration Number" for="registration_number" name="registration_number" :required="true">
-            <x-ui.input id="registration_number" name="registration_number" :value="old('registration_number', $vehicle->registration_number ?? '')" required />
+            <x-ui.input id="registration_number" name="registration_number" class="uppercase" oninput="this.value = this.value.toUpperCase()" :value="old('registration_number', $vehicle->registration_number ?? '')" required />
         </x-ui.form-field>
 
         <x-ui.form-field label="Make" for="make" name="make" :required="true">

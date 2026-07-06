@@ -26,6 +26,10 @@ window.Chart = Chart;
 window.flatpickr = flatpickr;
 window.TomSelect = TomSelect;
 
+function normalizeRegistrationNumber(value) {
+    return String(value ?? '').trim().toUpperCase();
+}
+
 let revenueChartInstance = null;
 
 function initDashboardRevenueChart() {
@@ -806,7 +810,7 @@ document.addEventListener('alpine:init', () => {
                 formData.append('email', this.customerForm.email);
             }
             if (this.customerForm.registration_number) {
-                formData.append('registration_number', this.customerForm.registration_number);
+                formData.append('registration_number', normalizeRegistrationNumber(this.customerForm.registration_number));
             }
 
             const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
@@ -821,7 +825,9 @@ document.addEventListener('alpine:init', () => {
                         full_name: this.customerForm.full_name,
                         phone: this.customerForm.phone,
                         email: this.customerForm.email || null,
-                        registration_number: this.customerForm.registration_number || null,
+                        registration_number: this.customerForm.registration_number
+                            ? normalizeRegistrationNumber(this.customerForm.registration_number)
+                            : null,
                         uuid,
                     }, uuid);
 
@@ -833,15 +839,16 @@ document.addEventListener('alpine:init', () => {
                     this.customerId = clientRef(uuid);
                     if (this.customerForm.registration_number) {
                         const vehicleUuid = newUuid();
+                        const registrationNumber = normalizeRegistrationNumber(this.customerForm.registration_number);
                         await enqueueMutation('vehicle.create', {
                             customer_id: clientRef(uuid),
-                            registration_number: this.customerForm.registration_number,
+                            registration_number: registrationNumber,
                             uuid: vehicleUuid,
                         }, vehicleUuid);
                         this.vehicles.push({
                             id: clientRef(vehicleUuid),
                             customer_id: clientRef(uuid),
-                            registration_number: this.customerForm.registration_number,
+                            registration_number: registrationNumber,
                         });
                         this.vehicleId = clientRef(vehicleUuid);
                     } else {
@@ -930,7 +937,7 @@ document.addEventListener('alpine:init', () => {
 
             const formData = new FormData();
             formData.append('customer_id', this.customerId);
-            formData.append('registration_number', this.vehicleForm.registration_number);
+            formData.append('registration_number', normalizeRegistrationNumber(this.vehicleForm.registration_number));
             if (this.vehicleForm.make) {
                 formData.append('make', this.vehicleForm.make);
             }
@@ -952,7 +959,7 @@ document.addEventListener('alpine:init', () => {
 
                     await enqueueMutation('vehicle.create', {
                         customer_id: this.customerId,
-                        registration_number: this.vehicleForm.registration_number,
+                        registration_number: normalizeRegistrationNumber(this.vehicleForm.registration_number),
                         make: this.vehicleForm.make || null,
                         model: this.vehicleForm.model || null,
                         color: this.vehicleForm.color || null,
@@ -962,7 +969,7 @@ document.addEventListener('alpine:init', () => {
                     this.vehicles.push({
                         id: clientRef(uuid),
                         customer_id: this.customerId,
-                        registration_number: this.vehicleForm.registration_number,
+                        registration_number: normalizeRegistrationNumber(this.vehicleForm.registration_number),
                         make: this.vehicleForm.make,
                         model: this.vehicleForm.model,
                         color: this.vehicleForm.color,
@@ -1557,7 +1564,7 @@ document.addEventListener('alpine:init', () => {
                 formData.append('email', this.customerForm.email);
             }
             if (this.customerForm.registration_number) {
-                formData.append('registration_number', this.customerForm.registration_number);
+                formData.append('registration_number', normalizeRegistrationNumber(this.customerForm.registration_number));
             }
 
             const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
@@ -1573,11 +1580,15 @@ document.addEventListener('alpine:init', () => {
                         full_name: this.customerForm.full_name,
                         phone: this.customerForm.phone,
                         email: this.customerForm.email || null,
-                        registration_number: this.customerForm.registration_number || null,
+                        registration_number: this.customerForm.registration_number
+                            ? normalizeRegistrationNumber(this.customerForm.registration_number)
+                            : null,
                         uuid,
                     }, uuid);
 
-                    const vehicleSummary = this.customerForm.registration_number || null;
+                    const vehicleSummary = this.customerForm.registration_number
+                        ? normalizeRegistrationNumber(this.customerForm.registration_number)
+                        : null;
 
                     this.customers.push(this.buildCustomerOption({
                         id: clientRef(uuid),

@@ -10,6 +10,7 @@ use App\Models\Customer;
 use App\Models\CustomerNote;
 use App\Models\LoyaltyTransaction;
 use App\Support\LoyaltySettings;
+use App\Support\RegistrationNumber;
 use App\Models\Vehicle;
 use App\Services\VehicleSmsNotificationService;
 use Illuminate\Http\JsonResponse;
@@ -46,7 +47,7 @@ class CustomerController extends Controller
         [$customer, $vehicle] = DB::transaction(function () use ($request) {
             $validated = $request->validated();
             $registrationNumber = filled($validated['registration_number'] ?? null)
-                ? trim((string) $validated['registration_number'])
+                ? RegistrationNumber::normalize($validated['registration_number'])
                 : null;
 
             unset($validated['registration_number']);

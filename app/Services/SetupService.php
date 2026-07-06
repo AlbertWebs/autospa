@@ -10,6 +10,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Support\CommissionSettings;
 use App\Support\LoyaltySettings;
+use Database\Seeders\CarWashServiceSeeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -66,6 +67,10 @@ class SetupService
 
             $this->applyPreferences($preferences);
             $this->applyCompanyDefaults($company->name);
+
+            if (filter_var($preferences['seed_car_wash_services'] ?? true, FILTER_VALIDATE_BOOLEAN)) {
+                (new CarWashServiceSeeder)->run();
+            }
 
             $this->installService->markInstalled();
         });

@@ -19,6 +19,7 @@ class SetupPreferencesRequest extends FormRequest
         $this->merge([
             'sms_notifications_enabled' => $this->boolean('sms_notifications_enabled'),
             'commissions_enabled' => $this->boolean('commissions_enabled'),
+            'seed_car_wash_services' => $this->boolean('seed_car_wash_services'),
         ]);
     }
 
@@ -37,6 +38,7 @@ class SetupPreferencesRequest extends FormRequest
                     CommissionSettings::TRIGGER_BOTH,
                 ]),
             ],
+            'seed_car_wash_services' => ['nullable', 'boolean'],
         ];
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\VehicleStatus;
+use App\Support\RegistrationNumber;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -11,6 +12,15 @@ class StoreVehicleRequest extends FormRequest
     public function authorize(): bool
     {
         return true;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('registration_number')) {
+            $this->merge([
+                'registration_number' => RegistrationNumber::normalize($this->input('registration_number')),
+            ]);
+        }
     }
 
     public function rules(): array

@@ -38,6 +38,11 @@
                                 @error('commission_trigger')<p class="auth-error">{{ $message }}</p>@enderror
                             </div>
                         </div>
+
+                        <label class="setup-checkbox-row">
+                            <input type="checkbox" name="seed_car_wash_services" value="1" @checked(old('seed_car_wash_services', $data['seed_car_wash_services'] ?? true))>
+                            <span>Load default car wash service catalog (pricing and commission rates)</span>
+                        </label>
                     </div>
 
                     <div class="setup-actions">

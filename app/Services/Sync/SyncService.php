@@ -17,6 +17,7 @@ use App\Models\User;
 use App\Models\Vehicle;
 use App\Services\PosService;
 use App\Services\VehicleSmsNotificationService;
+use App\Support\RegistrationNumber;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
@@ -188,7 +189,7 @@ class SyncService
 
         [$customer, $vehicle] = DB::transaction(function () use ($branchId, $payload, $uuid) {
             $registrationNumber = filled($payload['registration_number'] ?? null)
-                ? trim((string) $payload['registration_number'])
+                ? RegistrationNumber::normalize((string) $payload['registration_number'])
                 : null;
 
             $customer = Customer::query()->create([
@@ -263,7 +264,7 @@ class SyncService
             'uuid' => $uuid,
             'branch_id' => $branchId,
             'customer_id' => $customerId,
-            'registration_number' => $payload['registration_number'],
+            'registration_number' => RegistrationNumber::normalize($payload['registration_number'] ?? null),
             'make' => $payload['make'] ?? null,
             'model' => $payload['model'] ?? null,
             'year' => $payload['year'] ?? null,

@@ -6,6 +6,7 @@ use App\Enums\RoleSlug;
 use App\Models\Branch;
 use App\Models\Company;
 use App\Models\Role;
+use App\Models\Service;
 use App\Models\Setting;
 use App\Models\User;
 use App\Services\InstallService;
@@ -78,6 +79,51 @@ class SetupWizardTest extends TestCase
         $this->assertNull($admin->onboarding_completed_at);
 
         $this->get(route('setup.welcome'))->assertRedirect(route('login'));
+    }
+
+    public function test_setup_seeds_car_wash_services_by_default(): void
+    {
+        $this->post(route('setup.welcome.store'));
+        $this->post(route('setup.business.store'), ['name' => 'Catalog Spa']);
+        $this->post(route('setup.branch.store'), ['name' => 'Main', 'code' => 'MAIN']);
+        $this->post(route('setup.admin.store'), [
+            'name' => 'Owner',
+            'email' => 'owner@catalogspa.test',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
+        ]);
+        $this->post(route('setup.team.skip'));
+        $this->post(route('setup.preferences.skip'))->assertRedirect(route('login'));
+
+        $branch = Branch::query()->where('code', 'MAIN')->firstOrFail();
+
+        $this->assertDatabaseHas('services', [
+            'branch_id' => $branch->id,
+            'name' => 'ENGINE WASH',
+            'price' => 500,
+        ]);
+        $this->assertSame(10, Service::query()->where('branch_id', $branch->id)->count());
+    }
+
+    public function test_setup_can_skip_car_wash_service_catalog(): void
+    {
+        $this->post(route('setup.welcome.store'));
+        $this->post(route('setup.business.store'), ['name' => 'Empty Catalog Spa']);
+        $this->post(route('setup.branch.store'), ['name' => 'Main', 'code' => 'EMPTY']);
+        $this->post(route('setup.admin.store'), [
+            'name' => 'Owner',
+            'email' => 'owner@emptyspa.test',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
+        ]);
+        $this->post(route('setup.team.skip'));
+        $this->post(route('setup.preferences.store'), [
+            'seed_car_wash_services' => false,
+        ])->assertRedirect(route('login'));
+
+        $branch = Branch::query()->where('code', 'EMPTY')->firstOrFail();
+
+        $this->assertSame(0, Service::query()->where('branch_id', $branch->id)->count());
     }
 
     public function test_setup_can_create_optional_team_members(): void

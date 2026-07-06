@@ -26,6 +26,7 @@ class CoreSeeder extends Seeder
             ['group' => 'loyalty', 'key' => 'enabled', 'value' => 'true'],
             ['group' => 'loyalty', 'key' => 'washes_before_free', 'value' => '10'],
             ['group' => 'email', 'key' => 'from_name', 'value' => 'AutoSpa'],
+            ['group' => 'email', 'key' => 'notifications_enabled', 'value' => 'true'],
         ];
 
         foreach ($settings as $setting) {
