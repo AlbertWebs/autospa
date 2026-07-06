@@ -75,14 +75,6 @@ Route::middleware(['installed', 'auth', 'verified', 'branch'])->group(function (
     Route::post('/branch/switch', [BranchController::class, 'switch'])->name('branch.switch');
 
     Route::prefix('settings')->name('settings.')->group(function () {
-        Route::middleware('permission:settings.view')->group(function () {
-            Route::get('company', [CompanyController::class, 'edit'])->name('company');
-            Route::get('roles', [RoleController::class, 'index'])->name('roles.index');
-            Route::resource('payment-methods', PaymentMethodController::class)->only(['index', 'show']);
-            Route::get('integrations', [IntegrationController::class, 'index'])->name('integrations.index');
-            Route::get('business-hours', [BusinessHourController::class, 'edit'])->name('business-hours.edit');
-        });
-
         Route::middleware('permission:settings.update')->group(function () {
             Route::put('company', [CompanyController::class, 'update'])->name('company.update');
             Route::get('roles/{role}/edit', [RoleController::class, 'edit'])->name('roles.edit');
@@ -90,6 +82,14 @@ Route::middleware(['installed', 'auth', 'verified', 'branch'])->group(function (
             Route::resource('payment-methods', PaymentMethodController::class)->except(['index', 'show']);
             Route::put('integrations', [IntegrationController::class, 'update'])->name('integrations.update');
             Route::put('business-hours', [BusinessHourController::class, 'update'])->name('business-hours.update');
+        });
+
+        Route::middleware('permission:settings.view')->group(function () {
+            Route::get('company', [CompanyController::class, 'edit'])->name('company');
+            Route::get('roles', [RoleController::class, 'index'])->name('roles.index');
+            Route::resource('payment-methods', PaymentMethodController::class)->only(['index', 'show']);
+            Route::get('integrations', [IntegrationController::class, 'index'])->name('integrations.index');
+            Route::get('business-hours', [BusinessHourController::class, 'edit'])->name('business-hours.edit');
         });
 
         Route::resource('branches', SettingsBranchController::class);
@@ -149,6 +149,12 @@ Route::middleware(['installed', 'auth', 'verified', 'branch'])->group(function (
         Route::resource('job-cards', JobCardController::class)->only(['index', 'show']);
     });
 
+    Route::middleware('permission:inventory.manage')->group(function () {
+        Route::resource('products', ProductController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
+        Route::resource('suppliers', SupplierController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
+        Route::resource('purchase-orders', PurchaseOrderController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
+        Route::resource('stock-movements', StockMovementController::class)->only(['create', 'store'])->whereNumber('stock_movement');
+    });
     Route::middleware('permission:inventory.view')->group(function () {
         Route::get('products/low-stock', [ProductController::class, 'lowStock'])->name('products.low-stock');
         Route::resource('products', ProductController::class)->only(['index', 'show']);
@@ -156,17 +162,15 @@ Route::middleware(['installed', 'auth', 'verified', 'branch'])->group(function (
         Route::resource('purchase-orders', PurchaseOrderController::class)->only(['index', 'show']);
         Route::resource('stock-movements', StockMovementController::class)->only(['index', 'show'])->whereNumber('stock_movement');
     });
-    Route::middleware('permission:inventory.manage')->group(function () {
-        Route::resource('products', ProductController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
-        Route::resource('suppliers', SupplierController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
-        Route::resource('purchase-orders', PurchaseOrderController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
-        Route::resource('stock-movements', StockMovementController::class)->only(['create', 'store'])->whereNumber('stock_movement');
-    });
 
     Route::middleware('permission:pos.access')->group(function () {
         Route::get('pos', [PosController::class, 'index'])->name('pos.index');
         Route::post('pos/stk-push', [PosController::class, 'stkPush'])->name('pos.stk-push');
         Route::post('pos', [PosController::class, 'store'])->name('pos.store');
+    });
+    Route::middleware('permission:sales.manage')->group(function () {
+        Route::resource('invoices', InvoiceController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
+        Route::resource('refunds', RefundController::class)->only(['create', 'store']);
     });
     Route::middleware('permission:sales.view')->group(function () {
         Route::resource('invoices', InvoiceController::class)->only(['index', 'show']);
@@ -174,10 +178,6 @@ Route::middleware(['installed', 'auth', 'verified', 'branch'])->group(function (
         Route::resource('refunds', RefundController::class)->only(['index', 'show']);
     });
     Route::middleware('permission:pos.access,sales.view')->get('receipts/{receipt}', [ReceiptController::class, 'show'])->name('receipts.show');
-    Route::middleware('permission:sales.manage')->group(function () {
-        Route::resource('invoices', InvoiceController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
-        Route::resource('refunds', RefundController::class)->only(['create', 'store']);
-    });
 
     Route::middleware('permission:payments.view')->group(function () {
         Route::get('payments/cash', [PaymentController::class, 'cash'])->name('payments.cash');
@@ -187,15 +187,15 @@ Route::middleware(['installed', 'auth', 'verified', 'branch'])->group(function (
         Route::resource('payments', PaymentController::class)->only(['index', 'show']);
     });
 
+    Route::middleware('permission:staff.manage')->group(function () {
+        Route::resource('employees', EmployeeController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
+        Route::resource('attendance', AttendanceController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
+    });
     Route::middleware('permission:staff.view')->group(function () {
         Route::resource('employees', EmployeeController::class)->only(['index', 'show']);
         Route::resource('attendance', AttendanceController::class)->only(['index', 'show']);
         Route::resource('commissions', CommissionController::class)->only(['index']);
         Route::resource('performance', PerformanceController::class)->only(['index']);
-    });
-    Route::middleware('permission:staff.manage')->group(function () {
-        Route::resource('employees', EmployeeController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
-        Route::resource('attendance', AttendanceController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
     });
 
     Route::middleware('permission:reports.view')->group(function () {
