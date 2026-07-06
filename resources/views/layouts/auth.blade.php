@@ -11,7 +11,7 @@
 <body class="auth-body">
     <header class="auth-header">
         <a href="{{ route('login') }}" class="auth-brand">
-            @include('partials.brand-logo', ['class' => 'auth-brand-logo'])
+            <x-brand-logo variant="auth" />
             <span class="auth-brand-name">AutoSpa Pro</span>
         </a>
     </header>

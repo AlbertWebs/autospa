@@ -26,7 +26,7 @@
         <header class="asp-mobile-header">
             <div class="asp-mobile-header-inner">
                 <div class="asp-mobile-brand">
-                    @include('partials.brand-logo', ['size' => 'sm'])
+                    <x-brand-logo size="sm" />
                     <span class="asp-mobile-brand-name">AutoSpa Pro</span>
                 </div>
 

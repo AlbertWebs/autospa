@@ -52,7 +52,7 @@
 
     {{-- Brand --}}
     <div class="flex h-16 shrink-0 items-center gap-3 border-b border-slate-800/80 px-5">
-        @include('partials.brand-logo', ['size' => 'md'])
+        <x-brand-logo size="md" />
         <div class="min-w-0 flex-1">
             <p class="truncate text-sm font-semibold text-white">AutoSpa</p>
             <p class="truncate text-xs text-slate-400">{{ $currentBranch?->name ?? 'Management System' }}</p>

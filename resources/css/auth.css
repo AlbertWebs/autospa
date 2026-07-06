@@ -58,14 +58,27 @@
     color: inherit;
 }
 
+.auth-brand img {
+    width: 3rem;
+    height: 3rem;
+    max-width: 3rem;
+    max-height: 3rem;
+    border-radius: 0.625rem;
+    object-fit: contain;
+    flex-shrink: 0;
+    display: block;
+}
+
 .auth-brand-icon {
     font-size: 1.5rem;
     color: var(--auth-primary);
 }
 
 .auth-brand-logo {
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 3rem;
+    height: 3rem;
+    max-width: 3rem;
+    max-height: 3rem;
     border-radius: 0.625rem;
     object-fit: contain;
     flex-shrink: 0;
