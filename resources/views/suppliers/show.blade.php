@@ -1,5 +1,7 @@
 <x-layouts.app>
-    <x-slot name="header"><h1 class="text-2xl font-bold text-slate-900 dark:text-white">{{ $supplier->name }}</h1></x-slot>
+    <x-slot name="header"><span class="hidden sm:inline">Inventory</span></x-slot>
+
+    <x-ui.section-header eyebrow="Inventory" />
 
     <div class="mb-6">
         @include('partials.crud.show-actions', [

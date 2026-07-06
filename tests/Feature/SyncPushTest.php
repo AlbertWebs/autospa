@@ -35,7 +35,7 @@ class SyncPushTest extends TestCase
 
     public function test_push_applies_customer_create_mutation(): void
     {
-        $user = $this->makeUserWithRole(RoleSlug::Cashier);
+        $user = $this->makeUserWithRole(RoleSlug::Manager);
         $mutationId = (string) Str::uuid();
         $customerUuid = (string) Str::uuid();
 
@@ -70,7 +70,7 @@ class SyncPushTest extends TestCase
 
     public function test_push_returns_duplicate_for_replayed_mutation(): void
     {
-        $user = $this->makeUserWithRole(RoleSlug::Cashier);
+        $user = $this->makeUserWithRole(RoleSlug::Manager);
         $mutationId = (string) Str::uuid();
         $customerUuid = (string) Str::uuid();
 
@@ -180,7 +180,7 @@ class SyncPushTest extends TestCase
     public function test_push_applies_pos_checkout_mutation(): void
     {
         $branch = Branch::query()->firstOrFail();
-        $user = $this->makeUserWithRole(RoleSlug::Cashier, $branch);
+        $user = $this->makeUserWithRole(RoleSlug::Manager, $branch);
         $paymentMethod = PaymentMethod::query()->where('slug', 'cash')->firstOrFail();
 
         $customer = Customer::factory()->create([
@@ -243,7 +243,7 @@ class SyncPushTest extends TestCase
     public function test_push_rejects_mpesa_checkout_mutation(): void
     {
         $branch = Branch::query()->firstOrFail();
-        $user = $this->makeUserWithRole(RoleSlug::Cashier, $branch);
+        $user = $this->makeUserWithRole(RoleSlug::Manager, $branch);
         $paymentMethod = PaymentMethod::query()->where('slug', 'mpesa')->firstOrFail();
         $customer = Customer::factory()->create(['branch_id' => $branch->id]);
 

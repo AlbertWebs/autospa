@@ -26,6 +26,7 @@ class EmployeeController extends Controller
     {
         return view('employees.create', [
             'users' => User::query()->where('branch_id', session('current_branch_id'))->orderBy('name')->get(),
+            'nextEmployeeNumber' => Employee::generateEmployeeNumber(),
         ]);
     }
 

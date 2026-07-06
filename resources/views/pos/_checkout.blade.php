@@ -53,6 +53,7 @@
         oldCustomerId: @js(old('customer_id')),
         oldPaymentMethodId: @js(old('payment_method_id')),
         oldItems: @js(old('items', [])),
+        jobCardCart: @js($jobCardCart ?? null),
     })"
 >
     @if ($errors->any())
@@ -64,27 +65,17 @@
     @endif
 
     @unless ($compact)
-        <header class="asp-page-header">
-            <div>
-                <p class="asp-page-eyebrow">Sales</p>
-                <h1 class="asp-page-title">Point of Sale</h1>
-                <p class="asp-page-subtitle">Add services and products to the cart, then complete checkout.</p>
+        <x-ui.section-header eyebrow="Sales">
+            <div class="rounded-xl border border-slate-200/80 bg-white px-4 py-2.5 dark:border-brand-border/60 dark:bg-brand-surface-high">
+                <p class="font-mono text-[10px] font-semibold uppercase tracking-widest text-slate-400">Cart</p>
+                <p class="font-mono text-sm font-bold text-slate-900 dark:text-white">
+                    <span x-text="itemCount"></span> items · KES <span x-text="formatMoney(total)"></span>
+                </p>
             </div>
-            <div class="flex flex-wrap items-center gap-3">
-                <div class="rounded-xl border border-slate-200/80 bg-white px-4 py-2.5 dark:border-brand-border/60 dark:bg-brand-surface-high">
-                    <p class="font-mono text-[10px] font-semibold uppercase tracking-widest text-slate-400">Cart</p>
-                    <p class="font-mono text-sm font-bold text-slate-900 dark:text-white">
-                        <span x-text="itemCount"></span> items · KES <span x-text="formatMoney(total)"></span>
-                    </p>
-                </div>
-            </div>
-        </header>
+        </x-ui.section-header>
     @else
         <div class="mb-3 flex items-center justify-between rounded-xl border border-slate-200/80 bg-white px-4 py-3 dark:border-brand-border/60 dark:bg-brand-surface">
-            <div>
-                <p class="text-sm font-bold text-slate-900 dark:text-white">Point of Sale</p>
-                <p class="text-xs text-slate-500">Tap items to add to cart</p>
-            </div>
+            <p class="asp-page-eyebrow !mb-0">Sales</p>
             <p class="font-mono text-sm font-bold text-brand-primary">
                 <span x-text="itemCount"></span> · KES <span x-text="formatMoney(total)"></span>
             </p>
@@ -139,13 +130,25 @@
             </div>
         </div>
 
-        <div class="lg:col-span-1">
+        <div class="asp-pos-checkout">
             <div class="asp-pos-cart">
                 <div class="asp-pos-cart-header">
                     <div>
-                        <h2 class="asp-panel-title">Checkout</h2>
+                        <h2 class="asp-panel-title">
+                            @if (! empty($jobCardCart))
+                                Checkout · Job #{{ $jobCardCart['job_card_id'] }}
+                            @else
+                                Checkout
+                            @endif
+                        </h2>
                         <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
                             <span x-text="itemCount"></span> item(s) in cart
+                            @if (! empty($jobCardCart['customer']['full_name']))
+                                · {{ $jobCardCart['customer']['full_name'] }}
+                                @if (! empty($jobCardCart['vehicle']['registration_number']))
+                                    · {{ $jobCardCart['vehicle']['registration_number'] }}
+                                @endif
+                            @endif
                         </p>
                     </div>
                     <button
@@ -163,6 +166,8 @@
                     @csrf
 
                     <input type="hidden" name="customer_id" x-model="customerId">
+                    <input type="hidden" name="vehicle_id" x-bind:value="vehicleId">
+                    <input type="hidden" name="job_card_id" x-bind:value="jobCardId">
                     <input type="hidden" name="payment_method_id" x-bind:value="paymentMethodId">
                     <input type="hidden" name="method" x-bind:value="selectedMethodSlug">
                     <input type="hidden" name="stk_phone" x-model="stkPhone">
@@ -204,6 +209,20 @@
                                 <span class="material-symbols-outlined text-lg">person_add</span>
                             </button>
                         </div>
+                        <p
+                            x-show="jobCardVehicleLabel && customerId"
+                            x-cloak
+                            class="mt-1 text-xs font-medium text-brand-primary-dim dark:text-brand-primary"
+                        >
+                            Vehicle: <span x-text="jobCardVehicleLabel"></span>
+                        </p>
+                        <p
+                            x-show="selectedCustomerPhone && customerId"
+                            x-cloak
+                            class="mt-0.5 text-xs text-slate-500 dark:text-slate-400"
+                        >
+                            Phone: <span x-text="selectedCustomerPhone"></span>
+                        </p>
                     </x-ui.form-field>
 
                     <div class="asp-pos-cart-lines">

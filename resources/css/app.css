@@ -436,7 +436,7 @@
 
     /* ── POS ── */
     .asp-pos-layout {
-        @apply grid gap-6 lg:grid-cols-3 lg:items-start;
+        @apply grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start;
     }
 
     .asp-pos-layout--mobile {
@@ -448,7 +448,19 @@
     }
 
     .asp-pos-catalog {
-        @apply lg:col-span-2 space-y-4;
+        @apply lg:col-span-2;
+    }
+
+    .asp-pos-checkout {
+        @apply lg:col-span-1 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:self-start;
+    }
+
+    .asp-pos-checkout .asp-pos-cart {
+        @apply lg:flex lg:max-h-full lg:flex-col lg:overflow-hidden;
+    }
+
+    .asp-pos-checkout .asp-pos-cart-body {
+        @apply lg:min-h-0 lg:flex-1 lg:overflow-y-auto;
     }
 
     .asp-pos-toolbar {
@@ -520,7 +532,7 @@
     }
 
     .asp-pos-cart {
-        @apply asp-panel sticky top-6 overflow-hidden;
+        @apply asp-panel;
     }
 
     .asp-pos-cart-header {
@@ -532,7 +544,7 @@
     }
 
     .asp-pos-cart-lines {
-        @apply max-h-72 space-y-2 overflow-y-auto;
+        @apply space-y-2;
     }
 
     .asp-pos-line {

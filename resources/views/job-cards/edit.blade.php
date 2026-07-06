@@ -1,17 +1,11 @@
 <x-layouts.app>
     <x-slot name="header">
-        <span class="hidden sm:inline">Edit Job Card</span>
+        <span class="hidden sm:inline">Operations</span>
     </x-slot>
 
-    <header class="asp-page-header">
-        <div>
-            <p class="asp-page-eyebrow">Operations</p>
-            <h1 class="asp-page-title">Edit Job Card</h1>
-            <p class="asp-page-subtitle">Update assignment, status, or notes for this job.</p>
-        </div>
-    </header>
+    <x-ui.section-header eyebrow="Operations" />
 
-    <div class="asp-panel max-w-3xl">
+    <div class="asp-panel max-w-6xl">
         <div class="asp-panel-header">
             <h2 class="asp-panel-title">Job Card Details</h2>
             <span class="material-symbols-outlined text-brand-primary-dim dark:text-brand-primary">edit_note</span>

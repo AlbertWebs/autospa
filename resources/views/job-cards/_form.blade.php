@@ -38,7 +38,7 @@
                 <a href="{{ route('services.create') }}" class="font-medium underline">Add services</a> first.
             </p>
         @else
-            <div class="grid gap-2 sm:grid-cols-2">
+            <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 @foreach ($services as $service)
                     <label class="asp-checkbox-card">
                         <input
@@ -78,6 +78,7 @@
     </x-ui.form-field>
 </x-ui.form-section>
 
+<div class="grid gap-6 xl:grid-cols-2">
 <x-ui.form-section
     title="Vehicle & Customer"
     description="Link the job card to a customer and their vehicle."
@@ -215,6 +216,7 @@
         </x-ui.form-field>
     </div>
 </x-ui.form-section>
+</div>
 
 <x-ui.form-section title="Notes" description="Internal notes visible to staff on the job card.">
     <x-ui.form-field label="Notes" for="notes" name="notes" :col-span="2" :ajax="$ajax">

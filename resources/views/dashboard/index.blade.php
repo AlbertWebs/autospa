@@ -15,10 +15,25 @@
             </p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-            <span class="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+            @include('partials.sync-status-badge')
+
+            <span
+                x-show="$store.offline.online"
+                x-cloak
+                class="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400"
+            >
                 <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400"></span>
                 Systems Online
             </span>
+            <span
+                x-show="! $store.offline.online"
+                x-cloak
+                class="inline-flex items-center gap-1.5 rounded-full border border-slate-400/30 bg-slate-500/10 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-400"
+            >
+                <span class="h-1.5 w-1.5 rounded-full bg-slate-400"></span>
+                Systems Offline
+            </span>
+
             <a href="{{ route('pos.index') }}" class="inline-flex items-center gap-2 rounded-xl bg-brand-primary px-4 py-2.5 text-sm font-semibold text-brand-on-primary shadow-glow-sm transition hover:shadow-glow active:scale-[0.98]">
                 <span class="material-symbols-outlined text-[18px]">point_of_sale</span>
                 Open POS

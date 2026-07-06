@@ -12,6 +12,7 @@ use App\Models\Customer;
 use App\Models\Employee;
 use App\Models\JobCard;
 use App\Models\Vehicle;
+use App\Services\PosService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -139,13 +140,16 @@ class JobCardController extends Controller
 
         $jobCards = JobCard::query()
             ->forDay($today)
-            ->with(['customer', 'vehicle', 'assignee', 'services.service'])
+            ->with(['customer', 'vehicle', 'assignee', 'services.service', 'products.product'])
             ->whereIn('status', [JobCardStatus::Open, JobCardStatus::InProgress])
             ->latest()
             ->get();
 
+        $posService = app(PosService::class);
+
         return view('job-cards.live', [
             'jobCards' => $jobCards,
+            'jobCardsJson' => $jobCards->map(fn (JobCard $jobCard) => $this->liveJobCardPayload($jobCard, $posService))->values(),
             'stats' => [
                 'total' => $jobCards->count(),
                 'open' => $jobCards->where('status', JobCardStatus::Open)->count(),
@@ -164,6 +168,9 @@ class JobCardController extends Controller
             return response()->json([
                 'message' => 'Car washing status updated.',
                 'remove_from_live' => ! in_array($jobCard->status, [JobCardStatus::Open, JobCardStatus::InProgress], true),
+                'redirect_to_pos' => $jobCard->status === JobCardStatus::Completed
+                    ? route('pos.index', ['job_card' => $jobCard->id])
+                    : null,
                 'job_card' => [
                     'id' => $jobCard->id,
                     'status' => $jobCard->status?->value ?? JobCardStatus::Open->value,
@@ -173,7 +180,36 @@ class JobCardController extends Controller
             ]);
         }
 
+        if ($jobCard->status === JobCardStatus::Completed) {
+            return redirect()->route('pos.index', ['job_card' => $jobCard->id])
+                ->with('success', 'Vehicle marked ready. Complete checkout below.');
+        }
+
         return back()->with('success', 'Car washing status updated.');
+    }
+
+    protected function liveJobCardPayload(JobCard $jobCard, PosService $posService): array
+    {
+        return [
+            'id' => $jobCard->id,
+            'registration_number' => $jobCard->vehicle?->registration_number ?? 'No vehicle assigned',
+            'vehicle_summary' => trim(implode(' ', array_filter([
+                $jobCard->vehicle?->make,
+                $jobCard->vehicle?->model,
+            ]))) ?: 'Vehicle details unavailable',
+            'customer_name' => $jobCard->customer?->full_name ?? 'Walk-in',
+            'assignee_name' => $jobCard->assignee?->displayName() ?? 'Unassigned',
+            'status' => $jobCard->status?->value ?? JobCardStatus::Open->value,
+            'started_at_human' => $jobCard->started_at?->diffForHumans(),
+            'services_summary' => $jobCard->services
+                ->map(fn ($line) => $line->service?->name)
+                ->filter()
+                ->join(', ') ?: 'No services selected',
+            'view_url' => route('job-cards.show', $jobCard),
+            'update_url' => route('job-cards.live-status', $jobCard),
+            'pos_redirect_url' => route('pos.index', ['job_card' => $jobCard->id]),
+            'pos_cart' => $posService->buildCartFromJobCard($jobCard),
+        ];
     }
 
     protected function assignableEmployees()

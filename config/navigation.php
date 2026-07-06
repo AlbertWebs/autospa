@@ -149,6 +149,7 @@ return [
             ['label' => 'Roles', 'route' => 'settings.roles.index', 'permission' => 'settings.view'],
             ['label' => 'Payment Methods', 'route' => 'settings.payment-methods.index', 'permission' => 'settings.view'],
             ['label' => 'Integrations', 'route' => 'settings.integrations.index', 'permission' => 'settings.view'],
+            ['label' => 'Test Ground', 'route' => 'settings.test-ground.index', 'permission' => 'settings.view'],
         ],
     ],
 ];

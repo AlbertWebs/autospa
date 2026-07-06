@@ -1,28 +1,19 @@
 <x-layouts.app title="User Manual">
     <x-slot name="header">
-        <span class="hidden sm:inline">User Manual</span>
+        <span class="hidden sm:inline">Help</span>
     </x-slot>
 
     <div x-data="{ activeSection: @js($sections[0]['title'] ?? '') }">
-        <header class="asp-page-header">
-            <div>
-                <p class="asp-page-eyebrow">Help</p>
-                <h1 class="asp-page-title">User Manual</h1>
-                <p class="asp-page-subtitle">
-                    Complete guide to AutoSpa, from Mission Control through Settings.
-                </p>
-            </div>
-            <div class="flex flex-wrap items-center gap-3">
-                <button
-                    type="button"
-                    class="asp-btn asp-btn-secondary"
-                    @click="$store.onboarding.restart(@js(config('onboarding')))"
-                >
-                    <span class="material-symbols-outlined text-lg">map</span>
-                    Start guided tour
-                </button>
-            </div>
-        </header>
+        <x-ui.section-header eyebrow="Help">
+            <button
+                type="button"
+                class="asp-btn asp-btn-secondary"
+                @click="$store.onboarding.restart(@js(config('onboarding')))"
+            >
+                <span class="material-symbols-outlined text-lg">map</span>
+                Start guided tour
+            </button>
+        </x-ui.section-header>
 
         <div class="grid gap-6 lg:grid-cols-[16rem_minmax(0,1fr)]">
             <aside class="asp-panel h-fit lg:sticky lg:top-24">

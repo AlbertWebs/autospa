@@ -30,7 +30,7 @@ class SyncBootstrapTest extends TestCase
     public function test_bootstrap_returns_branch_scoped_reference_data(): void
     {
         $branch = Branch::query()->firstOrFail();
-        $user = $this->makeUserWithRole(RoleSlug::Cashier, $branch);
+        $user = $this->makeUserWithRole(RoleSlug::Manager, $branch);
 
         $category = ServiceCategory::query()->create([
             'branch_id' => $branch->id,

@@ -16,20 +16,10 @@
 
 <x-layouts.app>
     <x-slot name="header">
-        <span class="hidden sm:inline">{{ $headerMobile ?? $title }}</span>
+        <span class="hidden sm:inline">{{ $eyebrow ?? ($headerMobile ?? $title) }}</span>
     </x-slot>
 
-    <header class="asp-page-header">
-        <div>
-            @if ($eyebrow)
-                <p class="asp-page-eyebrow">{{ $eyebrow }}</p>
-            @endif
-            <h1 class="asp-page-title">{{ $title }}</h1>
-            @if ($subtitle)
-                <p class="asp-page-subtitle">{{ $subtitle }}</p>
-            @endif
-        </div>
-    </header>
+    <x-ui.section-header :eyebrow="$eyebrow ?? $title" />
 
     <div class="{{ $maxWidth }}">
         <div class="asp-panel">

@@ -54,13 +54,6 @@ class RoleSeeder extends Seeder
         $rolePermissions = [
             RoleSlug::SuperAdmin->value => Permission::pluck('id')->all(),
             RoleSlug::Manager->value => Permission::whereNotIn('slug', ['branches.delete'])->pluck('id')->all(),
-            RoleSlug::Cashier->value => Permission::whereIn('slug', [
-                'dashboard.view', 'customers.view', 'customers.create', 'pos.access',
-                'sales.view', 'sales.manage', 'payments.view', 'payments.manage',
-            ])->pluck('id')->all(),
-            RoleSlug::Receptionist->value => Permission::whereIn('group', ['dashboard', 'customers', 'vehicles', 'bookings'])->pluck('id')->all(),
-            RoleSlug::Detailer->value => Permission::whereIn('group', ['dashboard', 'job-cards', 'vehicles'])->pluck('id')->all(),
-            RoleSlug::InventoryManager->value => Permission::whereIn('group', ['dashboard', 'inventory'])->pluck('id')->all(),
         ];
 
         foreach (RoleSlug::cases() as $roleSlug) {
@@ -71,5 +64,27 @@ class RoleSeeder extends Seeder
 
             $role->permissions()->sync($rolePermissions[$roleSlug->value] ?? []);
         }
+
+        $this->removeLegacyRoles();
+    }
+
+    protected function removeLegacyRoles(): void
+    {
+        $supervisor = Role::query()->where('slug', RoleSlug::Manager->value)->first();
+
+        Role::query()
+            ->whereNotIn('slug', RoleSlug::values())
+            ->each(function (Role $role) use ($supervisor) {
+                foreach ($role->users as $user) {
+                    $role->users()->detach($user->id);
+
+                    if ($supervisor && ! $user->roles()->exists()) {
+                        $user->roles()->attach($supervisor->id);
+                    }
+                }
+
+                $role->permissions()->detach();
+                $role->delete();
+            });
     }
 }

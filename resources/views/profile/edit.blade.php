@@ -1,15 +1,9 @@
 <x-layouts.app>
     <x-slot name="header">
-        <span class="hidden sm:inline">Profile</span>
+        <span class="hidden sm:inline">Account</span>
     </x-slot>
 
-    <header class="asp-page-header">
-        <div>
-            <p class="asp-page-eyebrow">Account</p>
-            <h1 class="asp-page-title">Profile Settings</h1>
-            <p class="asp-page-subtitle">Manage your account information and security.</p>
-        </div>
-    </header>
+    <x-ui.section-header eyebrow="Account" />
 
     <div class="max-w-3xl space-y-6">
         <div class="asp-panel">

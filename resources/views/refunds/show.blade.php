@@ -1,5 +1,7 @@
 <x-layouts.app>
-    <x-slot name="header"><h1 class="text-2xl font-bold text-slate-900 dark:text-white">Refund #{{ $refund->id }}</h1></x-slot>
+    <x-slot name="header"><span class="hidden sm:inline">Sales</span></x-slot>
+
+    <x-ui.section-header eyebrow="Sales" />
 
     <div class="mb-6">
         @include('partials.crud.show-actions', [

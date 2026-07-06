@@ -16,19 +16,13 @@
 
 <x-layouts.app>
     <x-slot name="header">
-        <span class="hidden sm:inline">New Job Card</span>
+        <span class="hidden sm:inline">Operations</span>
     </x-slot>
 
-    <header class="asp-page-header">
-        <div>
-            <p class="asp-page-eyebrow">Operations</p>
-            <h1 class="asp-page-title">Check In Vehicle</h1>
-            <p class="asp-page-subtitle">Create a new job card to start service on the floor.</p>
-        </div>
-    </header>
+    <x-ui.section-header eyebrow="Operations" />
 
     <div
-        class="max-w-3xl"
+        class="max-w-6xl"
         x-data="jobCardCreateForm({
             customerId: @js(old('customer_id', '')),
             vehicleId: @js(old('vehicle_id', '')),

@@ -1,5 +1,7 @@
 <x-layouts.app>
-    <x-slot name="header"><h1 class="text-2xl font-bold text-slate-900 dark:text-white">Inventory Report</h1></x-slot>
+    <x-slot name="header"><span class="hidden sm:inline">Insights</span></x-slot>
+
+    <x-ui.section-header eyebrow="Insights" />
 
     <form method="GET" class="mb-6 grid gap-4 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 sm:grid-cols-2 lg:grid-cols-4">
         <x-ui.form-field label="Stock Position As Of" for="as_of">

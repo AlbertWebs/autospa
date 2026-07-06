@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\PosCheckoutRequest;
 use App\Http\Requests\PosStkPushRequest;
+use App\Models\JobCard;
 use App\Services\BranchService;
 use App\Services\PosService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class PosController extends Controller
@@ -17,9 +19,19 @@ class PosController extends Controller
         protected BranchService $branchService,
     ) {}
 
-    public function index(): View
+    public function index(Request $request): View
     {
-        return view('pos.index', $this->posService->checkoutData());
+        $branchId = $this->branchService->currentBranchId();
+        $jobCard = null;
+
+        if ($request->filled('job_card') && $branchId !== null) {
+            $jobCard = JobCard::query()
+                ->where('branch_id', $branchId)
+                ->with(['services.service', 'products.product'])
+                ->find($request->integer('job_card'));
+        }
+
+        return view('pos.index', $this->posService->checkoutData($branchId, $jobCard));
     }
 
     public function store(PosCheckoutRequest $request): RedirectResponse|JsonResponse

@@ -1257,6 +1257,11 @@ document.addEventListener('alpine:init', () => {
 
                     Alpine.store('offline').refreshPending();
                     Alpine.store('toast').show('Status change queued for sync.', 'success');
+
+                    if (status === 'completed') {
+                        this.redirectToPosCheckout(jobCard);
+                    }
+
                     const updating = { ...this.updating };
                     delete updating[jobCardId];
                     this.updating = updating;
@@ -1291,6 +1296,12 @@ document.addEventListener('alpine:init', () => {
                         : entry);
                 }
 
+                if (status === 'completed') {
+                    Alpine.store('toast').show(data.message ?? 'Vehicle ready — opening checkout…', 'success');
+                    this.redirectToPosCheckout(jobCard, data.redirect_to_pos);
+                    return;
+                }
+
                 Alpine.store('toast').show(data.message ?? 'Car washing status updated.', 'success');
             } catch {
                 Alpine.store('toast').show('Network error. Please try again.', 'error');
@@ -1300,11 +1311,28 @@ document.addEventListener('alpine:init', () => {
                 this.updating = updating;
             }
         },
+
+        redirectToPosCheckout(jobCard, redirectUrl = null) {
+            if (jobCard?.pos_cart) {
+                try {
+                    sessionStorage.setItem('autospa.posDraft', JSON.stringify(jobCard.pos_cart));
+                } catch {
+                    // Continue with server-side preload when storage is unavailable.
+                }
+            }
+
+            window.location.href = redirectUrl ?? jobCard?.pos_redirect_url ?? '/pos';
+        },
     }));
 
     Alpine.data('posCheckout', (config = {}) => ({
         cart: [],
-        customerId: config.defaultCustomerId ?? '',
+        customerId: config.jobCardCart?.customer_id
+            ? String(config.jobCardCart.customer_id)
+            : (config.oldCustomerId ? String(config.oldCustomerId) : (config.defaultCustomerId ?? '')),
+        vehicleId: config.jobCardCart?.vehicle_id ? String(config.jobCardCart.vehicle_id) : '',
+        jobCardId: config.jobCardCart?.job_card_id ? String(config.jobCardCart.job_card_id) : '',
+        jobCardVehicleLabel: '',
         paymentMethodId: '',
         showCheckoutGuide: true,
         catalogTab: 'all',
@@ -1337,7 +1365,13 @@ document.addEventListener('alpine:init', () => {
         pendingReceipt: null,
 
         async init() {
-            this.showCheckoutGuide = !this.checkoutGuideDismissed();
+            this.showCheckoutGuide = !this.checkoutGuideDismissed() && !config.jobCardCart;
+
+            if (config.jobCardCart) {
+                this.loadJobCardCart(config.jobCardCart);
+            } else {
+                this.loadPosDraftFromSession();
+            }
 
             if (Array.isArray(config.oldItems) && config.oldItems.length > 0) {
                 this.cart = config.oldItems.map((item) => ({
@@ -1353,7 +1387,7 @@ document.addEventListener('alpine:init', () => {
                 this.paymentMethodId = String(config.oldPaymentMethodId);
             }
 
-            if (config.oldCustomerId) {
+            if (config.oldCustomerId && !config.jobCardCart) {
                 this.customerId = String(config.oldCustomerId);
             }
 
@@ -1418,6 +1452,79 @@ document.addEventListener('alpine:init', () => {
                 }
             } catch {
                 // Keep server-rendered catalog when bootstrap is unavailable.
+            }
+        },
+
+        loadJobCardCart(cartPayload) {
+            if (!cartPayload) {
+                return;
+            }
+
+            if (Array.isArray(cartPayload.items)) {
+                this.cart = cartPayload.items.map((item) => ({
+                    id: item.item_id,
+                    itemType: item.item_type,
+                    name: item.description,
+                    price: parseFloat(item.unit_price),
+                    qty: parseFloat(item.quantity),
+                }));
+            }
+
+            if (cartPayload.customer || cartPayload.customer_id) {
+                this.ensureCustomerOption(cartPayload.customer, cartPayload.vehicle);
+                this.customerId = String(cartPayload.customer?.id ?? cartPayload.customer_id);
+            }
+
+            if (cartPayload.vehicle_id) {
+                this.vehicleId = String(cartPayload.vehicle_id);
+            }
+
+            if (cartPayload.job_card_id) {
+                this.jobCardId = String(cartPayload.job_card_id);
+            }
+
+            if (cartPayload.vehicle?.registration_number) {
+                this.jobCardVehicleLabel = cartPayload.vehicle.registration_number;
+            }
+        },
+
+        ensureCustomerOption(customer, vehicle) {
+            if (!customer?.id && !customer?.full_name) {
+                return;
+            }
+
+            const vehicleSummary = vehicle?.registration_number ?? null;
+            const option = this.buildCustomerOption({
+                id: customer.id,
+                full_name: customer.full_name,
+                phone: customer.phone ?? '',
+                vehicle_summary: vehicleSummary,
+            });
+
+            const existingIndex = this.customers.findIndex(
+                (entry) => String(entry.id) === String(option.id),
+            );
+
+            if (existingIndex >= 0) {
+                this.customers.splice(existingIndex, 1, option);
+            } else {
+                this.customers.push(option);
+                this.sortCustomers();
+            }
+        },
+
+        loadPosDraftFromSession() {
+            try {
+                const raw = sessionStorage.getItem('autospa.posDraft');
+
+                if (!raw) {
+                    return;
+                }
+
+                sessionStorage.removeItem('autospa.posDraft');
+                this.loadJobCardCart(JSON.parse(raw));
+            } catch {
+                // Ignore malformed drafts.
             }
         },
 
@@ -1842,6 +1949,8 @@ document.addEventListener('alpine:init', () => {
 
             const fields = {
                 customer_id: this.customerId,
+                vehicle_id: this.vehicleId,
+                job_card_id: this.jobCardId,
                 payment_method_id: this.paymentMethodId,
                 method: this.selectedMethodSlug,
                 subtotal: this.subtotal.toFixed(2),
@@ -1915,6 +2024,8 @@ document.addEventListener('alpine:init', () => {
             try {
                 await enqueueMutation('pos.checkout', {
                     customer_id: this.customerId,
+                    vehicle_id: this.vehicleId || null,
+                    job_card_id: this.jobCardId || null,
                     payment_method_id: this.paymentMethodId,
                     method: this.selectedMethodSlug,
                     subtotal: this.subtotal.toFixed(2),

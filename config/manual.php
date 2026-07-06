@@ -21,7 +21,7 @@ return [
                 ],
                 [
                     'heading' => 'Permissions',
-                    'body' => 'Each module is protected by permissions assigned through roles. If you see an access denied message, contact an administrator to adjust your role.',
+                    'body' => 'AutoSpa uses two roles: Admin (full system access) and Supervisor (branch operations). Assign roles under Settings → Users. Fine-tune Supervisor permissions under Settings → Roles if needed.',
                 ],
                 [
                     'heading' => 'Working offline',
@@ -320,6 +320,10 @@ return [
                 [
                     'heading' => 'Integrations',
                     'body' => 'Connect M-Pesa, SMS, email, and other external providers. Integration drivers can be stubbed for testing.',
+                ],
+                [
+                    'heading' => 'Test Ground',
+                    'body' => 'Under Settings → Test Ground, send test emails, SMS, WhatsApp messages, and M-Pesa STK pushes to verify configuration before customers are affected.',
                 ],
                 [
                     'heading' => 'Email notifications',

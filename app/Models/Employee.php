@@ -9,10 +9,33 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Employee extends Model
 {
     use BelongsToBranch, HasFactory, HasUuid, SoftDeletes;
+
+    protected static function booted(): void
+    {
+        static::creating(function (Employee $employee) {
+            if (blank($employee->employee_number)) {
+                $employee->employee_number = static::generateEmployeeNumber();
+            }
+        });
+    }
+
+    public static function generateEmployeeNumber(): string
+    {
+        $max = static::withTrashed()
+            ->where('employee_number', 'like', 'EMP-%')
+            ->pluck('employee_number')
+            ->map(fn (string $number) => (int) Str::after($number, 'EMP-'))
+            ->max();
+
+        $next = ($max ?? 0) + 1;
+
+        return 'EMP-'.str_pad((string) $next, 4, '0', STR_PAD_LEFT);
+    }
 
     protected $fillable = [
         'uuid',

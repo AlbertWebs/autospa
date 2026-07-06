@@ -1,11 +1,32 @@
 <x-layouts.mobile title="Mission Control">
-    <div class="mb-4">
-        <p class="text-xs font-semibold uppercase tracking-wider text-brand-primary">Live Operations</p>
-        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Mission Control</h1>
-        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Good {{ now()->hour < 12 ? 'morning' : (now()->hour < 17 ? 'afternoon' : 'evening') }}, {{ auth()->user()->name }}.
-            {{ now()->format('l, M j') }}
-        </p>
+    <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-brand-primary">Live Operations</p>
+            <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Mission Control</h1>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                Good {{ now()->hour < 12 ? 'morning' : (now()->hour < 17 ? 'afternoon' : 'evening') }}, {{ auth()->user()->name }}.
+                {{ now()->format('l, M j') }}
+            </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+            @include('partials.sync-status-badge')
+            <span
+                x-show="$store.offline.online"
+                x-cloak
+                class="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400"
+            >
+                <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400"></span>
+                Online
+            </span>
+            <span
+                x-show="! $store.offline.online"
+                x-cloak
+                class="inline-flex items-center gap-1.5 rounded-full border border-slate-400/30 bg-slate-500/10 px-2.5 py-1 text-[11px] font-semibold text-slate-600 dark:text-slate-400"
+            >
+                <span class="h-1.5 w-1.5 rounded-full bg-slate-400"></span>
+                Offline
+            </span>
+        </div>
     </div>
 
     <div class="asp-mobile-kpi-grid mb-6">

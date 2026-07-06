@@ -90,7 +90,11 @@ class AuthenticationTest extends TestCase
 
     public function test_non_admin_and_non_supervisor_users_can_not_authenticate(): void
     {
-        $user = $this->makeUserWithRole(RoleSlug::Cashier);
+        $user = User::factory()->create([
+            'branch_id' => Branch::query()->firstOrFail()->id,
+            'email_verified_at' => now(),
+            'is_active' => true,
+        ]);
 
         $response = $this->post('/login', [
             'login_method' => 'password',
@@ -122,7 +126,7 @@ class AuthenticationTest extends TestCase
 
     public function test_staff_user_can_authenticate_with_pin(): void
     {
-        $user = $this->makeUserWithRole(RoleSlug::Cashier, [
+        $user = $this->makeUserWithRole(RoleSlug::Manager, [
             'pin' => '1234',
         ]);
 
@@ -138,7 +142,7 @@ class AuthenticationTest extends TestCase
 
     public function test_staff_user_cannot_authenticate_with_invalid_pin(): void
     {
-        $user = $this->makeUserWithRole(RoleSlug::Cashier, [
+        $user = $this->makeUserWithRole(RoleSlug::Manager, [
             'pin' => '1234',
         ]);
 
@@ -154,7 +158,7 @@ class AuthenticationTest extends TestCase
 
     public function test_staff_user_without_pin_cannot_use_pin_login(): void
     {
-        $user = $this->makeUserWithRole(RoleSlug::Cashier);
+        $user = $this->makeUserWithRole(RoleSlug::Manager);
 
         $response = $this->post('/login', [
             'login_method' => 'pin',

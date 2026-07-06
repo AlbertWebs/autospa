@@ -1,5 +1,8 @@
 <x-layouts.app>
-    <x-slot name="header"><h1 class="text-2xl font-bold text-slate-900 dark:text-white">Monthly Report</h1></x-slot>
+    <x-slot name="header"><span class="hidden sm:inline">Insights</span></x-slot>
+
+    <x-ui.section-header eyebrow="Insights" />
+
     <div class="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <x-ui.stat-card label="Revenue" :value="number_format($report['revenue'] ?? 0, 2)" />
         <x-ui.stat-card label="Bookings" :value="$report['bookings'] ?? 0" />

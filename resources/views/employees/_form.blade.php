@@ -11,8 +11,14 @@
             </x-ui.select>
         </x-ui.form-field>
 
-        <x-ui.form-field label="Employee Number" for="employee_number" name="employee_number" :required="true">
-            <x-ui.input id="employee_number" name="employee_number" :value="old('employee_number', $employee->employee_number ?? '')" required />
+        <x-ui.form-field label="Employee Number" for="employee_number">
+            @if ($employee)
+                <x-ui.input id="employee_number" :value="$employee->employee_number" readonly disabled />
+                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Auto-generated and cannot be changed.</p>
+            @else
+                <x-ui.input id="employee_number" :value="$nextEmployeeNumber ?? ''" readonly disabled />
+                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Assigned automatically when you save.</p>
+            @endif
         </x-ui.form-field>
 
         <x-ui.form-field label="Full Name" for="full_name" name="full_name" :required="true">

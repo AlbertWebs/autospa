@@ -27,7 +27,7 @@ class InventoryPagesTest extends TestCase
      */
     public function test_inventory_manager_can_view_inventory_index_pages(string $routeName): void
     {
-        $user = $this->makeUserWithRole(RoleSlug::InventoryManager);
+        $user = $this->makeUserWithRole(RoleSlug::Manager);
 
         $this->actingAs($user)->get(route($routeName))->assertOk();
     }
@@ -37,7 +37,7 @@ class InventoryPagesTest extends TestCase
      */
     public function test_inventory_manager_can_view_inventory_create_pages(string $routeName, string $expectedText): void
     {
-        $user = $this->makeUserWithRole(RoleSlug::InventoryManager);
+        $user = $this->makeUserWithRole(RoleSlug::Manager);
 
         $response = $this->actingAs($user)->get(route($routeName));
 

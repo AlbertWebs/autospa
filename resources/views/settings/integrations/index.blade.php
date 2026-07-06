@@ -1,5 +1,7 @@
 <x-layouts.app>
-    <x-slot name="header"><h1 class="text-2xl font-bold text-slate-900 dark:text-white">Integrations</h1></x-slot>
+    <x-slot name="header"><span class="hidden sm:inline">Settings</span></x-slot>
+
+    <x-ui.section-header eyebrow="Settings" />
 
     <x-ui.card class="max-w-3xl">
         <form method="POST" action="{{ route('settings.integrations.update') }}" class="space-y-6">

@@ -8,6 +8,7 @@ use App\Data\Integrations\StkPushData;
 use App\Data\Integrations\StkPushResult;
 use App\Models\Customer;
 use App\Models\Invoice;
+use App\Models\JobCard;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Models\Product;
@@ -25,11 +26,11 @@ class PosService
         protected VehicleSmsNotificationService $vehicleSmsNotificationService,
     ) {}
 
-    public function checkoutData(?int $branchId = null): array
+    public function checkoutData(?int $branchId = null, ?JobCard $jobCard = null): array
     {
         $branchId = $branchId ?? $this->branchService->currentBranchId();
 
-        return [
+        $data = [
             'services' => Service::query()->where('branch_id', $branchId)->where('is_active', true)->with('category')->orderBy('name')->get(),
             'products' => Product::query()->where('branch_id', $branchId)->where('is_active', true)->orderBy('name')->get(),
             'customers' => Customer::query()
@@ -50,6 +51,58 @@ class PosService
                 })
                 ->orderBy('name')
                 ->get(),
+        ];
+
+        if ($jobCard !== null) {
+            $data['jobCardCart'] = $this->buildCartFromJobCard($jobCard);
+        }
+
+        return $data;
+    }
+
+    /** @return array{job_card_id: int, customer_id: int|null, vehicle_id: int|null, customer: array<string, mixed>|null, vehicle: array<string, mixed>|null, items: list<array<string, mixed>>} */
+    public function buildCartFromJobCard(JobCard $jobCard): array
+    {
+        $jobCard->loadMissing(['services.service', 'products.product', 'customer', 'vehicle']);
+
+        $items = [];
+
+        foreach ($jobCard->services as $line) {
+            $items[] = [
+                'item_id' => $line->service_id,
+                'item_type' => 'service',
+                'description' => $line->service?->name ?? 'Service',
+                'quantity' => 1,
+                'unit_price' => (float) $line->price,
+            ];
+        }
+
+        foreach ($jobCard->products as $line) {
+            $items[] = [
+                'item_id' => $line->product_id,
+                'item_type' => 'product',
+                'description' => $line->product_name ?: ($line->product?->name ?? 'Product'),
+                'quantity' => (float) $line->quantity,
+                'unit_price' => (float) $line->unit_price,
+            ];
+        }
+
+        return [
+            'job_card_id' => $jobCard->id,
+            'customer_id' => $jobCard->customer_id,
+            'vehicle_id' => $jobCard->vehicle_id,
+            'customer' => $jobCard->customer ? [
+                'id' => $jobCard->customer->id,
+                'full_name' => $jobCard->customer->full_name,
+                'phone' => $jobCard->customer->phone,
+            ] : null,
+            'vehicle' => $jobCard->vehicle ? [
+                'id' => $jobCard->vehicle->id,
+                'registration_number' => $jobCard->vehicle->registration_number,
+                'make' => $jobCard->vehicle->make,
+                'model' => $jobCard->vehicle->model,
+            ] : null,
+            'items' => $items,
         ];
     }
 
@@ -76,6 +129,7 @@ class PosService
                 'branch_id' => $branchId,
                 'customer_id' => $data['customer_id'],
                 'vehicle_id' => $data['vehicle_id'] ?? null,
+                'job_card_id' => $data['job_card_id'] ?? null,
                 'created_by' => $userId,
                 'invoice_number' => $this->nextInvoiceNumber($branchId),
                 'status' => InvoiceStatus::Paid,

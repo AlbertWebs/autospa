@@ -74,10 +74,10 @@ class MobileDashboardTest extends TestCase
             ->assertSee('Live');
     }
 
-    public function test_cashier_can_view_mobile_pos(): void
+    public function test_supervisor_can_view_mobile_pos(): void
     {
         $branch = Branch::first();
-        $role = Role::where('slug', RoleSlug::Cashier->value)->first();
+        $role = Role::where('slug', RoleSlug::Manager->value)->first();
         $user = User::factory()->create([
             'branch_id' => $branch->id,
             'email_verified_at' => now(),

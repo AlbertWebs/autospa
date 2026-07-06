@@ -45,6 +45,17 @@ class AttendanceFeatureTest extends TestCase
             ->assertOk();
     }
 
+    public function test_employee_create_is_available_when_attendance_is_disabled(): void
+    {
+        Setting::setValue('attendance', 'enabled', false, null, 'boolean');
+
+        $user = $this->makeUserWithRole(RoleSlug::SuperAdmin);
+
+        $this->actingAs($user)
+            ->get(route('employees.create'))
+            ->assertOk();
+    }
+
     protected function makeUserWithRole(RoleSlug $roleSlug): User
     {
         $branch = Branch::query()->firstOrFail();

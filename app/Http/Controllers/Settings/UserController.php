@@ -30,9 +30,10 @@ class UserController extends Controller
         return view('settings.users.create', [
             'branches' => Branch::query()->where('is_active', true)->orderBy('name')->get(),
             'roles' => Role::query()
+                ->system()
+                ->ordered()
                 ->withCount('permissions')
                 ->with('permissions:id,name,slug,group')
-                ->orderBy('name')
                 ->get(),
         ]);
     }
@@ -68,9 +69,10 @@ class UserController extends Controller
             'user' => $user->load('roles.permissions'),
             'branches' => Branch::query()->where('is_active', true)->orderBy('name')->get(),
             'roles' => Role::query()
+                ->system()
+                ->ordered()
                 ->withCount('permissions')
                 ->with('permissions:id,name,slug,group')
-                ->orderBy('name')
                 ->get(),
         ]);
     }

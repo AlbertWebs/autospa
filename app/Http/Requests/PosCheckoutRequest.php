@@ -18,6 +18,7 @@ class PosCheckoutRequest extends FormRequest
         return [
             'customer_id' => ['required', 'exists:customers,id'],
             'vehicle_id' => ['nullable', 'exists:vehicles,id'],
+            'job_card_id' => ['nullable', 'exists:job_cards,id'],
             'payment_method_id' => ['required', 'exists:payment_methods,id'],
             'method' => ['required', Rule::enum(PaymentMethodType::class)],
             'stk_phone' => ['nullable', 'string', 'max:50'],

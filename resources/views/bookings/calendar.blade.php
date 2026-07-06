@@ -18,7 +18,7 @@
 
 <x-layouts.app>
     <x-slot name="header">
-        <span class="hidden sm:inline">Booking Calendar</span>
+        <span class="hidden sm:inline">Operations</span>
     </x-slot>
 
     <div
@@ -36,24 +36,16 @@
         }"
         class="relative"
     >
-        {{-- Page header --}}
-        <header class="asp-page-header">
-            <div>
-                <p class="asp-page-eyebrow">Operations</p>
-                <h1 class="asp-page-title">Booking Calendar</h1>
-                <p class="asp-page-subtitle">Schedule overview for {{ $date->format('F Y') }}</p>
-            </div>
-            <div class="flex flex-wrap items-center gap-2">
-                <a href="{{ route('bookings.walk-ins') }}" class="asp-action !py-2.5 !px-4 text-sm">
-                    <span class="material-symbols-outlined asp-action-icon !h-8 !w-8 !text-base">directions_walk</span>
-                    Walk-in
-                </a>
-                <a href="{{ route('bookings.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-brand-primary px-4 py-2.5 text-sm font-semibold text-brand-on-primary shadow-glow-sm transition hover:bg-brand-primary-dim">
-                    <span class="material-symbols-outlined text-lg">add</span>
-                    New Booking
-                </a>
-            </div>
-        </header>
+        <x-ui.section-header eyebrow="Operations">
+            <a href="{{ route('bookings.walk-ins') }}" class="asp-action !py-2.5 !px-4 text-sm">
+                <span class="material-symbols-outlined asp-action-icon !h-8 !w-8 !text-base">directions_walk</span>
+                Walk-in
+            </a>
+            <a href="{{ route('bookings.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-brand-primary px-4 py-2.5 text-sm font-semibold text-brand-on-primary shadow-glow-sm transition hover:bg-brand-primary-dim">
+                <span class="material-symbols-outlined text-lg">add</span>
+                New Booking
+            </a>
+        </x-ui.section-header>
 
         {{-- Month stats --}}
         <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">

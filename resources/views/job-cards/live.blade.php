@@ -1,24 +1,5 @@
 @php
     use App\Enums\JobCardStatus;
-
-    $jobCardsJson = $jobCards->map(fn ($jobCard) => [
-        'id' => $jobCard->id,
-        'registration_number' => $jobCard->vehicle?->registration_number ?? 'No vehicle assigned',
-        'vehicle_summary' => trim(implode(' ', array_filter([
-            $jobCard->vehicle?->make,
-            $jobCard->vehicle?->model,
-        ]))) ?: 'Vehicle details unavailable',
-        'customer_name' => $jobCard->customer?->full_name ?? 'Walk-in',
-        'assignee_name' => $jobCard->assignee?->displayName() ?? 'Unassigned',
-        'status' => $jobCard->status?->value ?? JobCardStatus::Open->value,
-        'started_at_human' => $jobCard->started_at?->diffForHumans(),
-        'services_summary' => $jobCard->services
-            ->map(fn ($line) => $line->service?->name)
-            ->filter()
-            ->join(', ') ?: 'No services selected',
-        'view_url' => route('job-cards.show', $jobCard),
-        'update_url' => route('job-cards.live-status', $jobCard),
-    ])->values();
 @endphp
 
 <x-ui.index-page

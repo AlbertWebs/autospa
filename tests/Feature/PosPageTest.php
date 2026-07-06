@@ -32,7 +32,7 @@ class PosPageTest extends TestCase
     public function test_pos_page_shows_global_payment_methods_for_branch_users(): void
     {
         $branch = Branch::query()->firstOrFail();
-        $role = Role::query()->where('slug', RoleSlug::Cashier->value)->firstOrFail();
+        $role = Role::query()->where('slug', RoleSlug::Manager->value)->firstOrFail();
 
         $user = User::factory()->create([
             'branch_id' => $branch->id,
@@ -50,7 +50,7 @@ class PosPageTest extends TestCase
     public function test_cash_checkout_creates_receipt_and_redirects_to_receipt_page(): void
     {
         $branch = Branch::query()->firstOrFail();
-        $role = Role::query()->where('slug', RoleSlug::Cashier->value)->firstOrFail();
+        $role = Role::query()->where('slug', RoleSlug::Manager->value)->firstOrFail();
         $paymentMethod = PaymentMethod::query()->where('slug', 'cash')->firstOrFail();
 
         $user = User::factory()->create([
@@ -182,7 +182,7 @@ class PosPageTest extends TestCase
     public function test_cash_checkout_without_items_returns_validation_errors(): void
     {
         $branch = Branch::query()->firstOrFail();
-        $role = Role::query()->where('slug', RoleSlug::Cashier->value)->firstOrFail();
+        $role = Role::query()->where('slug', RoleSlug::Manager->value)->firstOrFail();
         $paymentMethod = PaymentMethod::query()->where('slug', 'cash')->firstOrFail();
 
         $user = User::factory()->create([
@@ -214,7 +214,7 @@ class PosPageTest extends TestCase
     public function test_cash_checkout_without_payment_method_returns_validation_errors(): void
     {
         $branch = Branch::query()->firstOrFail();
-        $role = Role::query()->where('slug', RoleSlug::Cashier->value)->firstOrFail();
+        $role = Role::query()->where('slug', RoleSlug::Manager->value)->firstOrFail();
 
         $user = User::factory()->create([
             'branch_id' => $branch->id,

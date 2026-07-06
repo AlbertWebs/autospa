@@ -6,20 +6,18 @@ enum RoleSlug: string
 {
     case SuperAdmin = 'super_admin';
     case Manager = 'manager';
-    case Cashier = 'cashier';
-    case Receptionist = 'receptionist';
-    case Detailer = 'detailer';
-    case InventoryManager = 'inventory_manager';
 
     public function label(): string
     {
         return match ($this) {
             self::SuperAdmin => 'Admin',
             self::Manager => 'Supervisor',
-            self::Cashier => 'Cashier',
-            self::Receptionist => 'Receptionist',
-            self::Detailer => 'Detailer',
-            self::InventoryManager => 'Inventory Manager',
         };
+    }
+
+    /** @return list<string> */
+    public static function values(): array
+    {
+        return array_map(fn (self $role) => $role->value, self::cases());
     }
 }

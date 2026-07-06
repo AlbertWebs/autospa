@@ -24,7 +24,7 @@ class ProductCreatePageTest extends TestCase
 
     public function test_inventory_manager_can_view_product_create_page(): void
     {
-        $user = $this->makeUserWithRole(RoleSlug::InventoryManager);
+        $user = $this->makeUserWithRole(RoleSlug::Manager);
 
         $response = $this->actingAs($user)->get(route('products.create'));
 

@@ -7,23 +7,9 @@
 @endphp
 
 <x-layouts.app>
-    <x-slot name="header">
-        <span class="hidden sm:inline">Booking #{{ $booking->id }}</span>
-    </x-slot>
+    <x-slot name="header"><span class="hidden sm:inline">Operations</span>    </x-slot>
 
-    {{-- Page header --}}
-    <header class="asp-page-header">
-        <div>
-            <p class="asp-page-eyebrow">Operations · Booking</p>
-            <h1 class="asp-page-title">{{ $booking->customer?->full_name ?? 'Walk-in' }}</h1>
-            <p class="asp-page-subtitle">
-                {{ $booking->type->label() }}
-                @if ($booking->vehicle)
-                    · {{ $booking->vehicle->registration_number }}
-                @endif
-            </p>
-        </div>
-        <div class="flex flex-wrap items-center gap-2">
+    <x-ui.section-header eyebrow="Operations">
             <a href="{{ route('bookings.index') }}" class="asp-btn asp-btn-secondary">
                 <span class="material-symbols-outlined text-lg">arrow_back</span>
                 Back
@@ -51,8 +37,7 @@
                     Delete
                 </button>
             </form>
-        </div>
-    </header>
+    </x-ui.section-header>
 
     {{-- Hero: schedule + status --}}
     <div class="asp-detail-hero">

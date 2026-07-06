@@ -1,7 +1,7 @@
 <x-ui.index-page
     eyebrow="Settings"
     title="Roles"
-    subtitle="Define what team members can access in the system."
+    subtitle="Admin and Supervisor roles control access across the system."
 >
     <x-ui.data-table
         :empty="$roles->isEmpty()"

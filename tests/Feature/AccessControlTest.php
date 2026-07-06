@@ -41,36 +41,33 @@ class AccessControlTest extends TestCase
         $response->assertSee('Point of Sale');
     }
 
-    public function test_cashier_cannot_access_user_management_settings(): void
+    public function test_user_without_roles_cannot_access_settings(): void
     {
-        $user = $this->makeUserWithRole(RoleSlug::Cashier);
+        $user = User::factory()->create([
+            'branch_id' => Branch::query()->firstOrFail()->id,
+            'email_verified_at' => now(),
+        ]);
 
         $response = $this->actingAs($user)->get(route('settings.users.index'));
 
         $response->assertForbidden();
     }
 
-    public function test_inventory_manager_cannot_access_pos(): void
+    public function test_supervisor_can_access_staff_module(): void
     {
-        $user = $this->makeUserWithRole(RoleSlug::InventoryManager);
-
-        $response = $this->actingAs($user)->get(route('pos.index'));
-
-        $response->assertForbidden();
-    }
-
-    public function test_cashier_cannot_access_staff_module(): void
-    {
-        $user = $this->makeUserWithRole(RoleSlug::Cashier);
+        $user = $this->makeUserWithRole(RoleSlug::Manager);
 
         $response = $this->actingAs($user)->get(route('employees.index'));
 
-        $response->assertForbidden();
+        $response->assertOk();
     }
 
     public function test_denied_access_shows_reasonable_message(): void
     {
-        $user = $this->makeUserWithRole(RoleSlug::InventoryManager);
+        $user = User::factory()->create([
+            'branch_id' => Branch::query()->firstOrFail()->id,
+            'email_verified_at' => now(),
+        ]);
 
         $response = $this->actingAs($user)->get(route('employees.index'));
 
@@ -88,7 +85,7 @@ class AccessControlTest extends TestCase
             'branch_id' => $branch->id,
             'email_verified_at' => now(),
         ]);
-        $target->roles()->attach(Role::query()->where('slug', RoleSlug::Cashier->value)->firstOrFail());
+        $target->roles()->attach(Role::query()->where('slug', RoleSlug::Manager->value)->firstOrFail());
 
         $response = $this->actingAs($manager)->delete(route('settings.users.destroy', $target));
 

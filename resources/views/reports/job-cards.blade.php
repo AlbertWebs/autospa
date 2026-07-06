@@ -10,7 +10,9 @@
 @endphp
 
 <x-layouts.app>
-    <x-slot name="header"><h1 class="text-2xl font-bold text-slate-900 dark:text-white">Job Cards Report</h1></x-slot>
+    <x-slot name="header"><span class="hidden sm:inline">Insights</span></x-slot>
+
+    <x-ui.section-header eyebrow="Insights" />
 
     <form method="GET" class="mb-6 flex flex-wrap items-end gap-3">
         <x-ui.form-field label="Report Date" for="report_date">
