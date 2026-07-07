@@ -201,7 +201,7 @@ return [
                 ],
                 [
                     'heading' => 'Performance & commissions',
-                    'body' => 'Review productivity metrics and commission calculations for incentivized roles. Commission rules are configured under Settings → Company.',
+                    'body' => 'Review productivity metrics. Attendees earn per-wash commission; supervisors are on salary. Commission rules are configured under Settings → Company.',
                 ],
             ],
         ],

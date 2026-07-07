@@ -22,11 +22,12 @@ class BookingController extends Controller
 
     public function index(Request $request): View
     {
-        $query = Booking::query()->with(['customer', 'vehicle'])->latest('scheduled_at');
+        $date = $request->date('date') ?? today();
 
-        if ($request->filled('date')) {
-            $query->whereDate('scheduled_at', $request->date('date'));
-        }
+        $query = Booking::query()
+            ->with(['customer', 'vehicle'])
+            ->whereDate('scheduled_at', $date)
+            ->latest('scheduled_at');
 
         if ($request->filled('status')) {
             $status = BookingStatus::tryFrom($request->string('status')->toString());
@@ -46,8 +47,9 @@ class BookingController extends Controller
 
         return view('bookings.index', [
             'bookings' => $query->paginate(15)->withQueryString(),
+            'selectedDate' => $date,
             'filters' => [
-                'date' => $request->input('date'),
+                'date' => $date->toDateString(),
                 'status' => $request->input('status'),
                 'type' => $request->input('type'),
             ],
@@ -127,6 +129,19 @@ class BookingController extends Controller
             ->with('success', 'Booking deleted.');
     }
 
+    public function markDone(Booking $booking): RedirectResponse
+    {
+        if (! $booking->canMarkAsDone()) {
+            return redirect()->back()
+                ->with('error', 'This booking cannot be marked as done.');
+        }
+
+        $booking->update(['status' => BookingStatus::Completed]);
+
+        return redirect()->back()
+            ->with('success', 'Booking marked as done.');
+    }
+
     public function calendar(Request $request): View
     {
         $month = (int) $request->input('month', now()->month);
@@ -175,23 +190,40 @@ class BookingController extends Controller
         ]);
     }
 
-    public function walkIns(): RedirectResponse
+    public function walkIns(Request $request): RedirectResponse
     {
-        return redirect()->route('bookings.index', ['type' => BookingType::WalkIn->value]);
+        return redirect()->route('bookings.index', $this->indexRedirectParams($request, [
+            'type' => BookingType::WalkIn->value,
+        ]));
     }
 
-    public function pending(): RedirectResponse
+    public function pending(Request $request): RedirectResponse
     {
-        return redirect()->route('bookings.index', ['status' => BookingStatus::Pending->value]);
+        return redirect()->route('bookings.index', $this->indexRedirectParams($request, [
+            'status' => BookingStatus::Pending->value,
+        ]));
     }
 
-    public function completed(): RedirectResponse
+    public function completed(Request $request): RedirectResponse
     {
-        return redirect()->route('bookings.index', ['status' => BookingStatus::Completed->value]);
+        return redirect()->route('bookings.index', $this->indexRedirectParams($request, [
+            'status' => BookingStatus::Completed->value,
+        ]));
     }
 
-    public function cancelled(): RedirectResponse
+    public function cancelled(Request $request): RedirectResponse
     {
-        return redirect()->route('bookings.index', ['status' => BookingStatus::Cancelled->value]);
+        return redirect()->route('bookings.index', $this->indexRedirectParams($request, [
+            'status' => BookingStatus::Cancelled->value,
+        ]));
+    }
+
+    /** @param  array<string, string>  $params */
+    protected function indexRedirectParams(Request $request, array $params = []): array
+    {
+        return array_filter([
+            'date' => $request->date('date')?->toDateString() ?? today()->toDateString(),
+            ...$params,
+        ]);
     }
 }

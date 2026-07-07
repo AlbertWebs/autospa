@@ -22,7 +22,7 @@ class CoreSeeder extends Seeder
             ['group' => 'sms', 'key' => 'sender_id', 'value' => 'AUTOSPA'],
             ['group' => 'commission', 'key' => 'enabled', 'value' => 'false'],
             ['group' => 'commission', 'key' => 'default_rate', 'value' => '0.30'],
-            ['group' => 'commission', 'key' => 'trigger', 'value' => 'pos_checkout'],
+            ['group' => 'commission', 'key' => 'trigger', 'value' => 'job_completed'],
             ['group' => 'loyalty', 'key' => 'enabled', 'value' => 'true'],
             ['group' => 'loyalty', 'key' => 'washes_before_free', 'value' => '10'],
             ['group' => 'attendance', 'key' => 'enabled', 'value' => 'false'],

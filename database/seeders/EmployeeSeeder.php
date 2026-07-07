@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\EmployeeType;
 use App\Enums\RoleSlug;
 use App\Models\Employee;
 use App\Models\User;
@@ -29,6 +30,7 @@ class EmployeeSeeder extends Seeder
                         'phone' => $user->phone,
                         'email' => $user->email,
                         'position' => $user->roles->first()?->name,
+                        'employee_type' => EmployeeType::Supervisor,
                         'hire_date' => now()->toDateString(),
                         'is_active' => true,
                     ],

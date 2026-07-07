@@ -11,10 +11,40 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Product extends Model
 {
     use BelongsToBranch, HasFactory, HasUuid, SoftDeletes;
+
+    protected static function booted(): void
+    {
+        static::creating(function (Product $product) {
+            if (blank($product->sku)) {
+                $product->sku = static::generateSku($product->branch_id);
+            }
+        });
+    }
+
+    public static function generateSku(?int $branchId = null): string
+    {
+        $branchId ??= session('current_branch_id');
+
+        $query = static::withTrashed()->where('sku', 'like', 'SKU-%');
+
+        if ($branchId) {
+            $query->where('branch_id', $branchId);
+        }
+
+        $max = $query
+            ->pluck('sku')
+            ->map(fn (string $sku) => (int) Str::after($sku, 'SKU-'))
+            ->max();
+
+        $next = ($max ?? 0) + 1;
+
+        return 'SKU-'.str_pad((string) $next, 4, '0', STR_PAD_LEFT);
+    }
 
     protected $fillable = [
         'uuid',

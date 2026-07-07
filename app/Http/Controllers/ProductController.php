@@ -31,6 +31,7 @@ class ProductController extends Controller
     {
         return view('products.create', [
             'suppliers' => Supplier::query()->where('is_active', true)->orderBy('name')->get(),
+            'nextSku' => Product::generateSku(),
         ]);
     }
 

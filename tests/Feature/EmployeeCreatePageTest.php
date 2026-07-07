@@ -29,7 +29,8 @@ class EmployeeCreatePageTest extends TestCase
         $response = $this->actingAs($user)->get(route('employees.create'));
 
         $response->assertOk();
-        $response->assertSee('Add Employee');
+        $response->assertSee('Employee Type');
+        $response->assertSee('Create Employee');
     }
 
     protected function makeUserWithRole(RoleSlug $roleSlug): User

@@ -66,8 +66,8 @@ class EmployeeNumberGenerationTest extends TestCase
         $expected = Employee::generateEmployeeNumber();
 
         $response = $this->actingAs($user)->post(route('employees.store'), [
+            'employee_type' => 'attendee',
             'full_name' => 'New Hire',
-            'position' => 'Technician',
             'is_active' => true,
         ]);
 

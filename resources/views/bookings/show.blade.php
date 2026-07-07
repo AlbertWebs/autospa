@@ -14,6 +14,15 @@
                 <span class="material-symbols-outlined text-lg">arrow_back</span>
                 Back
             </a>
+            @if ($booking->canMarkAsDone() && app(\App\Support\RouteAccess::class)->allows(auth()->user(), route('bookings.mark-done', $booking), 'POST'))
+                <form method="POST" action="{{ route('bookings.mark-done', $booking) }}">
+                    @csrf
+                    <button type="submit" class="asp-btn asp-btn-primary">
+                        <span class="material-symbols-outlined text-lg">check_circle</span>
+                        Mark done
+                    </button>
+                </form>
+            @endif
             <a href="{{ route('bookings.edit', $booking) }}" class="asp-btn asp-btn-primary">
                 <span class="material-symbols-outlined text-lg">edit</span>
                 Edit

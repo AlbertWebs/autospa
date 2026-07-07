@@ -5,9 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\AssignsBranchId;
 use App\Http\Requests\StoreEmployeeRequest;
 use App\Http\Requests\UpdateEmployeeRequest;
+use App\Enums\JobCardStatus;
 use App\Models\Employee;
-use App\Models\User;
 use App\Support\AttendanceSettings;
+use App\Support\CommissionSettings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -18,14 +19,13 @@ class EmployeeController extends Controller
     public function index(): View
     {
         return view('employees.index', [
-            'employees' => Employee::query()->with('user')->latest()->paginate(15),
+            'employees' => Employee::query()->latest()->paginate(15),
         ]);
     }
 
     public function create(): View
     {
         return view('employees.create', [
-            'users' => User::query()->where('branch_id', session('current_branch_id'))->orderBy('name')->get(),
             'nextEmployeeNumber' => Employee::generateEmployeeNumber(),
         ]);
     }
@@ -40,14 +40,36 @@ class EmployeeController extends Controller
 
     public function show(Employee $employee): View
     {
-        $relations = ['user', 'commissions'];
+        $relations = [
+            'user',
+            'commissions' => fn ($query) => $query->latest('earned_on')->latest('id')->limit(8),
+            'assignedJobCards' => fn ($query) => $query
+                ->with(['customer', 'vehicle'])
+                ->latest()
+                ->limit(8),
+        ];
 
         if (AttendanceSettings::enabled()) {
-            $relations[] = 'attendance';
+            $relations['attendance'] = fn ($query) => $query->latest('date')->limit(8);
         }
 
+        $employee->load($relations);
+
         return view('employees.show', [
-            'employee' => $employee->load($relations),
+            'employee' => $employee,
+            'stats' => [
+                'active_jobs' => $employee->assignedJobCards()
+                    ->whereIn('status', [JobCardStatus::Open, JobCardStatus::InProgress])
+                    ->count(),
+                'completed_jobs' => $employee->assignedJobCards()
+                    ->where('status', JobCardStatus::Completed)
+                    ->count(),
+                'commission_earned' => (float) $employee->commissions()->sum('amount'),
+                'commission_pending' => (float) $employee->commissions()->where('status', 'pending')->sum('amount'),
+            ],
+            'attendanceEnabled' => AttendanceSettings::enabled(),
+            'commissionsEnabled' => CommissionSettings::enabled(),
+            'commissionRatePercent' => CommissionSettings::defaultRate() * 100,
         ]);
     }
 
@@ -55,7 +77,6 @@ class EmployeeController extends Controller
     {
         return view('employees.edit', [
             'employee' => $employee,
-            'users' => User::query()->where('branch_id', session('current_branch_id'))->orderBy('name')->get(),
         ]);
     }
 

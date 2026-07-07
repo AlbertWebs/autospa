@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\ActivityLog;
 use App\Models\Booking;
+use App\Models\Commission;
 use App\Models\Employee;
 use App\Models\Invoice;
 use App\Models\JobCard;
@@ -12,6 +13,8 @@ use App\Enums\BookingStatus;
 use App\Enums\InvoiceStatus;
 use App\Enums\JobCardStatus;
 use App\Enums\VehicleStatus;
+use App\Support\CommissionSettings;
+
 use Illuminate\Support\Collection;
 
 class DashboardService
@@ -57,6 +60,36 @@ class DashboardService
                 ->where('branch_id', $branchId)
                 ->whereColumn('quantity_on_hand', '<=', 'minimum_level')
                 ->count(),
+            ...$this->commissionStats($branchId, $today),
+        ];
+    }
+
+    protected function commissionStats(int $branchId, string $today): array
+    {
+        if (! CommissionSettings::enabled()) {
+            return [
+                'commissions_enabled' => false,
+                'today_commissions' => 0,
+                'today_commissions_pending' => 0,
+                'today_washers' => 0,
+            ];
+        }
+
+        $commissionQuery = Commission::query()
+            ->where('branch_id', $branchId)
+            ->whereDate('earned_on', $today);
+
+        return [
+            'commissions_enabled' => true,
+            'today_commissions' => (float) (clone $commissionQuery)->sum('amount'),
+            'today_commissions_pending' => (float) (clone $commissionQuery)->where('status', 'pending')->sum('amount'),
+            'today_washers' => (int) JobCard::query()
+                ->where('branch_id', $branchId)
+                ->where('status', JobCardStatus::Completed)
+                ->whereDate('completed_at', $today)
+                ->whereNotNull('assigned_to')
+                ->distinct('assigned_to')
+                ->count('assigned_to'),
         ];
     }
 
@@ -174,6 +207,10 @@ class DashboardService
             'vehicles_ready' => 0,
             'pending_payments' => 0,
             'low_stock_count' => 0,
+            'commissions_enabled' => false,
+            'today_commissions' => 0,
+            'today_commissions_pending' => 0,
+            'today_washers' => 0,
         ];
     }
 }

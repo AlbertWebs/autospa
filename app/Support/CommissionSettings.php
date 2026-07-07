@@ -27,7 +27,7 @@ class CommissionSettings
 
     public static function trigger(): string
     {
-        $trigger = Setting::getValue('commission', 'trigger', self::TRIGGER_POS_CHECKOUT);
+        $trigger = Setting::getValue('commission', 'trigger', self::TRIGGER_JOB_COMPLETED);
 
         return in_array($trigger, [
             self::TRIGGER_JOB_COMPLETED,
@@ -50,8 +50,8 @@ class CommissionSettings
     public static function triggerOptions(): array
     {
         return [
-            self::TRIGGER_POS_CHECKOUT => self::triggerLabel(self::TRIGGER_POS_CHECKOUT),
             self::TRIGGER_JOB_COMPLETED => self::triggerLabel(self::TRIGGER_JOB_COMPLETED),
+            self::TRIGGER_POS_CHECKOUT => self::triggerLabel(self::TRIGGER_POS_CHECKOUT),
             self::TRIGGER_BOTH => self::triggerLabel(self::TRIGGER_BOTH),
         ];
     }

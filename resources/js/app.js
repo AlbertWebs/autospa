@@ -733,6 +733,8 @@ document.addEventListener('alpine:init', () => {
         customerStoreUrl: config.customerStoreUrl ?? '/customers',
         vehicleStoreUrl: config.vehicleStoreUrl ?? '/vehicles',
         successMessage: config.successMessage ?? 'Job card created.',
+        services: config.services ?? [],
+        selectedServiceIds: (config.selectedServiceIds ?? []).map((id) => Number(id)),
         showCustomerModal: false,
         customerSaving: false,
         customerErrors: {},
@@ -771,6 +773,47 @@ document.addEventListener('alpine:init', () => {
                 }
             }
             return label;
+        },
+
+        get selectedServices() {
+            return this.services.filter((service) => this.selectedServiceIds.includes(Number(service.id)));
+        },
+
+        get serviceTotal() {
+            return this.selectedServices.reduce((sum, service) => sum + Number(service.price || 0), 0);
+        },
+
+        get selectedCustomerName() {
+            const customer = this.customers.find(
+                (entry) => String(entry.id) === String(this.customerId),
+            );
+
+            return customer?.full_name ?? '';
+        },
+
+        get selectedVehicleLabel() {
+            const vehicle = this.vehicles.find(
+                (entry) => String(entry.id) === String(this.vehicleId),
+            );
+
+            return vehicle ? this.vehicleLabel(vehicle) : '';
+        },
+
+        toggleService(serviceId, checked) {
+            const id = Number(serviceId);
+
+            if (checked) {
+                if (!this.selectedServiceIds.includes(id)) {
+                    this.selectedServiceIds.push(id);
+                }
+                return;
+            }
+
+            this.selectedServiceIds = this.selectedServiceIds.filter((value) => value !== id);
+        },
+
+        formatMoney(amount) {
+            return `KES ${Number(amount || 0).toLocaleString('en-KE', { maximumFractionDigits: 0 })}`;
         },
 
         init() {
@@ -1329,7 +1372,9 @@ document.addEventListener('alpine:init', () => {
         cart: [],
         customerId: config.jobCardCart?.customer_id
             ? String(config.jobCardCart.customer_id)
-            : (config.oldCustomerId ? String(config.oldCustomerId) : (config.defaultCustomerId ?? '')),
+            : (config.jobCardCart?.customer?.id
+                ? String(config.jobCardCart.customer.id)
+                : (config.oldCustomerId ? String(config.oldCustomerId) : String(config.defaultCustomerId ?? ''))),
         vehicleId: config.jobCardCart?.vehicle_id ? String(config.jobCardCart.vehicle_id) : '',
         jobCardId: config.jobCardCart?.job_card_id ? String(config.jobCardCart.job_card_id) : '',
         jobCardVehicleLabel: '',
@@ -1338,6 +1383,7 @@ document.addEventListener('alpine:init', () => {
         catalogTab: 'all',
         search: '',
         customers: config.customers ?? [],
+        initialCustomerIds: (config.initialCustomerIds ?? []).map(String),
         customerStoreUrl: config.customerStoreUrl ?? '/customers',
         stkPushUrl: config.stkPushUrl ?? '/pos/stk-push',
         services: config.services ?? [],
@@ -1400,6 +1446,14 @@ document.addEventListener('alpine:init', () => {
             });
 
             await this.loadOfflineCatalog();
+
+            if (config.jobCardCart) {
+                this.loadJobCardCart(config.jobCardCart);
+            }
+
+            if (this.customerId) {
+                this.syncCustomerSelect();
+            }
         },
 
         async loadOfflineCatalog() {
@@ -1471,8 +1525,13 @@ document.addEventListener('alpine:init', () => {
             }
 
             if (cartPayload.customer || cartPayload.customer_id) {
-                this.ensureCustomerOption(cartPayload.customer, cartPayload.vehicle);
-                this.customerId = String(cartPayload.customer?.id ?? cartPayload.customer_id);
+                const customer = cartPayload.customer ?? this.customers.find(
+                    (entry) => String(entry.id) === String(cartPayload.customer_id),
+                );
+
+                this.ensureCustomerOption(customer, cartPayload.vehicle, cartPayload.customer_id);
+                this.customerId = String(customer?.id ?? cartPayload.customer_id);
+                this.syncCustomerSelect();
             }
 
             if (cartPayload.vehicle_id) {
@@ -1488,16 +1547,47 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-        ensureCustomerOption(customer, vehicle) {
-            if (!customer?.id && !customer?.full_name) {
+        syncCustomerSelect() {
+            if (!this.customerId) {
+                return;
+            }
+
+            const selectedId = String(this.customerId);
+
+            this.$nextTick(() => {
+                const select = this.$root.querySelector('#pos_customer');
+
+                if (!select) {
+                    return;
+                }
+
+                const hasOption = Array.from(select.options).some(
+                    (option) => option.value === selectedId,
+                );
+
+                if (!hasOption) {
+                    return;
+                }
+
+                this.customerId = '';
+                this.$nextTick(() => {
+                    this.customerId = selectedId;
+                });
+            });
+        },
+
+        ensureCustomerOption(customer, vehicle, customerId = null) {
+            const resolvedId = customer?.id ?? customerId;
+
+            if (!resolvedId && !customer?.full_name) {
                 return;
             }
 
             const vehicleSummary = vehicle?.registration_number ?? null;
             const option = this.buildCustomerOption({
-                id: customer.id,
-                full_name: customer.full_name,
-                phone: customer.phone ?? '',
+                id: resolvedId,
+                full_name: customer?.full_name ?? `Customer #${resolvedId}`,
+                phone: customer?.phone ?? '',
                 vehicle_summary: vehicleSummary,
             });
 
@@ -1544,6 +1634,14 @@ document.addEventListener('alpine:init', () => {
             } catch {
                 // Ignore storage failures and just hide for this session.
             }
+        },
+
+        get dynamicCustomers() {
+            const known = new Set(this.initialCustomerIds);
+
+            return this.customers.filter(
+                (customer) => !known.has(String(customer.id)),
+            );
         },
 
         get filteredItems() {
@@ -1629,7 +1727,7 @@ document.addEventListener('alpine:init', () => {
             }
 
             return {
-                id: customer.id,
+                id: String(customer.id),
                 display_name: displayName,
                 phone: customer.phone ?? '',
                 vehicle_summary: vehicleSummary,
@@ -1718,6 +1816,7 @@ document.addEventListener('alpine:init', () => {
                     }));
                     this.sortCustomers();
                     this.customerId = clientRef(uuid);
+                    this.syncCustomerSelect();
                     this.showCustomerModal = false;
                     this.customerSaving = false;
                     Alpine.store('offline').refreshPending();
@@ -1753,6 +1852,7 @@ document.addEventListener('alpine:init', () => {
                 this.customers.push(this.buildCustomerOption(data.customer));
                 this.sortCustomers();
                 this.customerId = String(data.customer.id);
+                this.syncCustomerSelect();
                 this.showCustomerModal = false;
                 this.customerSaving = false;
                 Alpine.store('toast').show(data.message ?? 'Customer created.', 'success');
@@ -2085,6 +2185,113 @@ document.addEventListener('turbo:load', () => {
         Alpine.store('toast').show(meta.content, 'error');
         meta.remove();
     });
+
+    Alpine.data('commissionMpesaPayout', (config = {}) => ({
+        showOtpModal: false,
+        payoutToken: '',
+        otpSentTo: '',
+        payoutAmount: 0,
+        payoutEmployeeName: '',
+        otp: '',
+        debugOtp: '',
+        initiating: false,
+        confirming: false,
+        initiateUrl: config.initiateUrl ?? '',
+        confirmUrl: config.confirmUrl ?? '',
+        csrfToken: config.csrfToken ?? '',
+
+        formatMoney(amount) {
+            return `KES ${Number(amount ?? 0).toLocaleString('en-KE', { maximumFractionDigits: 0 })}`;
+        },
+
+        async startMpesaPayout(employeeId, date, employeeName, amount) {
+            if (this.initiating) {
+                return;
+            }
+
+            this.initiating = true;
+            this.payoutEmployeeName = employeeName;
+            this.payoutAmount = amount;
+
+            try {
+                const response = await fetch(this.initiateUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': this.csrfToken,
+                    },
+                    body: JSON.stringify({
+                        employee_id: employeeId,
+                        date,
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    Alpine.store('toast').show(data.message ?? 'Could not start M-Pesa payout.', 'error');
+                    return;
+                }
+
+                this.payoutToken = data.payout_token;
+                this.otpSentTo = data.otp_sent_to;
+                this.payoutAmount = data.amount ?? amount;
+                this.payoutEmployeeName = data.employee_name ?? employeeName;
+                this.otp = '';
+                this.debugOtp = data.debug_otp ?? '';
+                this.showOtpModal = true;
+                Alpine.store('toast').show(data.message ?? 'OTP sent to your phone.', 'success');
+            } catch {
+                Alpine.store('toast').show('Network error. Please try again.', 'error');
+            } finally {
+                this.initiating = false;
+            }
+        },
+
+        async confirmOtp() {
+            if (this.confirming || !this.payoutToken) {
+                return;
+            }
+
+            this.confirming = true;
+
+            try {
+                const response = await fetch(this.confirmUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': this.csrfToken,
+                    },
+                    body: JSON.stringify({
+                        payout_token: this.payoutToken,
+                        otp: this.otp,
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    Alpine.store('toast').show(data.message ?? 'Invalid OTP.', 'error');
+                    return;
+                }
+
+                Alpine.store('toast').show(data.message ?? 'Commission sent via M-Pesa.', 'success');
+                window.location.reload();
+            } catch {
+                Alpine.store('toast').show('Network error. Please try again.', 'error');
+            } finally {
+                this.confirming = false;
+            }
+        },
+
+        closeOtpModal() {
+            this.showOtpModal = false;
+            this.otp = '';
+            this.debugOtp = '';
+        },
+    }));
 });
 
 document.addEventListener('turbo:before-cache', () => {

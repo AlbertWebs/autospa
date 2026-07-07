@@ -44,12 +44,13 @@
 <div
     x-data="posCheckout({
         customers: @js($customersJson),
+        initialCustomerIds: @js($customersJson->pluck('id')->values()->all()),
         customerStoreUrl: @js(route('customers.store')),
         stkPushUrl: @js(route('pos.stk-push')),
         services: @js($servicesJson),
         products: @js($productsJson),
         paymentMethods: @js($paymentMethodsJson),
-        defaultCustomerId: @js(old('customer_id', $customers->first()?->id ?? '')),
+        defaultCustomerId: @js(old('customer_id', ($jobCardCart ?? [])['customer_id'] ?? (($jobCardCart ?? [])['customer']['id'] ?? null) ?? $customers->first()?->id ?? '')),
         oldCustomerId: @js(old('customer_id')),
         oldPaymentMethodId: @js(old('payment_method_id')),
         oldItems: @js(old('items', [])),
@@ -201,8 +202,14 @@
                         <div class="asp-field-addon">
                             <x-ui.select id="pos_customer" x-model="customerId" required>
                                 <option value="">Select customer…</option>
-                                <template x-for="customer in customers" :key="customer.id">
-                                    <option :value="customer.id" x-text="customer.option_label"></option>
+                                @foreach ($customersJson as $customer)
+                                    <option
+                                        value="{{ $customer['id'] }}"
+                                        @selected((string) old('customer_id', ($jobCardCart ?? [])['customer_id'] ?? '') === (string) $customer['id'])
+                                    >{{ $customer['option_label'] }}</option>
+                                @endforeach
+                                <template x-for="customer in dynamicCustomers" :key="'customer-' + customer.id">
+                                    <option :value="String(customer.id)" x-text="customer.option_label"></option>
                                 </template>
                             </x-ui.select>
                             <button type="button" class="asp-btn asp-btn-secondary shrink-0 !px-3" title="Create new customer" @click="openCustomerModal()">

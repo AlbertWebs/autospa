@@ -55,6 +55,12 @@
             :value="'KES ' . number_format($stats['pending_payments'], 0)" hint="Outstanding balance" />
         <x-ui.stat-card variant="stock" label="Low Stock" icon="inventory_2"
             :value="$stats['low_stock_count']" :hint="$stats['low_stock_count'] > 0 ? 'Needs reorder' : 'All healthy'" />
+        @if ($stats['commissions_enabled'] ?? false)
+            <x-ui.stat-card variant="payments" label="Today's Commissions" icon="savings"
+                :value="'KES ' . number_format($stats['today_commissions'], 0)" hint="KES {{ number_format($stats['today_commissions_pending'], 0) }} pending payout" />
+            <x-ui.stat-card variant="bookings" label="Washers Today" icon="groups"
+                :value="$stats['today_washers']" hint="Staff who completed washes" />
+        @endif
     </div>
 
     {{-- Chart + Quick actions --}}
@@ -81,6 +87,7 @@
                 <x-ui.quick-action href="{{ route('pos.index') }}" icon="point_of_sale" label="Open POS" description="Process a new sale" />
                 <x-ui.quick-action href="{{ route('bookings.walk-ins') }}" icon="directions_walk" label="New Walk-in" description="Register arrival" />
                 <x-ui.quick-action href="{{ route('vehicles.check-in') }}" icon="garage" label="Check In Vehicle" description="Start a job card" />
+                <x-ui.quick-action href="{{ route('commissions.index') }}" icon="savings" label="Daily Commissions" description="Pay washer commissions" />
                 <x-ui.quick-action href="{{ route('customers.create') }}" icon="person_add" label="Add Customer" description="New client profile" />
             </div>
         </x-ui.panel>

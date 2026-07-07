@@ -103,7 +103,7 @@ class JobCardLiveTest extends TestCase
     {
         $manager = $this->makeUserWithRole(RoleSlug::Manager);
         session(['current_branch_id' => $manager->branch_id]);
-        [$jobCard, , , $service] = $this->createJobCardFixtures($manager->branch_id, JobCardStatus::Completed, withService: true);
+        [$jobCard, $customer, , $service] = $this->createJobCardFixtures($manager->branch_id, JobCardStatus::Completed, withService: true);
 
         $response = $this->actingAs($manager)->get(route('pos.index', ['job_card' => $jobCard->id]));
 
@@ -112,6 +112,8 @@ class JobCardLiveTest extends TestCase
         $response->assertSee($service->name);
         $response->assertSee('Live Customer');
         $response->assertSee('KDL 456Z');
+        $response->assertSee('value="'.$customer->id.'"', false);
+        $response->assertSee('selected', false);
     }
 
     public function test_user_without_roles_cannot_access_live_page_or_update_live_status(): void

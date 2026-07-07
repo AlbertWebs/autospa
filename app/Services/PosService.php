@@ -15,6 +15,7 @@ use App\Models\Product;
 use App\Models\Receipt;
 use App\Models\Service;
 use App\Models\Scopes\BranchScope;
+use App\Support\CommissionSettings;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -22,6 +23,7 @@ class PosService
 {
     public function __construct(
         protected BranchService $branchService,
+        protected CommissionService $commissionService,
         protected IntegrationService $integrationService,
         protected VehicleSmsNotificationService $vehicleSmsNotificationService,
     ) {}
@@ -192,6 +194,13 @@ class PosService
             $this->vehicleSmsNotificationService->sendVehicleCollected(
                 $receipt->invoice->customer,
                 $receipt->invoice->vehicle
+            );
+        }
+
+        if ($receipt->invoice) {
+            $this->commissionService->recordForInvoice(
+                $receipt->invoice->loadMissing('jobCard'),
+                CommissionSettings::TRIGGER_POS_CHECKOUT,
             );
         }
 

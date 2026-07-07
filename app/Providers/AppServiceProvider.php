@@ -2,7 +2,12 @@
 
 namespace App\Providers;
 
+use App\Enums\ActivityEvent;
+use App\Observers\ModelActivityObserver;
+use App\Services\ActivityLogService;
 use App\Support\EmailSettings;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
@@ -15,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(ActivityLogService::class);
     }
 
     /**
@@ -24,6 +29,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Http::globalOptions($this->httpClientOptions());
+
+        $this->registerActivityLogging();
 
         Event::listen(MessageSending::class, function (MessageSending $event): bool {
             if (app()->bound('integration_test_bypass_email')) {
@@ -60,5 +67,58 @@ class AppServiceProvider extends ServiceProvider
         }
 
         return ['verify' => true];
+    }
+
+    protected function registerActivityLogging(): void
+    {
+        if (! config('activity_log.enabled', true)) {
+            return;
+        }
+
+        $observer = $this->app->make(ModelActivityObserver::class);
+
+        foreach (config('activity_log.observed_models', []) as $modelClass) {
+            $modelClass::observe($observer);
+        }
+
+        $activityLog = $this->app->make(ActivityLogService::class);
+
+        Event::listen(Login::class, function (Login $event) use ($activityLog): void {
+            $user = $event->user;
+
+            if (! $user instanceof \App\Models\User) {
+                return;
+            }
+
+            $activityLog->record(
+                ActivityEvent::AuthLogin->value,
+                "{$user->name} signed in",
+                $user,
+                [
+                    'guard' => $event->guard,
+                ],
+                $user->id,
+                $user->branch_id,
+            );
+        });
+
+        Event::listen(Logout::class, function (Logout $event) use ($activityLog): void {
+            $user = $event->user;
+
+            if (! $user instanceof \App\Models\User) {
+                return;
+            }
+
+            $activityLog->record(
+                ActivityEvent::AuthLogout->value,
+                "{$user->name} signed out",
+                $user,
+                [
+                    'guard' => $event->guard,
+                ],
+                $user->id,
+                $user->branch_id,
+            );
+        });
     }
 }

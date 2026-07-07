@@ -41,6 +41,7 @@ trait SyncsJobCardServices
     protected function availableServices()
     {
         return Service::query()
+            ->with('category')
             ->where('branch_id', session('current_branch_id'))
             ->where('is_active', true)
             ->orderBy('name')

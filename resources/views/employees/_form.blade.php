@@ -1,14 +1,24 @@
-@php $employee = $employee ?? null; @endphp
+@php
+    use App\Enums\EmployeeType;
 
-<x-ui.form-section title="Employee Information" description="Basic details, contact information, and employment data.">
-    <div class="asp-form-grid">
-        <x-ui.form-field label="Linked User" for="user_id" name="user_id">
-            <x-ui.select id="user_id" name="user_id">
-                <option value="">None</option>
-                @foreach ($users as $user)
-                    <option value="{{ $user->id }}" @selected(old('user_id', $employee->user_id ?? '') == $user->id)>{{ $user->name }}</option>
+    $employee = $employee ?? null;
+    $selectedType = old('employee_type', $employee->employee_type?->value ?? EmployeeType::Attendee->value);
+@endphp
+
+<x-ui.form-section title="Employee Information" description="Choose the staff type, then add contact and pay details.">
+    <div class="asp-form-grid" x-data="{ employeeType: @js($selectedType) }">
+        <x-ui.form-field label="Employee Type" for="employee_type" name="employee_type" :required="true" :col-span="2">
+            <x-ui.select id="employee_type" name="employee_type" x-model="employeeType" required>
+                @foreach (EmployeeType::options() as $value => $label)
+                    <option value="{{ $value }}" @selected($selectedType === $value)>{{ $label }}</option>
                 @endforeach
             </x-ui.select>
+            <p class="asp-field-hint" x-show="employeeType === 'supervisor'" x-cloak>
+                Supervisors receive a fixed salary.
+            </p>
+            <p class="asp-field-hint" x-show="employeeType === 'attendee'" x-cloak>
+                Attendees wash vehicles and are paid commission per job.
+            </p>
         </x-ui.form-field>
 
         <x-ui.form-field label="Employee Number" for="employee_number">
@@ -25,11 +35,7 @@
             <x-ui.input id="full_name" name="full_name" :value="old('full_name', $employee->full_name ?? '')" required />
         </x-ui.form-field>
 
-        <x-ui.form-field label="Position" for="position" name="position">
-            <x-ui.input id="position" name="position" :value="old('position', $employee->position ?? '')" />
-        </x-ui.form-field>
-
-        <x-ui.form-field label="Phone" for="phone" name="phone">
+        <x-ui.form-field label="Phone" for="phone" name="phone" hint="Required for M-Pesa commission payouts.">
             <x-ui.input id="phone" name="phone" type="tel" :value="old('phone', $employee->phone ?? '')" />
         </x-ui.form-field>
 
@@ -38,7 +44,19 @@
         </x-ui.form-field>
 
         <x-ui.form-field label="Base Salary" for="base_salary" name="base_salary">
-            <x-ui.input id="base_salary" name="base_salary" type="number" step="0.01" :value="old('base_salary', $employee->base_salary ?? '')" />
+            <x-ui.input
+                id="base_salary"
+                name="base_salary"
+                type="number"
+                step="0.01"
+                min="0"
+                :value="old('base_salary', $employee->base_salary ?? '')"
+                x-bind:required="employeeType === 'supervisor'"
+                x-bind:disabled="employeeType === 'attendee'"
+                x-bind:placeholder="employeeType === 'attendee' ? 'Commission only' : '0.00'"
+            />
+            <p class="asp-field-hint" x-show="employeeType === 'supervisor'" x-cloak>Monthly salary for this supervisor.</p>
+            <p class="asp-field-hint" x-show="employeeType === 'attendee'" x-cloak>Leave blank — attendees are paid commission only.</p>
         </x-ui.form-field>
 
         <x-ui.form-field label="Hire Date" for="hire_date" name="hire_date">

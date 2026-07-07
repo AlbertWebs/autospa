@@ -13,7 +13,9 @@ use App\Models\Customer;
 use App\Models\Employee;
 use App\Models\JobCard;
 use App\Models\Vehicle;
+use App\Services\CommissionService;
 use App\Services\PosService;
+use App\Support\CommissionSettings;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -90,7 +92,12 @@ class MobileJobCardController extends Controller
         return view('mobile.job-cards.create', [
             'customers' => Customer::query()->orderBy('full_name')->get(),
             'vehicles' => Vehicle::query()->with('customer')->get(),
-            'bookings' => Booking::query()->with('customer')->latest()->limit(50)->get(),
+            'bookings' => Booking::query()
+                ->linkableToJobCard()
+                ->with('customer')
+                ->latest('scheduled_at')
+                ->limit(50)
+                ->get(),
             'employees' => $this->assignableEmployees(),
             'services' => $this->availableServices(),
         ]);
@@ -116,10 +123,14 @@ class MobileJobCardController extends Controller
             ->with('success', 'Job card created.');
     }
 
-    public function updateLiveStatus(UpdateJobCardRequest $request, JobCard $jobCard): RedirectResponse|JsonResponse
+    public function updateLiveStatus(UpdateJobCardRequest $request, JobCard $jobCard, CommissionService $commissionService): RedirectResponse|JsonResponse
     {
         $jobCard->update($this->statusAwarePayload($jobCard, $request->validated()));
         $jobCard->refresh();
+
+        if ($jobCard->status === JobCardStatus::Completed) {
+            $commissionService->recordForJobCard($jobCard, CommissionSettings::TRIGGER_JOB_COMPLETED);
+        }
 
         if ($request->wantsJson()) {
             return response()->json([

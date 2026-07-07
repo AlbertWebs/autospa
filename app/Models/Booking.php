@@ -6,6 +6,7 @@ use App\Enums\BookingStatus;
 use App\Enums\BookingType;
 use App\Models\Concerns\BelongsToBranch;
 use App\Models\Concerns\HasUuid;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -70,5 +71,43 @@ class Booking extends Model
     public function jobCard(): HasOne
     {
         return $this->hasOne(JobCard::class);
+    }
+
+    public function scopeLinkableToJobCard(Builder $query, ?int $includeId = null): void
+    {
+        $query->where(function (Builder $query) use ($includeId) {
+            $query->where(function (Builder $query) {
+                $query->whereNotIn('status', [
+                    BookingStatus::Completed,
+                    BookingStatus::Cancelled,
+                ])->whereDoesntHave('jobCard');
+            });
+
+            if ($includeId !== null) {
+                $query->orWhere('id', $includeId);
+            }
+        });
+    }
+
+    public function isScheduledDatePast(): bool
+    {
+        if (! $this->scheduled_at) {
+            return false;
+        }
+
+        return $this->scheduled_at->toDateString() < now()->toDateString();
+    }
+
+    public function canMarkAsDone(): bool
+    {
+        if (! $this->isScheduledDatePast()) {
+            return false;
+        }
+
+        return in_array($this->status, [
+            BookingStatus::Pending,
+            BookingStatus::Confirmed,
+            BookingStatus::InProgress,
+        ], true);
     }
 }

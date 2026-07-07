@@ -12,6 +12,14 @@
         'model' => $v->model,
         'color' => $v->color,
     ])->values();
+
+    $servicesJson = $services->map(fn ($service) => [
+        'id' => $service->id,
+        'name' => $service->name,
+        'price' => (float) $service->price,
+        'duration_minutes' => $service->duration_minutes,
+        'category' => $service->category?->name,
+    ])->values();
 @endphp
 
 <x-layouts.app>
@@ -22,26 +30,20 @@
     <x-ui.section-header eyebrow="Operations" />
 
     <div
-        class="max-w-6xl"
+        class="max-w-7xl"
         x-data="jobCardCreateForm({
             customerId: @js(old('customer_id', '')),
             vehicleId: @js(old('vehicle_id', '')),
             customers: @js($customersJson),
             vehicles: @js($vehiclesJson),
+            services: @js($servicesJson),
+            selectedServiceIds: @js(array_map('intval', old('service_ids', []))),
             customerStoreUrl: @js(route('customers.store')),
             vehicleStoreUrl: @js(route('vehicles.store')),
             successMessage: 'Job card created.',
         })"
     >
         <div class="asp-panel">
-            <div class="asp-panel-header">
-                <div>
-                    <h2 class="asp-panel-title">Job Card Details</h2>
-                    <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">All required fields are marked with an asterisk.</p>
-                </div>
-                <span class="material-symbols-outlined text-brand-primary-dim dark:text-brand-primary">garage</span>
-            </div>
-
             <div class="asp-panel-body">
                 <form
                     method="POST"
@@ -61,7 +63,7 @@
                         <p>Please fix the highlighted fields below and try again.</p>
                     </div>
 
-                    @include('job-cards._form', ['ajax' => true])
+                    @include('job-cards._form', ['ajax' => true, 'splitLayout' => true])
 
                     <x-ui.form-actions>
                         <button

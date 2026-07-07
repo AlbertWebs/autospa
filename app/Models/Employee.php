@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\EmployeeType;
 use App\Models\Concerns\BelongsToBranch;
 use App\Models\Concerns\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -46,6 +47,7 @@ class Employee extends Model
         'phone',
         'email',
         'position',
+        'employee_type',
         'base_salary',
         'hire_date',
         'is_active',
@@ -54,6 +56,7 @@ class Employee extends Model
     protected function casts(): array
     {
         return [
+            'employee_type' => EmployeeType::class,
             'base_salary' => 'decimal:2',
             'hire_date' => 'date',
             'is_active' => 'boolean',
@@ -89,14 +92,31 @@ class Employee extends Model
     {
         $query
             ->where('is_active', true)
+            ->where(function ($query) {
+                $query->where('employee_type', EmployeeType::Attendee)
+                    ->orWhereNull('employee_type');
+            })
             ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
             ->orderBy('full_name');
     }
 
+    public function isSupervisor(): bool
+    {
+        return $this->employee_type === EmployeeType::Supervisor;
+    }
+
+    public function isAttendee(): bool
+    {
+        return $this->employee_type === EmployeeType::Attendee;
+    }
+
+    public function typeLabel(): string
+    {
+        return $this->employee_type?->label() ?? 'Attendee';
+    }
+
     public function displayName(): string
     {
-        return $this->position
-            ? "{$this->full_name} ({$this->position})"
-            : $this->full_name;
+        return "{$this->full_name} ({$this->typeLabel()})";
     }
 }

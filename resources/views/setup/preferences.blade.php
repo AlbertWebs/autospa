@@ -18,7 +18,7 @@
 
                         <label class="setup-checkbox-row">
                             <input type="checkbox" name="commissions_enabled" value="1" @checked(old('commissions_enabled', $data['commissions_enabled'] ?? false))>
-                            <span>Enable supervisor commissions</span>
+                            <span>Enable attendee commission per wash</span>
                         </label>
 
                         <div class="setup-form-grid">
@@ -32,7 +32,7 @@
                                 <label for="commission_trigger">Commission trigger</label>
                                 <select id="commission_trigger" name="commission_trigger" class="auth-input setup-input-plain setup-select">
                                     @foreach ($commissionTriggerOptions as $value => $label)
-                                        <option value="{{ $value }}" @selected(old('commission_trigger', $data['commission_trigger'] ?? 'pos_checkout') === $value)>{{ $label }}</option>
+                                        <option value="{{ $value }}" @selected(old('commission_trigger', $data['commission_trigger'] ?? 'job_completed') === $value)>{{ $label }}</option>
                                     @endforeach
                                 </select>
                                 @error('commission_trigger')<p class="auth-error">{{ $message }}</p>@enderror

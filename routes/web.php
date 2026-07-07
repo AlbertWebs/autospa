@@ -130,6 +130,7 @@ Route::middleware(['installed', 'auth', 'verified', 'branch'])->group(function (
     });
 
     Route::middleware('permission:bookings.manage')->group(function () {
+        Route::post('bookings/{booking}/mark-done', [BookingController::class, 'markDone'])->name('bookings.mark-done')->whereNumber('booking');
         Route::resource('bookings', BookingController::class)->only(['create', 'store', 'edit', 'update', 'destroy'])->whereNumber('booking');
     });
     Route::middleware('permission:bookings.view')->group(function () {
@@ -199,7 +200,16 @@ Route::middleware(['installed', 'auth', 'verified', 'branch'])->group(function (
     });
     Route::middleware('permission:staff.view')->group(function () {
         Route::resource('employees', EmployeeController::class)->only(['index', 'show']);
-        Route::resource('commissions', CommissionController::class)->only(['index']);
+        Route::post('commissions/pay', [CommissionController::class, 'pay'])
+            ->middleware('permission:staff.manage')
+            ->name('commissions.pay');
+        Route::post('commissions/pay/mpesa/initiate', [CommissionController::class, 'initiateMpesaPay'])
+            ->middleware('permission:staff.manage')
+            ->name('commissions.pay.mpesa.initiate');
+        Route::post('commissions/pay/mpesa/confirm', [CommissionController::class, 'confirmMpesaPay'])
+            ->middleware('permission:staff.manage')
+            ->name('commissions.pay.mpesa.confirm');
+        Route::resource('commissions', CommissionController::class)->only(['index', 'show']);
         Route::resource('performance', PerformanceController::class)->only(['index']);
     });
     Route::middleware(['permission:staff.view', 'attendance.enabled'])->group(function () {

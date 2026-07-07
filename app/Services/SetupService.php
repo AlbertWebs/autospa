@@ -130,7 +130,7 @@ class SetupService
         Setting::setValue(
             'commission',
             'trigger',
-            $preferences['commission_trigger'] ?? CommissionSettings::TRIGGER_POS_CHECKOUT,
+            $preferences['commission_trigger'] ?? CommissionSettings::TRIGGER_JOB_COMPLETED,
             null,
             'string'
         );

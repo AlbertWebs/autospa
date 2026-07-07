@@ -12,7 +12,9 @@ use App\Models\Customer;
 use App\Models\Employee;
 use App\Models\JobCard;
 use App\Models\Vehicle;
+use App\Services\CommissionService;
 use App\Services\PosService;
+use App\Support\CommissionSettings;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -47,7 +49,12 @@ class JobCardController extends Controller
         return view('job-cards.create', [
             'customers' => Customer::query()->orderBy('full_name')->get(),
             'vehicles' => $vehicles,
-            'bookings' => Booking::query()->with('customer')->latest()->limit(50)->get(),
+            'bookings' => Booking::query()
+                ->linkableToJobCard()
+                ->with('customer')
+                ->latest('scheduled_at')
+                ->limit(50)
+                ->get(),
             'employees' => $this->assignableEmployees(),
             'services' => $this->availableServices(),
         ]);
@@ -88,20 +95,30 @@ class JobCardController extends Controller
             'jobCard' => $jobCard,
             'customers' => Customer::query()->orderBy('full_name')->get(),
             'vehicles' => $vehicles,
-            'bookings' => Booking::query()->with('customer')->latest()->limit(50)->get(),
+            'bookings' => Booking::query()
+                ->linkableToJobCard($jobCard->booking_id)
+                ->with('customer')
+                ->latest('scheduled_at')
+                ->limit(50)
+                ->get(),
             'employees' => $this->assignableEmployees(),
             'services' => $this->availableServices(),
             'selectedServiceIds' => $jobCard->services()->pluck('service_id')->all(),
         ]);
     }
 
-    public function update(UpdateJobCardRequest $request, JobCard $jobCard): RedirectResponse
+    public function update(UpdateJobCardRequest $request, JobCard $jobCard, CommissionService $commissionService): RedirectResponse
     {
         $validated = $request->validated();
         $serviceIds = $validated['service_ids'] ?? null;
         unset($validated['service_ids']);
 
         $jobCard->update($this->statusAwarePayload($jobCard, $validated));
+        $jobCard->refresh();
+
+        if ($jobCard->status === JobCardStatus::Completed) {
+            $commissionService->recordForJobCard($jobCard, CommissionSettings::TRIGGER_JOB_COMPLETED);
+        }
 
         if (is_array($serviceIds)) {
             $this->syncJobCardServices($jobCard, $serviceIds);
@@ -159,10 +176,14 @@ class JobCardController extends Controller
         ]);
     }
 
-    public function updateLiveStatus(UpdateJobCardRequest $request, JobCard $jobCard): RedirectResponse|JsonResponse
+    public function updateLiveStatus(UpdateJobCardRequest $request, JobCard $jobCard, CommissionService $commissionService): RedirectResponse|JsonResponse
     {
         $jobCard->update($this->statusAwarePayload($jobCard, $request->validated()));
         $jobCard->refresh();
+
+        if ($jobCard->status === JobCardStatus::Completed) {
+            $commissionService->recordForJobCard($jobCard, CommissionSettings::TRIGGER_JOB_COMPLETED);
+        }
 
         if ($request->wantsJson()) {
             return response()->json([

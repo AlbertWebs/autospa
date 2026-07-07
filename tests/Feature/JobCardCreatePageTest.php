@@ -2,7 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Enums\BookingStatus;
+use App\Enums\BookingType;
 use App\Enums\RoleSlug;
+use App\Models\Booking;
 use App\Models\Branch;
 use App\Models\Customer;
 use App\Models\JobCard;
@@ -34,8 +37,83 @@ class JobCardCreatePageTest extends TestCase
         $response = $this->actingAs($user)->get(route('job-cards.create'));
 
         $response->assertOk();
+        $response->assertSee('Vehicle & Customer');
         $response->assertSee('Create Job Card');
-        $response->assertSee('Services');
+    }
+
+    public function test_job_card_create_hides_booking_field_when_no_bookings_exist(): void
+    {
+        $user = $this->makeUserWithRole(RoleSlug::Manager);
+
+        $response = $this->actingAs($user)->get(route('job-cards.create'));
+
+        $response->assertOk();
+        $response->assertDontSee('name="booking_id"', false);
+        $response->assertDontSee('for="booking_id"', false);
+    }
+
+    public function test_job_card_create_excludes_completed_bookings_from_dropdown(): void
+    {
+        $user = $this->makeUserWithRole(RoleSlug::Manager);
+
+        $customer = Customer::factory()->create([
+            'branch_id' => $user->branch_id,
+            'full_name' => 'Completed Booking Customer',
+        ]);
+
+        Vehicle::create([
+            'branch_id' => $user->branch_id,
+            'customer_id' => $customer->id,
+            'registration_number' => 'KCE 555E',
+        ]);
+
+        $booking = Booking::create([
+            'branch_id' => $user->branch_id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => Vehicle::query()->where('registration_number', 'KCE 555E')->value('id'),
+            'type' => BookingType::Appointment,
+            'status' => BookingStatus::Completed,
+            'scheduled_at' => now()->subDay(),
+            'created_by' => $user->id,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('job-cards.create'));
+
+        $response->assertOk();
+        $response->assertDontSee('#'.$booking->id.': Completed Booking Customer');
+        $response->assertDontSee('name="booking_id"', false);
+    }
+
+    public function test_job_card_create_shows_open_bookings_in_dropdown(): void
+    {
+        $user = $this->makeUserWithRole(RoleSlug::Manager);
+
+        $customer = Customer::factory()->create([
+            'branch_id' => $user->branch_id,
+            'full_name' => 'Open Booking Customer',
+        ]);
+
+        $vehicle = Vehicle::create([
+            'branch_id' => $user->branch_id,
+            'customer_id' => $customer->id,
+            'registration_number' => 'KCF 666F',
+        ]);
+
+        $booking = Booking::create([
+            'branch_id' => $user->branch_id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'type' => BookingType::Appointment,
+            'status' => BookingStatus::Confirmed,
+            'scheduled_at' => now()->addDay(),
+            'created_by' => $user->id,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('job-cards.create'));
+
+        $response->assertOk();
+        $response->assertSee('#'.$booking->id.': Open Booking Customer');
+        $response->assertSee('name="booking_id"', false);
     }
 
     public function test_creating_a_job_card_requires_at_least_one_service(): void

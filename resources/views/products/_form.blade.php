@@ -11,8 +11,14 @@
             </x-ui.select>
         </x-ui.form-field>
 
-        <x-ui.form-field label="SKU" for="sku" name="sku" :required="true">
-            <x-ui.input id="sku" name="sku" :value="old('sku', $product->sku ?? '')" required />
+        <x-ui.form-field label="SKU" for="sku">
+            @if ($product)
+                <x-ui.input id="sku" :value="$product->sku" readonly disabled />
+                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Auto-generated and cannot be changed.</p>
+            @else
+                <x-ui.input id="sku" :value="$nextSku ?? ''" readonly disabled />
+                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Assigned automatically when you save.</p>
+            @endif
         </x-ui.form-field>
 
         <x-ui.form-field label="Product Name" for="name" name="name" :required="true">

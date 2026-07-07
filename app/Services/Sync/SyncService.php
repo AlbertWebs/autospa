@@ -2,6 +2,7 @@
 
 namespace App\Services\Sync;
 
+use App\Enums\ActivityEvent;
 use App\Enums\JobCardStatus;
 use App\Enums\PaymentMethodType;
 use App\Enums\VehicleStatus;
@@ -15,6 +16,7 @@ use App\Models\Service;
 use App\Models\SyncMutation;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Services\ActivityLogService;
 use App\Services\PosService;
 use App\Services\VehicleSmsNotificationService;
 use App\Support\RegistrationNumber;
@@ -28,6 +30,7 @@ class SyncService
     public function __construct(
         protected PosService $posService,
         protected VehicleSmsNotificationService $vehicleSmsNotificationService,
+        protected ActivityLogService $activityLogService,
     ) {}
 
     public function bootstrap(int $branchId): array
@@ -129,6 +132,19 @@ class SyncService
                     'result' => $result,
                     'applied_at' => now(),
                 ]);
+
+                $this->activityLogService->record(
+                    ActivityEvent::SyncMutationApplied->value,
+                    'Offline sync: '.str_replace('.', ' ', (string) $mutation['type']),
+                    null,
+                    [
+                        'mutation_id' => $mutationId,
+                        'type' => $mutation['type'],
+                        'result' => $result,
+                    ],
+                    $user->id,
+                    $branchId,
+                );
 
                 $this->mergeIdMapFromResult($idMap, $result);
 

@@ -3,7 +3,7 @@
     $smsNotificationsEnabled = $smsNotificationsEnabled ?? false;
     $commissionsEnabled = $commissionsEnabled ?? false;
     $commissionDefaultRatePercent = $commissionDefaultRatePercent ?? 0;
-    $commissionTrigger = $commissionTrigger ?? 'pos_checkout';
+    $commissionTrigger = $commissionTrigger ?? 'job_completed';
     $commissionTriggerOptions = $commissionTriggerOptions ?? [];
     $loyaltyEnabled = $loyaltyEnabled ?? true;
     $loyaltyWashesBeforeFree = $loyaltyWashesBeforeFree ?? 10;
@@ -57,7 +57,7 @@
     </div>
 </x-ui.form-section>
 
-<x-ui.form-section title="Commission Settings" description="Supervisors earn commission on each wash. Configure the rate and when it is earned.">
+<x-ui.form-section title="Washer Commission" description="Attendees (wash staff) earn commission on each wash. Supervisors are on fixed salary and are not included here.">
     <div class="asp-form-grid">
         <x-ui.form-field :col-span="2" name="commissions_enabled">
             <div class="asp-checkbox-group">
@@ -65,12 +65,12 @@
                     name="commissions_enabled"
                     :checked="old('commissions_enabled', $commissionsEnabled)"
                 >
-                    Enable supervisor commissions
+                    Enable attendee commission per wash
                 </x-ui.checkbox>
             </div>
         </x-ui.form-field>
 
-        <x-ui.form-field label="Default Commission Rate (%)" for="commission_default_rate" name="commission_default_rate">
+        <x-ui.form-field label="Commission Rate (%)" for="commission_default_rate" name="commission_default_rate" hint="Percentage of each wash paid to the assigned attendee.">
             <x-ui.input
                 id="commission_default_rate"
                 name="commission_default_rate"
@@ -82,7 +82,7 @@
             />
         </x-ui.form-field>
 
-        <x-ui.form-field label="Earn Commission" for="commission_trigger" name="commission_trigger">
+        <x-ui.form-field label="Earn Commission" for="commission_trigger" name="commission_trigger" hint="When attendee commission is calculated for a completed wash.">
             <x-ui.select id="commission_trigger" name="commission_trigger">
                 @foreach ($commissionTriggerOptions as $value => $label)
                     <option value="{{ $value }}" @selected(old('commission_trigger', $commissionTrigger) === $value)>{{ $label }}</option>

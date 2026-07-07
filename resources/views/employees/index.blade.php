@@ -14,7 +14,7 @@
         <x-slot name="header">
             <x-ui.th>Name</x-ui.th>
             <x-ui.th>Employee #</x-ui.th>
-            <x-ui.th>Position</x-ui.th>
+            <x-ui.th>Type</x-ui.th>
             <x-ui.th>Phone</x-ui.th>
             <x-ui.th>Status</x-ui.th>
             <x-ui.th align="right">Actions</x-ui.th>
@@ -24,7 +24,7 @@
             <tr class="asp-table-row">
                 <x-ui.td primary>{{ $employee->full_name }}</x-ui.td>
                 <x-ui.td mono>{{ $employee->employee_number ?? 'N/A' }}</x-ui.td>
-                <x-ui.td>{{ $employee->position ?? 'N/A' }}</x-ui.td>
+                <x-ui.td>{{ $employee->typeLabel() }}</x-ui.td>
                 <x-ui.td muted>{{ $employee->phone ?? 'N/A' }}</x-ui.td>
                 <x-ui.td>
                     @if ($employee->is_active)

@@ -29,7 +29,8 @@ class ProductCreatePageTest extends TestCase
         $response = $this->actingAs($user)->get(route('products.create'));
 
         $response->assertOk();
-        $response->assertSee('Add Product');
+        $response->assertSee('Create Product');
+        $response->assertSee('Assigned automatically when you save.');
     }
 
     protected function makeUserWithRole(RoleSlug $roleSlug): User

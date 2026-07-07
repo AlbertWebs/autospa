@@ -7,13 +7,16 @@ use App\Models\Commission;
 use App\Models\Customer;
 use App\Models\Employee;
 use App\Models\Invoice;
+use App\Models\InvoiceItem;
 use App\Models\JobCard;
+use App\Models\Payment;
 use App\Models\Product;
 use App\Models\StockMovement;
 use App\Models\Attendance;
 use App\Enums\BookingStatus;
 use App\Enums\InvoiceStatus;
 use App\Enums\JobCardStatus;
+use App\Enums\PaymentMethodType;
 use App\Services\StockMovementService;
 use App\Support\AttendanceSettings;
 use App\Support\CommissionSettings;
@@ -85,10 +88,12 @@ class ReportService
         $from = $from ?? now()->copy()->startOfMonth()->startOfDay();
         $to = $to ?? now()->copy()->endOfDay();
 
+        $breakdown = $this->revenueBreakdown($branchId, $from, $to);
+
         return [
             'from' => $from->toDateString(),
             'to' => $to->toDateString(),
-            'period' => $this->revenueForPeriod($branchId, $from, $to),
+            'period' => $breakdown['collected'],
             'today' => $this->revenueForPeriod($branchId, now()->startOfDay(), now()->endOfDay()),
             'this_week' => $this->revenueForPeriod($branchId, now()->startOfWeek(), now()->endOfWeek()),
             'this_month' => Invoice::query()
@@ -100,6 +105,7 @@ class ReportService
                 ->where('branch_id', $branchId)
                 ->whereIn('status', [InvoiceStatus::Issued, InvoiceStatus::PartiallyPaid])
                 ->sum('balance_due'),
+            ...$breakdown,
         ];
     }
 
@@ -535,5 +541,137 @@ class ReportService
             ->where('branch_id', $branchId)
             ->whereBetween('issued_at', [$start, $end])
             ->sum('paid_amount');
+    }
+
+    /** @return array<string, mixed> */
+    protected function revenueBreakdown(int $branchId, Carbon $from, Carbon $to): array
+    {
+        $periodInvoices = Invoice::query()
+            ->where('branch_id', $branchId)
+            ->whereBetween('issued_at', [$from, $to]);
+
+        $invoiceIds = (clone $periodInvoices)->pluck('id');
+
+        $billed = (float) (clone $periodInvoices)->sum('total_amount');
+        $collected = (float) (clone $periodInvoices)->sum('paid_amount');
+        $discounts = (float) (clone $periodInvoices)->sum('discount_amount');
+        $tax = (float) (clone $periodInvoices)->sum('tax_amount');
+        $outstandingFromPeriod = (float) (clone $periodInvoices)->sum('balance_due');
+        $invoiceCount = (int) (clone $periodInvoices)->count();
+
+        $paymentBreakdown = Payment::query()
+            ->where('branch_id', $branchId)
+            ->whereIn('invoice_id', $invoiceIds)
+            ->where('status', 'completed')
+            ->selectRaw('method, SUM(amount) as total, COUNT(*) as payment_count')
+            ->groupBy('method')
+            ->orderByDesc('total')
+            ->get()
+            ->map(function ($row) {
+                $methodValue = $row->method instanceof PaymentMethodType
+                    ? $row->method->value
+                    : (string) $row->method;
+
+                return [
+                    'method' => $methodValue,
+                    'label' => PaymentMethodType::tryFrom($methodValue)?->label() ?? ucfirst($methodValue),
+                    'total' => (float) $row->total,
+                    'count' => (int) $row->payment_count,
+                ];
+            })
+            ->values();
+
+        if ($paymentBreakdown->isEmpty() && $collected > 0) {
+            $paymentBreakdown = collect([[
+                'method' => 'recorded',
+                'label' => 'Recorded on invoices',
+                'total' => $collected,
+                'count' => $invoiceCount,
+            ]]);
+        }
+
+        $paymentTotal = (float) $paymentBreakdown->sum('total');
+        $maxPayment = max(1.0, (float) $paymentBreakdown->max('total') ?: 1);
+
+        $salesByType = InvoiceItem::query()
+            ->whereIn('invoice_id', $invoiceIds)
+            ->selectRaw('item_type, SUM(total) as total, SUM(quantity) as quantity, COUNT(*) as line_count')
+            ->groupBy('item_type')
+            ->get()
+            ->mapWithKeys(fn ($row) => [
+                $row->item_type => [
+                    'total' => (float) $row->total,
+                    'quantity' => (float) $row->quantity,
+                    'line_count' => (int) $row->line_count,
+                ],
+            ]);
+
+        $servicesRevenue = (float) ($salesByType->get('service')['total'] ?? 0);
+        $productsRevenue = (float) ($salesByType->get('product')['total'] ?? 0);
+        $salesTotal = $servicesRevenue + $productsRevenue;
+
+        $topServices = InvoiceItem::query()
+            ->whereIn('invoice_id', $invoiceIds)
+            ->where('item_type', 'service')
+            ->selectRaw('description, SUM(total) as total, SUM(quantity) as quantity')
+            ->groupBy('description')
+            ->orderByDesc('total')
+            ->limit(8)
+            ->get();
+
+        $topProducts = InvoiceItem::query()
+            ->whereIn('invoice_id', $invoiceIds)
+            ->where('item_type', 'product')
+            ->selectRaw('description, SUM(total) as total, SUM(quantity) as quantity')
+            ->groupBy('description')
+            ->orderByDesc('total')
+            ->limit(8)
+            ->get();
+
+        $dailyTrend = Invoice::query()
+            ->where('branch_id', $branchId)
+            ->whereBetween('issued_at', [$from, $to])
+            ->selectRaw('DATE(issued_at) as day, SUM(paid_amount) as collected, SUM(total_amount) as billed, COUNT(*) as invoices')
+            ->groupBy('day')
+            ->orderBy('day')
+            ->get()
+            ->map(fn ($row) => [
+                'day' => $row->day,
+                'label' => Carbon::parse($row->day)->format('M j'),
+                'collected' => (float) $row->collected,
+                'billed' => (float) $row->billed,
+                'invoices' => (int) $row->invoices,
+            ]);
+
+        $maxDailyCollected = max(1.0, (float) $dailyTrend->max('collected') ?: 1);
+
+        $recentInvoices = Invoice::query()
+            ->with(['customer'])
+            ->where('branch_id', $branchId)
+            ->whereBetween('issued_at', [$from, $to])
+            ->where('paid_amount', '>', 0)
+            ->latest('issued_at')
+            ->limit(10)
+            ->get();
+
+        return [
+            'billed' => $billed,
+            'collected' => $collected,
+            'discounts' => $discounts,
+            'tax' => $tax,
+            'outstanding_from_period' => $outstandingFromPeriod,
+            'invoice_count' => $invoiceCount,
+            'payment_breakdown' => $paymentBreakdown,
+            'payment_total' => $paymentTotal,
+            'max_payment' => $maxPayment,
+            'services_revenue' => $servicesRevenue,
+            'products_revenue' => $productsRevenue,
+            'sales_total' => $salesTotal,
+            'top_services' => $topServices,
+            'top_products' => $topProducts,
+            'daily_trend' => $dailyTrend,
+            'max_daily_collected' => $maxDailyCollected,
+            'recent_invoices' => $recentInvoices,
+        ];
     }
 }

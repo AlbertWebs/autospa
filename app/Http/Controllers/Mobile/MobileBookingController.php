@@ -14,11 +14,12 @@ class MobileBookingController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = Booking::query()->with(['customer', 'vehicle'])->latest('scheduled_at');
+        $date = $request->date('date') ?? today();
 
-        if ($request->filled('date')) {
-            $query->whereDate('scheduled_at', $request->date('date'));
-        }
+        $query = Booking::query()
+            ->with(['customer', 'vehicle'])
+            ->whereDate('scheduled_at', $date)
+            ->latest('scheduled_at');
 
         if ($request->filled('status')) {
             $status = BookingStatus::tryFrom($request->string('status')->toString());
@@ -30,8 +31,9 @@ class MobileBookingController extends Controller
 
         return view('mobile.bookings.index', [
             'bookings' => $query->paginate(20)->withQueryString(),
+            'selectedDate' => $date,
             'filters' => [
-                'date' => $request->input('date'),
+                'date' => $date->toDateString(),
                 'status' => $request->input('status'),
             ],
             'statuses' => BookingStatus::cases(),

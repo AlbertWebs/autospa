@@ -21,6 +21,10 @@ class Commission extends Model
         'rate',
         'status',
         'earned_on',
+        'trigger_event',
+        'paid_at',
+        'payment_method',
+        'payment_reference',
     ];
 
     protected function casts(): array
@@ -29,6 +33,7 @@ class Commission extends Model
             'amount' => 'decimal:2',
             'rate' => 'decimal:4',
             'earned_on' => 'date',
+            'paid_at' => 'datetime',
         ];
     }
 
