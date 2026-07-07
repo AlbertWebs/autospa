@@ -8,6 +8,7 @@ use App\Http\Requests\StoreJobCardRequest;
 use App\Http\Requests\UpdateJobCardRequest;
 use App\Enums\JobCardStatus;
 use App\Models\Booking;
+use App\Models\Commission;
 use App\Models\Customer;
 use App\Models\Employee;
 use App\Models\JobCard;
@@ -82,8 +83,41 @@ class JobCardController extends Controller
 
     public function show(JobCard $jobCard): View
     {
+        $jobCard->load([
+            'customer',
+            'vehicle',
+            'assignee',
+            'booking',
+            'services.service',
+            'products.product',
+            'checklistItems' => fn ($query) => $query->orderBy('sort_order'),
+            'invoice.receipt',
+        ]);
+
+        $servicesTotal = (float) $jobCard->services->sum('price');
+        $productsTotal = (float) $jobCard->products->sum(
+            fn ($line) => (float) $line->quantity * (float) $line->unit_price
+        );
+
+        $commission = Commission::query()
+            ->where('reference_type', $jobCard->getMorphClass())
+            ->where('reference_id', $jobCard->id)
+            ->first();
+
+        $washDurationMinutes = null;
+        if ($jobCard->started_at && $jobCard->completed_at) {
+            $washDurationMinutes = (int) $jobCard->started_at->diffInMinutes($jobCard->completed_at);
+        } elseif ($jobCard->started_at) {
+            $washDurationMinutes = (int) $jobCard->started_at->diffInMinutes(now());
+        }
+
         return view('job-cards.show', [
-            'jobCard' => $jobCard->load(['customer', 'vehicle', 'assignee', 'services.service', 'products', 'checklistItems']),
+            'jobCard' => $jobCard,
+            'servicesTotal' => $servicesTotal,
+            'productsTotal' => $productsTotal,
+            'grandTotal' => $servicesTotal + $productsTotal,
+            'commission' => $commission,
+            'washDurationMinutes' => $washDurationMinutes,
         ]);
     }
 

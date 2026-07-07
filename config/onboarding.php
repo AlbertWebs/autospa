@@ -13,22 +13,22 @@ return [
     ],
     [
         'title' => 'Mission Control',
-        'body' => 'Mission Control is your dashboard. Review today\'s revenue, bookings, vehicles in service, ready-for-pickup counts, and pending payments at a glance.',
+        'body' => 'Mission Control is your dashboard. Review today\'s revenue, bookings, vehicles in service, ready-for-pickup counts, pending payments, commissions, and recent activity at a glance.',
         'target' => null,
     ],
     [
         'title' => 'Daily operations',
-        'body' => 'Operations covers Live job boards, Bookings, Vehicles, Customers, Job Cards, and POS. This is where front-desk and floor teams spend most of their day.',
+        'body' => 'Operations covers Live job boards, Bookings (one day at a time), Vehicles, Customers, Job Cards, and POS. Move washes from Queued → Washing → Ready, then checkout.',
         'target' => 'sidebar',
     ],
     [
         'title' => 'Point of Sale',
-        'body' => 'Use POS to add services and products to a cart, select a customer, take cash or M-Pesa payment, and issue a receipt in one flow.',
+        'body' => 'Use POS to add services and products to a cart, select a customer, take cash or M-Pesa payment, and issue a receipt. Completed job cards open POS with the cart pre-filled.',
         'target' => null,
     ],
     [
         'title' => 'Services, staff & inventory',
-        'body' => 'Configure service categories, packages, and pricing. Manage employees, attendance, and commissions. Track products, suppliers, purchases, and stock movement.',
+        'body' => 'Configure service categories, packages, and pricing. Manage attendees and supervisors, daily washer commissions (with M-Pesa OTP payout), attendance, and inventory.',
         'target' => null,
     ],
     [
@@ -38,17 +38,17 @@ return [
     ],
     [
         'title' => 'Reports',
-        'body' => 'Run daily, weekly, and monthly reports. Revenue, customer, and staff reports support date filters and detailed analytics. Job cards and inventory reports help with floor and stock oversight.',
+        'body' => 'Run daily, weekly, and monthly reports. The Revenue report includes payment-method breakdown and services vs products. Customer and Staff reports support date filters.',
         'target' => null,
     ],
     [
         'title' => 'Header tools',
-        'body' => 'Switch branches, toggle dark mode, switch between Minimalist (daily ops) and Beast (full admin) navigation, and enter fullscreen from the top bar.',
+        'body' => 'Switch branches, toggle dark mode, switch between Minimalist (daily ops) and Beast (full admin) navigation, watch the sync badge for offline changes, and enter fullscreen from the top bar.',
         'target' => 'header-tools',
     ],
     [
         'title' => 'Settings & user manual',
-        'body' => 'Configure company details, branches, users, roles, and integrations under Settings. The User Manual explains every module in detail.',
+        'body' => 'Configure company details, commissions, loyalty, branches, users, roles, and integrations under Settings. The User Manual explains every module in detail.',
         'target' => 'user-manual',
     ],
     [

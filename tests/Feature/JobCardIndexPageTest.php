@@ -116,6 +116,38 @@ class JobCardIndexPageTest extends TestCase
         $response->assertRedirect(route('job-cards.index', ['section' => 'open']));
     }
 
+    public function test_manager_can_view_job_card_show_page(): void
+    {
+        $user = $this->makeUserWithRole(RoleSlug::Manager);
+        $branch = Branch::query()->firstOrFail();
+
+        $customer = Customer::factory()->create(['branch_id' => $branch->id, 'full_name' => 'Jane Mwangi']);
+        $vehicle = Vehicle::create([
+            'branch_id' => $branch->id,
+            'customer_id' => $customer->id,
+            'registration_number' => 'KDJ 902K',
+            'make' => 'Toyota',
+            'model' => 'Vitz',
+        ]);
+
+        $jobCard = JobCard::create([
+            'branch_id' => $branch->id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'status' => JobCardStatus::InProgress,
+            'started_at' => now(),
+        ]);
+
+        $response = $this->actingAs($user)->get(route('job-cards.show', $jobCard));
+
+        $response->assertOk();
+        $response->assertSee('KDJ 902K', false);
+        $response->assertSee('Jane Mwangi');
+        $response->assertSee('In Progress');
+        $response->assertSee('Mark Ready');
+        $response->assertSee('Washing');
+    }
+
     protected function makeUserWithRole(RoleSlug $roleSlug): User
     {
         $branch = Branch::query()->firstOrFail();

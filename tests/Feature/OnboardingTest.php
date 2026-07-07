@@ -68,6 +68,9 @@ class OnboardingTest extends TestCase
         $response->assertSee('Mission Control');
         $response->assertSee('Point of Sale');
         $response->assertSee('Settings');
+        $response->assertSee('Recent activity');
+        $response->assertSee('Mobile cockpit');
+        $response->assertSee('M-Pesa');
         $response->assertSee('Start guided tour');
     }
 
