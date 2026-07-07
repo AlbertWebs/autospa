@@ -33,12 +33,14 @@ class DashboardService
 
         $today = now()->toDateString();
 
+        $todayRevenue = (float) Invoice::query()
+            ->where('branch_id', $branchId)
+            ->whereDate('issued_at', $today)
+            ->whereIn('status', [InvoiceStatus::Paid, InvoiceStatus::PartiallyPaid])
+            ->sum('paid_amount');
+
         return [
-            'today_revenue' => Invoice::query()
-                ->where('branch_id', $branchId)
-                ->whereDate('issued_at', $today)
-                ->whereIn('status', [InvoiceStatus::Paid, InvoiceStatus::PartiallyPaid])
-                ->sum('paid_amount'),
+            'today_revenue' => $todayRevenue,
             'today_bookings' => Booking::query()
                 ->where('branch_id', $branchId)
                 ->whereDate('scheduled_at', $today)
@@ -60,17 +62,18 @@ class DashboardService
                 ->where('branch_id', $branchId)
                 ->whereColumn('quantity_on_hand', '<=', 'minimum_level')
                 ->count(),
-            ...$this->commissionStats($branchId, $today),
+            ...$this->commissionStats($branchId, $today, $todayRevenue),
         ];
     }
 
-    protected function commissionStats(int $branchId, string $today): array
+    protected function commissionStats(int $branchId, string $today, float $todayRevenue): array
     {
         if (! CommissionSettings::enabled()) {
             return [
                 'commissions_enabled' => false,
                 'today_commissions' => 0,
                 'today_commissions_pending' => 0,
+                'today_net_profit' => $todayRevenue,
                 'today_washers' => 0,
             ];
         }
@@ -79,10 +82,13 @@ class DashboardService
             ->where('branch_id', $branchId)
             ->whereDate('earned_on', $today);
 
+        $todayCommissions = (float) (clone $commissionQuery)->sum('amount');
+
         return [
             'commissions_enabled' => true,
-            'today_commissions' => (float) (clone $commissionQuery)->sum('amount'),
+            'today_commissions' => $todayCommissions,
             'today_commissions_pending' => (float) (clone $commissionQuery)->where('status', 'pending')->sum('amount'),
+            'today_net_profit' => $todayRevenue - $todayCommissions,
             'today_washers' => (int) JobCard::query()
                 ->where('branch_id', $branchId)
                 ->where('status', JobCardStatus::Completed)
@@ -210,6 +216,7 @@ class DashboardService
             'commissions_enabled' => false,
             'today_commissions' => 0,
             'today_commissions_pending' => 0,
+            'today_net_profit' => 0,
             'today_washers' => 0,
         ];
     }

@@ -58,6 +58,8 @@
         @if ($stats['commissions_enabled'] ?? false)
             <x-ui.stat-card variant="payments" label="Today's Commissions" icon="savings"
                 :value="'KES ' . number_format($stats['today_commissions'], 0)" hint="KES {{ number_format($stats['today_commissions_pending'], 0) }} pending payout" />
+            <x-ui.stat-card variant="revenue" label="Net Profit" icon="trending_up"
+                :value="'KES ' . number_format($stats['today_net_profit'], 0)" hint="Today's revenue minus commissions" />
             <x-ui.stat-card variant="bookings" label="Washers Today" icon="groups"
                 :value="$stats['today_washers']" hint="Staff who completed washes" />
         @endif

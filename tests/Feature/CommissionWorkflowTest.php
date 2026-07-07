@@ -276,8 +276,10 @@ class CommissionWorkflowTest extends TestCase
 
         $response->assertOk();
         $response->assertSee("Today's Commissions");
+        $response->assertSee('Net Profit');
         $response->assertSee('Washers Today');
         $response->assertSee('KES 450');
+        $response->assertSee('KES -450');
     }
 
     protected function makeUserWithRole(RoleSlug $roleSlug): User
