@@ -10,7 +10,7 @@
     <x-slot name="header"><span class="hidden sm:inline">Operations</span>    </x-slot>
 
     <x-ui.section-header eyebrow="Operations">
-            <a href="{{ route('bookings.index') }}" class="asp-btn asp-btn-secondary">
+            <a href="{{ route('bookings.index', ['date' => $booking->scheduled_at?->toDateString() ?? today()->toDateString()]) }}" class="asp-btn asp-btn-secondary">
                 <span class="material-symbols-outlined text-lg">arrow_back</span>
                 Back
             </a>

@@ -70,7 +70,7 @@
         <x-ui.form-field label="Services" name="services" :col-span="2">
             <div class="asp-checkbox-group">
                 @foreach ($services as $service)
-                    <x-ui.checkbox-card name="services[]" :value="$service->id" :checked="in_array($service->id, old('services', $booking?->services->pluck('id')->toArray() ?? []))">
+                    <x-ui.checkbox-card name="services[]" :value="$service->id" :checked="in_array($service->id, old('services', $booking?->bookingServices->pluck('service_id')->toArray() ?? []))">
                         {{ $service->name }}
                     </x-ui.checkbox-card>
                 @endforeach

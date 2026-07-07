@@ -68,6 +68,10 @@ class BookingController extends Controller
             }
         }
 
+        if (! $scheduledAt) {
+            $scheduledAt = now()->format('Y-m-d\TH:i');
+        }
+
         return view('bookings.create', [
             'customers' => Customer::query()->orderBy('full_name')->get(),
             'vehicles' => Vehicle::query()->with('customer')->get(),
@@ -87,8 +91,9 @@ class BookingController extends Controller
             $booking->bookingServices()->createMany($services);
         }
 
-        return redirect()->route('bookings.show', $booking)
-            ->with('success', 'Booking created.');
+        return redirect()->route('bookings.index', [
+            'date' => $booking->scheduled_at?->toDateString() ?? today()->toDateString(),
+        ])->with('success', 'Booking created.');
     }
 
     public function show(Booking $booking): View
@@ -125,8 +130,9 @@ class BookingController extends Controller
     {
         $booking->delete();
 
-        return redirect()->route('bookings.index')
-            ->with('success', 'Booking deleted.');
+        return redirect()->route('bookings.index', [
+            'date' => $booking->scheduled_at?->toDateString() ?? today()->toDateString(),
+        ])->with('success', 'Booking deleted.');
     }
 
     public function markDone(Booking $booking): RedirectResponse

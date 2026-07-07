@@ -4,11 +4,13 @@ namespace App\Http\Requests;
 
 use App\Enums\BookingStatus;
 use App\Enums\BookingType;
+use App\Http\Requests\Concerns\NormalizesBookingServices;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdateBookingRequest extends FormRequest
 {
+    use NormalizesBookingServices;
     public function authorize(): bool
     {
         return true;
@@ -28,6 +30,7 @@ class UpdateBookingRequest extends FormRequest
             'services' => ['array'],
             'services.*.service_id' => ['required', 'exists:services,id'],
             'services.*.price' => ['required', 'numeric', 'min:0'],
+            'services.*.duration_minutes' => ['nullable', 'integer', 'min:0'],
         ];
     }
 }

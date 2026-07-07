@@ -9,7 +9,7 @@
     eyebrow="Operations"
     title="Bookings"
     :subtitle="'Bookings for ' . $selectedDate->format('l, F j, Y') . '.'"
-    :create-route="route('bookings.create')"
+    :create-route="route('bookings.create', ['scheduled_at' => $filters['date']])"
     create-label="New Booking"
 >
     <form method="GET" action="{{ route('bookings.index') }}" class="mb-6 rounded-2xl border border-slate-200/80 bg-white p-4 dark:border-brand-border/60 dark:bg-brand-surface-high">
