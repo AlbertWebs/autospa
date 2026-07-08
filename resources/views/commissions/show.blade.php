@@ -1,5 +1,6 @@
 @php
     use App\Services\CommissionService;
+    use App\Support\CommissionSettings;
     use App\Support\RouteAccess;
 
     $employee = $commission->employee;
@@ -9,6 +10,9 @@
     $ratePercent = $commission->rate ? rtrim(rtrim(number_format($commission->rate * 100, 2), '0'), '.') : null;
     $canPay = $isPending && app(RouteAccess::class)->allows(auth()->user(), route('commissions.pay'), 'POST');
     $commissionsDayUrl = route('commissions.index', ['date' => $commission->earned_on?->toDateString() ?? now()->toDateString()]);
+    $commissionsPageTitle = CommissionSettings::commissionsPageTitle();
+    $pendingPayoutHint = CommissionSettings::isWeeklyPayout() ? 'Awaiting weekly payout' : 'Awaiting daily payout';
+    $backToListLabel = CommissionSettings::isWeeklyPayout() ? 'Back to weekly list' : 'Back to daily list';
 @endphp
 
 <x-layouts.app>
@@ -24,7 +28,7 @@
     <x-ui.section-header eyebrow="Staff">
         <a href="{{ $commissionsDayUrl }}" class="asp-btn asp-btn-secondary">
             <span class="material-symbols-outlined text-lg">arrow_back</span>
-            Daily Commissions
+            {{ $commissionsPageTitle }}
         </a>
         @if ($employee && app(RouteAccess::class)->allows(auth()->user(), route('employees.show', $employee)))
             <a href="{{ route('employees.show', $employee) }}" class="asp-btn asp-btn-secondary">
@@ -110,7 +114,7 @@
             label="Commission Amount"
             icon="payments"
             :value="'KES ' . number_format($commission->amount ?? 0, 0)"
-            :hint="$isPending ? 'Awaiting daily payout' : 'Paid to washer'"
+            :hint="$isPending ? $pendingPayoutHint : 'Paid to washer'"
         />
     </div>
 
@@ -192,7 +196,7 @@
                             <dt class="asp-detail-dt">Settlement</dt>
                             <dd class="asp-detail-dd text-amber-600 dark:text-amber-400">
                                 Pending — settle from
-                                <a href="{{ $commissionsDayUrl }}" class="asp-detail-link">Daily Commissions</a>
+                                <a href="{{ $commissionsDayUrl }}" class="asp-detail-link">{{ $commissionsPageTitle }}</a>
                             </dd>
                         </div>
                     @endif
@@ -275,7 +279,7 @@
         @if ($jobCard)
             <span>Job card #{{ $jobCard->id }}</span>
         @endif
-        <a href="{{ $commissionsDayUrl }}" class="asp-detail-link">Back to daily list</a>
+        <a href="{{ $commissionsDayUrl }}" class="asp-detail-link">{{ $backToListLabel }}</a>
     </footer>
 
     @include('commissions._mpesa-otp-modal')

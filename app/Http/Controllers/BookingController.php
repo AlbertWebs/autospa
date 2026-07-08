@@ -22,12 +22,13 @@ class BookingController extends Controller
 
     public function index(Request $request): View
     {
-        $date = $request->date('date') ?? today();
-
         $query = Booking::query()
             ->with(['customer', 'vehicle'])
-            ->whereDate('scheduled_at', $date)
             ->latest('scheduled_at');
+
+        if ($request->filled('date')) {
+            $query->whereDate('scheduled_at', $request->date('date'));
+        }
 
         if ($request->filled('status')) {
             $status = BookingStatus::tryFrom($request->string('status')->toString());
@@ -45,11 +46,13 @@ class BookingController extends Controller
             }
         }
 
+        $selectedDate = $request->filled('date') ? $request->date('date') : null;
+
         return view('bookings.index', [
             'bookings' => $query->paginate(15)->withQueryString(),
-            'selectedDate' => $date,
+            'selectedDate' => $selectedDate,
             'filters' => [
-                'date' => $date->toDateString(),
+                'date' => $request->input('date'),
                 'status' => $request->input('status'),
                 'type' => $request->input('type'),
             ],
@@ -91,9 +94,8 @@ class BookingController extends Controller
             $booking->bookingServices()->createMany($services);
         }
 
-        return redirect()->route('bookings.index', [
-            'date' => $booking->scheduled_at?->toDateString() ?? today()->toDateString(),
-        ])->with('success', 'Booking created.');
+        return redirect()->route('bookings.index')
+            ->with('success', 'Booking created.');
     }
 
     public function show(Booking $booking): View
@@ -130,9 +132,8 @@ class BookingController extends Controller
     {
         $booking->delete();
 
-        return redirect()->route('bookings.index', [
-            'date' => $booking->scheduled_at?->toDateString() ?? today()->toDateString(),
-        ])->with('success', 'Booking deleted.');
+        return redirect()->route('bookings.index')
+            ->with('success', 'Booking deleted.');
     }
 
     public function markDone(Booking $booking): RedirectResponse
@@ -228,7 +229,7 @@ class BookingController extends Controller
     protected function indexRedirectParams(Request $request, array $params = []): array
     {
         return array_filter([
-            'date' => $request->date('date')?->toDateString() ?? today()->toDateString(),
+            'date' => $request->filled('date') ? $request->date('date')->toDateString() : null,
             ...$params,
         ]);
     }

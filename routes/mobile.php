@@ -6,6 +6,7 @@ use App\Http\Controllers\Mobile\MobileCommissionController;
 use App\Http\Controllers\Mobile\MobileCustomerController;
 use App\Http\Controllers\Mobile\MobileDashboardController;
 use App\Http\Controllers\Mobile\MobileEmployeeController;
+use App\Http\Controllers\Mobile\MobileFixedAssetController;
 use App\Http\Controllers\Mobile\MobileInvoiceController;
 use App\Http\Controllers\Mobile\MobileJobCardController;
 use App\Http\Controllers\Mobile\MobileMenuController;
@@ -15,7 +16,6 @@ use App\Http\Controllers\Mobile\MobilePosController;
 use App\Http\Controllers\Mobile\MobileProductController;
 use App\Http\Controllers\Mobile\MobilePurchaseOrderController;
 use App\Http\Controllers\Mobile\MobileReceiptController;
-use App\Http\Controllers\Mobile\MobileRefundController;
 use App\Http\Controllers\Mobile\MobileReportController;
 use App\Http\Controllers\Mobile\MobileServiceController;
 use App\Http\Controllers\Mobile\MobileSettingsController;
@@ -72,7 +72,6 @@ Route::middleware('permission:sales.view')->group(function () {
     Route::get('/invoices', [MobileInvoiceController::class, 'index'])->name('invoices.index');
     Route::get('/invoices/{invoice}', [MobileInvoiceController::class, 'show'])->name('invoices.show')->whereNumber('invoice');
     Route::get('/receipts', [MobileReceiptController::class, 'index'])->name('receipts.index');
-    Route::get('/refunds', [MobileRefundController::class, 'index'])->name('refunds.index');
 });
 
 Route::middleware('permission:payments.view')->prefix('payments')->name('payments.')->group(function () {
@@ -90,6 +89,7 @@ Route::middleware('permission:inventory.view')->group(function () {
     Route::get('/suppliers', [MobileSupplierController::class, 'index'])->name('suppliers.index');
     Route::get('/purchase-orders', [MobilePurchaseOrderController::class, 'index'])->name('purchase-orders.index');
     Route::get('/stock-movements', [MobileStockMovementController::class, 'index'])->name('stock-movements.index');
+    Route::get('/fixed-assets', [MobileFixedAssetController::class, 'index'])->name('fixed-assets.index');
 });
 
 Route::middleware('permission:staff.view')->group(function () {
@@ -104,7 +104,6 @@ Route::middleware(['permission:staff.view', 'attendance.enabled'])->group(functi
 
 Route::middleware('permission:services.view')->group(function () {
     Route::get('/services', [MobileServiceController::class, 'index'])->name('services.index');
-    Route::get('/packages', [MobileServiceController::class, 'packages'])->name('packages.index');
     Route::get('/service-categories', [MobileServiceController::class, 'categories'])->name('services.categories.index');
 });
 
@@ -114,6 +113,7 @@ Route::middleware('permission:reports.view')->prefix('reports')->name('reports.'
     Route::get('/weekly', [MobileReportController::class, 'weekly'])->name('weekly');
     Route::get('/monthly', [MobileReportController::class, 'monthly'])->name('monthly');
     Route::get('/revenue', [MobileReportController::class, 'revenue'])->name('revenue');
+    Route::get('/profit', [MobileReportController::class, 'profit'])->name('profit');
     Route::get('/customers', [MobileReportController::class, 'customers'])->name('customers');
     Route::get('/staff', [MobileReportController::class, 'staff'])->name('staff');
     Route::get('/job-cards', [MobileReportController::class, 'jobCards'])->name('job-cards');

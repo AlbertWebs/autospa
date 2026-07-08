@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Mobile;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\CustomerNote;
-use App\Models\LoyaltyTransaction;
+use App\Services\LoyaltyService;
 use App\Support\LoyaltySettings;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -40,15 +40,12 @@ class MobileCustomerController extends Controller
         ]);
     }
 
-    public function loyalty(): View
+    public function loyalty(LoyaltyService $loyaltyService): View
     {
         $this->authorize('viewAny', Customer::class);
 
         return view('mobile.customers.loyalty', [
-            'transactions' => LoyaltyTransaction::query()
-                ->with('customer')
-                ->latest()
-                ->paginate(20),
+            'vehicles' => $loyaltyService->paginatedVehicleWashes(request()),
             'loyaltyEnabled' => LoyaltySettings::enabled(),
             'loyaltySummary' => LoyaltySettings::summary(),
         ]);

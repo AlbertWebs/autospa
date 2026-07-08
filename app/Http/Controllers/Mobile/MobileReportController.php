@@ -62,6 +62,26 @@ class MobileReportController extends Controller
         ]);
     }
 
+    public function profit(Request $request): View
+    {
+        $from = $request->date('from')?->startOfDay() ?? now()->copy()->startOfMonth()->startOfDay();
+        $to = $request->date('to')?->endOfDay() ?? now()->copy()->endOfDay();
+
+        if ($from->gt($to)) {
+            [$from, $to] = [$to->copy()->startOfDay(), $from->copy()->endOfDay()];
+        }
+
+        return view('mobile.reports.profit', [
+            'title' => 'Profit & Loss',
+            'report' => $this->reportService->profit(null, $from, $to),
+            'filterRoute' => route('mobile.reports.profit'),
+            'filters' => [
+                'from' => $from->toDateString(),
+                'to' => $to->toDateString(),
+            ],
+        ]);
+    }
+
     public function customers(Request $request): View
     {
         $from = $request->date('from')?->startOfDay() ?? now()->copy()->startOfMonth()->startOfDay();

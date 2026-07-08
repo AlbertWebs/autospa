@@ -7,15 +7,14 @@ use App\Models\Commission;
 use App\Models\Company;
 use App\Models\Customer;
 use App\Models\Employee;
+use App\Models\FixedAsset;
 use App\Models\Invoice;
-use App\Models\Package;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Models\Product;
 use App\Models\PurchaseOrder;
 use App\Models\Receipt;
 use App\Models\RecurringBookingRule;
-use App\Models\Refund;
 use App\Models\Service;
 use App\Models\ServiceCategory;
 use App\Models\Setting;
@@ -43,16 +42,15 @@ return [
         Company::class,
         Customer::class,
         Employee::class,
+        FixedAsset::class,
         Invoice::class,
         JobCard::class,
-        Package::class,
         Payment::class,
         PaymentMethod::class,
         Product::class,
         PurchaseOrder::class,
         Receipt::class,
         RecurringBookingRule::class,
-        Refund::class,
         Service::class,
         ServiceCategory::class,
         Setting::class,

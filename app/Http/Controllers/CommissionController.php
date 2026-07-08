@@ -26,19 +26,25 @@ class CommissionController extends Controller
     {
         $date = Carbon::parse($request->query('date', now()->toDateString()));
         $branchId = $this->branchService->currentBranchId();
+        $period = CommissionSettings::periodForDate($date);
 
         $this->commissionService->syncMissingCommissions($branchId, $date);
 
         return view('commissions.index', [
             'date' => $date,
+            'periodStart' => $period['start'],
+            'periodEnd' => $period['end'],
+            'periodLabel' => CommissionSettings::periodLabel($period['start'], $period['end']),
+            'payoutCycle' => CommissionSettings::payoutCycle(),
             'commissionsEnabled' => CommissionSettings::enabled(),
             'defaultRate' => CommissionSettings::defaultRate(),
-            'dailySummary' => $this->commissionService->dailySummary($branchId, $date),
-            'totals' => $this->commissionService->totalsForDate($branchId, $date),
+            'dailySummary' => $this->commissionService->summary($branchId, $date),
+            'totals' => $this->commissionService->totalsForPeriod($branchId, $date),
             'recentCommissions' => Commission::query()
                 ->with(['employee', 'reference'])
                 ->when($branchId, fn ($query) => $query->where('branch_id', $branchId))
-                ->whereDate('earned_on', $date->toDateString())
+                ->whereDate('earned_on', '>=', $period['start']->toDateString())
+                ->whereDate('earned_on', '<=', $period['end']->toDateString())
                 ->latest('id')
                 ->paginate(20),
         ]);
@@ -75,7 +81,7 @@ class CommissionController extends Controller
         $employee = \App\Models\Employee::query()->findOrFail($validated['employee_id']);
         $date = Carbon::parse($validated['date']);
 
-        $result = $this->commissionService->payEmployeeDaily(
+        $result = $this->commissionService->payEmployee(
             $employee,
             $date,
             (bool) ($validated['send_mpesa'] ?? false),

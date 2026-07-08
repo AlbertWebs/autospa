@@ -33,5 +33,9 @@
         @endif
     </x-ui.section-header>
 
+    @if ($subtitle)
+        <p class="mb-6 text-sm text-slate-500 dark:text-slate-400">{{ $subtitle }}</p>
+    @endif
+
     {{ $slot }}
 </x-layouts.app>

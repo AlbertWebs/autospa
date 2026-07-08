@@ -8,7 +8,7 @@ use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
 use App\Models\Customer;
 use App\Models\CustomerNote;
-use App\Models\LoyaltyTransaction;
+use App\Services\LoyaltyService;
 use App\Support\LoyaltySettings;
 use App\Support\RegistrationNumber;
 use App\Models\Vehicle;
@@ -132,15 +132,13 @@ class CustomerController extends Controller
             ->with('success', 'Customer deleted.');
     }
 
-    public function loyalty(): View
+    public function loyalty(LoyaltyService $loyaltyService): View
     {
         $this->authorize('viewAny', Customer::class);
 
         return view('customers.loyalty', [
-            'transactions' => LoyaltyTransaction::query()
-                ->with('customer')
-                ->latest()
-                ->paginate(20),
+            'vehicles' => $loyaltyService->paginatedVehicleWashes(request()),
+            'search' => request()->input('q', ''),
             'loyaltyEnabled' => LoyaltySettings::enabled(),
             'loyaltySummary' => LoyaltySettings::summary(),
         ]);

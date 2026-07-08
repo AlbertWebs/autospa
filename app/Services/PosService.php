@@ -13,7 +13,6 @@ use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Models\Product;
 use App\Models\Receipt;
-use App\Models\Service;
 use App\Models\Scopes\BranchScope;
 use App\Support\CommissionSettings;
 use Illuminate\Support\Facades\DB;
@@ -33,7 +32,6 @@ class PosService
         $branchId = $branchId ?? $this->branchService->currentBranchId();
 
         $data = [
-            'services' => Service::query()->where('branch_id', $branchId)->where('is_active', true)->with('category')->orderBy('name')->get(),
             'products' => Product::query()->where('branch_id', $branchId)->where('is_active', true)->orderBy('name')->get(),
             'customers' => Customer::query()
                 ->where('branch_id', $branchId)

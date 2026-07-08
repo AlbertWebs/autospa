@@ -4,7 +4,7 @@
     subtitle="Update category name and display settings."
     panel-title="Category Details"
     panel-icon="category"
-    :action="route('services.categories.update', $category)"
+    :action="route('services.categories.update', ['category' => $category])"
     method="PUT"
     submit-label="Save Changes"
     :cancel-url="route('services.categories.index')"

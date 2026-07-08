@@ -58,7 +58,7 @@ class BookingIndexPageTest extends TestCase
         $response->assertSee('Pending');
     }
 
-    public function test_bookings_index_defaults_to_today_only(): void
+    public function test_bookings_index_shows_all_bookings_by_default(): void
     {
         $user = $this->makeUserWithRole(RoleSlug::Manager);
         $branch = Branch::query()->firstOrFail();
@@ -93,6 +93,49 @@ class BookingIndexPageTest extends TestCase
         ]);
 
         $response = $this->actingAs($user)->get(route('bookings.index'));
+
+        $response->assertOk();
+        $response->assertSee('1–2 of 2');
+        $response->assertSee('All bookings for this branch.');
+    }
+
+    public function test_bookings_index_can_filter_to_single_day(): void
+    {
+        $user = $this->makeUserWithRole(RoleSlug::Manager);
+        $branch = Branch::query()->firstOrFail();
+
+        $customer = Customer::factory()->create(['branch_id' => $branch->id]);
+        $vehicle = Vehicle::create([
+            'branch_id' => $branch->id,
+            'customer_id' => $customer->id,
+            'registration_number' => 'KCA 111A',
+            'make' => 'Nissan',
+            'model' => 'Note',
+        ]);
+
+        Booking::create([
+            'branch_id' => $branch->id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'type' => BookingType::Appointment,
+            'status' => BookingStatus::Pending,
+            'scheduled_at' => now(),
+            'created_by' => $user->id,
+        ]);
+
+        Booking::create([
+            'branch_id' => $branch->id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'type' => BookingType::Appointment,
+            'status' => BookingStatus::Pending,
+            'scheduled_at' => now()->subDay(),
+            'created_by' => $user->id,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('bookings.index', [
+            'date' => now()->toDateString(),
+        ]));
 
         $response->assertOk();
         $response->assertSee('1–1 of 1');
@@ -150,7 +193,6 @@ class BookingIndexPageTest extends TestCase
 
         $response->assertRedirect();
         $response->assertLocation(route('bookings.index', [
-            'date' => now()->toDateString(),
             'status' => BookingStatus::Pending->value,
         ]));
     }
@@ -179,9 +221,7 @@ class BookingIndexPageTest extends TestCase
             'created_by' => $user->id,
         ]);
 
-        $response = $this->actingAs($user)->get(route('bookings.index', [
-            'date' => now()->subDay()->toDateString(),
-        ]));
+        $response = $this->actingAs($user)->get(route('bookings.index'));
 
         $response->assertOk();
         $response->assertSee('Mark done');

@@ -127,4 +127,22 @@ class ReportController extends Controller
             ),
         ]);
     }
+
+    public function profit(Request $request): View
+    {
+        $from = $request->date('from')?->startOfDay() ?? now()->copy()->startOfMonth()->startOfDay();
+        $to = $request->date('to')?->endOfDay() ?? now()->copy()->endOfDay();
+
+        if ($from->gt($to)) {
+            [$from, $to] = [$to->copy()->startOfDay(), $from->copy()->endOfDay()];
+        }
+
+        return view('reports.profit', [
+            'report' => $this->reportService->profit(
+                $this->branchService->currentBranchId(),
+                $from,
+                $to,
+            ),
+        ]);
+    }
 }

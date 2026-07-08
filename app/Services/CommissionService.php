@@ -97,12 +97,21 @@ class CommissionService
     /** @return Collection<int, array{employee: Employee, washes: int, earned: float, pending: float, paid: float, commission_ids: list<int>}> */
     public function dailySummary(?int $branchId, ?Carbon $date = null): Collection
     {
-        $date = ($date ?? now())->toDateString();
+        return $this->summary($branchId, $date);
+    }
+
+    /** @return Collection<int, array{employee: Employee, washes: int, earned: float, pending: float, paid: float, commission_ids: list<int>}> */
+    public function summary(?int $branchId, ?Carbon $date = null): Collection
+    {
+        $period = CommissionSettings::periodForDate($date ?? now());
+        $startDate = $period['start']->toDateString();
+        $endDate = $period['end']->toDateString();
 
         $washCounts = JobCard::query()
             ->when($branchId, fn ($query) => $query->where('branch_id', $branchId))
             ->where('status', JobCardStatus::Completed)
-            ->whereDate('completed_at', $date)
+            ->whereDate('completed_at', '>=', $startDate)
+            ->whereDate('completed_at', '<=', $endDate)
             ->whereNotNull('assigned_to')
             ->selectRaw('assigned_to, COUNT(*) as washes')
             ->groupBy('assigned_to')
@@ -111,7 +120,8 @@ class CommissionService
         $commissions = Commission::query()
             ->with('employee')
             ->when($branchId, fn ($query) => $query->where('branch_id', $branchId))
-            ->whereDate('earned_on', $date)
+            ->whereDate('earned_on', '>=', $startDate)
+            ->whereDate('earned_on', '<=', $endDate)
             ->get();
 
         $employeeIds = $washCounts->keys()
@@ -148,7 +158,10 @@ class CommissionService
     /** @return array{started: bool, payout_token?: string, amount?: float, employee_name?: string, otp_sent_to?: string, message: string} */
     public function initiateMpesaPayout(Employee $employee, Carbon $date, User $initiator): array
     {
-        $dateString = $date->toDateString();
+        $period = CommissionSettings::periodForDate($date);
+        $startDate = $period['start']->toDateString();
+        $endDate = $period['end']->toDateString();
+        $anchorDate = $date->toDateString();
 
         if (blank($employee->phone)) {
             return [
@@ -169,14 +182,15 @@ class CommissionService
         $pending = Commission::query()
             ->where('employee_id', $employee->id)
             ->where('branch_id', $employee->branch_id)
-            ->whereDate('earned_on', $dateString)
+            ->whereDate('earned_on', '>=', $startDate)
+            ->whereDate('earned_on', '<=', $endDate)
             ->where('status', self::STATUS_PENDING)
             ->get();
 
         if ($pending->isEmpty()) {
             return [
                 'started' => false,
-                'message' => 'No pending commissions for this day.',
+                'message' => $this->noPendingCommissionsMessage(),
             ];
         }
 
@@ -187,7 +201,9 @@ class CommissionService
         Cache::put(self::MPESA_PAYOUT_CACHE_PREFIX.$payoutToken, [
             'employee_id' => $employee->id,
             'branch_id' => $employee->branch_id,
-            'date' => $dateString,
+            'date' => $anchorDate,
+            'period_start' => $startDate,
+            'period_end' => $endDate,
             'commission_ids' => $pending->pluck('id')->values()->all(),
             'amount' => $amount,
             'employee_phone' => $employee->phone,
@@ -213,7 +229,9 @@ class CommissionService
             $employee,
             [
                 'employee_id' => $employee->id,
-                'date' => $dateString,
+                'date' => $anchorDate,
+                'period_start' => $startDate,
+                'period_end' => $endDate,
                 'amount' => $amount,
                 'commission_count' => $pending->count(),
                 'otp_sent_to' => $this->maskPhone($adminPhone),
@@ -295,15 +313,23 @@ class CommissionService
             }
 
             $amount = (float) $pending->sum('amount');
-            $date = (string) $payload['date'];
+            $anchorDate = (string) $payload['date'];
             $employeeId = (int) $payload['employee_id'];
+            $periodStart = (string) ($payload['period_start'] ?? $anchorDate);
+            $periodEnd = (string) ($payload['period_end'] ?? $anchorDate);
 
             $result = $this->integrationService->mpesa()->initiateB2cPayment(
                 new B2cPaymentData(
                     phone: (string) $payload['employee_phone'],
                     amount: $amount,
-                    reference: sprintf('COM-%s-%s', $date, $employeeId),
-                    description: 'Daily commission payout for '.($payload['employee_name'] ?? 'washer'),
+                    reference: sprintf('COM-%s-%s', $periodEnd, $employeeId),
+                    description: sprintf(
+                        '%s commission payout for %s',
+                        CommissionSettings::payoutCycleLabel(),
+                        CommissionSettings::isWeeklyPayout()
+                            ? CommissionSettings::periodLabel(Carbon::parse($periodStart), Carbon::parse($periodEnd))
+                            : Carbon::parse($anchorDate)->format('M j, Y'),
+                    ),
                 ),
             );
 
@@ -331,7 +357,9 @@ class CommissionService
             $this->logCommissionPayout(
                 employeeId: $employeeId,
                 branchId: (int) $payload['branch_id'],
-                date: $date,
+                date: $anchorDate,
+                periodStart: $periodStart,
+                periodEnd: $periodEnd,
                 amount: $amount,
                 paymentMethod: self::PAYMENT_MPESA,
                 paymentReference: $b2cReference,
@@ -356,13 +384,25 @@ class CommissionService
         ?Carbon $date = null,
         bool $sendMpesa = false,
     ): array {
-        $date = ($date ?? now())->toDateString();
+        return $this->payEmployee($employee, $date, $sendMpesa);
+    }
 
-        return DB::transaction(function () use ($employee, $date, $sendMpesa) {
+    public function payEmployee(
+        Employee $employee,
+        ?Carbon $date = null,
+        bool $sendMpesa = false,
+    ): array {
+        $period = CommissionSettings::periodForDate($date ?? now());
+        $startDate = $period['start']->toDateString();
+        $endDate = $period['end']->toDateString();
+        $anchorDate = ($date ?? now())->toDateString();
+
+        return DB::transaction(function () use ($employee, $startDate, $endDate, $anchorDate, $sendMpesa) {
             $pending = Commission::query()
                 ->where('employee_id', $employee->id)
                 ->where('branch_id', $employee->branch_id)
-                ->whereDate('earned_on', $date)
+                ->whereDate('earned_on', '>=', $startDate)
+                ->whereDate('earned_on', '<=', $endDate)
                 ->where('status', self::STATUS_PENDING)
                 ->lockForUpdate()
                 ->get();
@@ -371,7 +411,7 @@ class CommissionService
                 return [
                     'paid' => false,
                     'amount' => 0.0,
-                    'message' => 'No pending commissions for this day.',
+                    'message' => $this->noPendingCommissionsMessage(),
                 ];
             }
 
@@ -401,7 +441,9 @@ class CommissionService
             $this->logCommissionPayout(
                 employeeId: $employee->id,
                 branchId: $employee->branch_id,
-                date: $date,
+                date: $anchorDate,
+                periodStart: $startDate,
+                periodEnd: $endDate,
                 amount: $amount,
                 paymentMethod: $paymentMethod,
                 paymentReference: $paymentReference,
@@ -424,11 +466,19 @@ class CommissionService
 
     public function totalsForDate(?int $branchId, ?Carbon $date = null): array
     {
-        $date = ($date ?? now())->toDateString();
+        return $this->totalsForPeriod($branchId, $date);
+    }
+
+    public function totalsForPeriod(?int $branchId, ?Carbon $date = null): array
+    {
+        $period = CommissionSettings::periodForDate($date ?? now());
+        $startDate = $period['start']->toDateString();
+        $endDate = $period['end']->toDateString();
 
         $query = Commission::query()
             ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
-            ->whereDate('earned_on', $date);
+            ->whereDate('earned_on', '>=', $startDate)
+            ->whereDate('earned_on', '<=', $endDate);
 
         return [
             'earned' => (float) (clone $query)->sum('amount'),
@@ -437,7 +487,8 @@ class CommissionService
             'washers' => (int) JobCard::query()
                 ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
                 ->where('status', JobCardStatus::Completed)
-                ->whereDate('completed_at', $date)
+                ->whereDate('completed_at', '>=', $startDate)
+                ->whereDate('completed_at', '<=', $endDate)
                 ->whereNotNull('assigned_to')
                 ->distinct('assigned_to')
                 ->count('assigned_to'),
@@ -455,7 +506,18 @@ class CommissionService
             return;
         }
 
-        $dateString = ($date ?? now())->toDateString();
+        $period = CommissionSettings::periodForDate($date ?? now());
+        $cursor = $period['start']->copy();
+
+        while ($cursor->lte($period['end'])) {
+            $this->syncMissingCommissionsForDay($branchId, $cursor);
+            $cursor->addDay();
+        }
+    }
+
+    protected function syncMissingCommissionsForDay(?int $branchId, Carbon $date): void
+    {
+        $dateString = $date->toDateString();
         $trigger = CommissionSettings::trigger();
 
         if (in_array($trigger, [CommissionSettings::TRIGGER_JOB_COMPLETED, CommissionSettings::TRIGGER_BOTH], true)) {
@@ -599,6 +661,13 @@ class CommissionService
         return app()->environment(['local', 'testing']);
     }
 
+    protected function noPendingCommissionsMessage(): string
+    {
+        return CommissionSettings::isWeeklyPayout()
+            ? 'No pending commissions for this week.'
+            : 'No pending commissions for this day.';
+    }
+
     /**
      * @param  array<int, int>  $commissionIds
      */
@@ -606,6 +675,8 @@ class CommissionService
         int $employeeId,
         int $branchId,
         string $date,
+        string $periodStart,
+        string $periodEnd,
         float $amount,
         string $paymentMethod,
         ?string $paymentReference,
@@ -613,13 +684,19 @@ class CommissionService
         ?int $userId,
         string $employeeName,
     ): void {
+        $periodLabel = CommissionSettings::isWeeklyPayout()
+            ? CommissionSettings::periodLabel(Carbon::parse($periodStart), Carbon::parse($periodEnd))
+            : Carbon::parse($date)->format('M j, Y');
+
         $this->activityLogService->record(
             ActivityEvent::CommissionPaid->value,
-            sprintf('Paid KES %s commission to %s for %s', number_format($amount, 2), $employeeName, $date),
+            sprintf('Paid KES %s commission to %s for %s', number_format($amount, 2), $employeeName, $periodLabel),
             null,
             [
                 'employee_id' => $employeeId,
                 'date' => $date,
+                'period_start' => $periodStart,
+                'period_end' => $periodEnd,
                 'amount' => $amount,
                 'payment_method' => $paymentMethod,
                 'payment_reference' => $paymentReference,

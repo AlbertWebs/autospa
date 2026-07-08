@@ -48,6 +48,14 @@ class UpdateCompanyRequest extends FormRequest
                     CommissionSettings::TRIGGER_BOTH,
                 ]),
             ],
+            'commission_payout_cycle' => [
+                'nullable',
+                'string',
+                Rule::in([
+                    CommissionSettings::PAYOUT_DAILY,
+                    CommissionSettings::PAYOUT_WEEKLY,
+                ]),
+            ],
             'loyalty_enabled' => ['nullable', 'boolean'],
             'loyalty_washes_before_free' => ['nullable', 'integer', 'min:1', 'max:100'],
             'attendance_enabled' => ['nullable', 'boolean'],

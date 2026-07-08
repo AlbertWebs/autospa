@@ -113,8 +113,8 @@ return [
             'summary' => 'Schedule and manage customer appointments.',
             'topics' => [
                 [
-                    'heading' => 'Daily bookings list',
-                    'body' => 'All Bookings shows one day at a time (defaults to today). Pick a date, filter by status or type, and use quick links for yesterday/tomorrow. This keeps reception focused on the current schedule.',
+                    'heading' => 'All bookings list',
+                    'body' => 'All Bookings shows every booking for the branch, newest first. Optionally filter by date, status, or type. Use quick links for walk-ins, pending, completed, and cancelled.',
                 ],
                 [
                     'heading' => 'Booking detail',
@@ -199,7 +199,7 @@ return [
             'topics' => [
                 [
                     'heading' => 'Catalog',
-                    'body' => 'Browse services and products. Tap an item to add it to the cart. Filter by type or search by name.',
+                    'body' => 'Browse products. Tap an item to add it to the cart. Wash services are added on job cards and appear when you checkout from a job card.',
                 ],
                 [
                     'heading' => 'Checkout from job card',
@@ -242,15 +242,11 @@ return [
                 ],
                 [
                     'heading' => 'Services',
-                    'body' => 'Define individual services with price and estimated duration. Only active services appear on job cards and POS.',
-                ],
-                [
-                    'heading' => 'Packages',
-                    'body' => 'Bundle multiple services at a combined price for upsells and promotions.',
+                    'body' => 'Define individual services with price and estimated duration. Only active services appear on job cards.',
                 ],
                 [
                     'heading' => 'Pricing',
-                    'body' => 'Edit service prices from the Services list. Package prices are managed on the Packages screen. Price changes apply to new job cards and POS sales.',
+                    'body' => 'Edit service prices from the Services list. Price changes apply to new job cards and job card checkouts.',
                 ],
             ],
         ],
@@ -277,11 +273,11 @@ return [
                 ],
                 [
                     'heading' => 'Commissions overview',
-                    'body' => 'Attendees earn a percentage of each wash (default 30%). Supervisors do not earn per-wash commission. Enable commissions and set rate/trigger under Settings → Company.',
+                    'body' => 'Attendees earn a percentage of each wash (default 30%). Supervisors do not earn per-wash commission. Enable commissions, set rate/trigger, and choose daily or weekly payout under Settings → Company.',
                 ],
                 [
-                    'heading' => 'Daily commissions page',
-                    'body' => 'Staff → Commissions shows washer payouts for a selected day: earned total, pending payout, and wash count. Pick a date to review historical days. Missing commissions for completed washes are backfilled when you open the page.',
+                    'heading' => 'Commissions page',
+                    'body' => 'Staff → Commissions shows washer payouts for the selected day or week (based on your payout schedule): earned total, pending payout, and wash count. Pick a date to review historical periods. Missing commissions for completed washes are backfilled when you open the page.',
                 ],
                 [
                     'heading' => 'Commission detail',
@@ -289,7 +285,11 @@ return [
                 ],
                 [
                     'heading' => 'Paying washers',
-                    'body' => 'Mark Paid records a manual settlement for all pending commissions that day for one washer. Send M-Pesa opens an OTP flow: an authorization code is sent to the admin phone (user profile or company phone). Enter the OTP to trigger B2C payout to the washer. Employee and admin phones must be set.',
+                    'body' => 'Mark Paid records a manual settlement for all pending commissions in the current payout period for one washer. Send M-Pesa opens an OTP flow: an authorization code is sent to the admin phone (user profile or company phone). Enter the OTP to trigger B2C payout to the washer. Employee and admin phones must be set.',
+                ],
+                [
+                    'heading' => 'Payout schedule',
+                    'body' => 'Under Settings → Company, choose Daily to settle commissions every day, or Weekly to batch payouts Monday–Sunday. The commissions page and payout actions follow this schedule.',
                 ],
                 [
                     'heading' => 'Commission triggers',
@@ -323,7 +323,7 @@ return [
         [
             'title' => 'Sales records',
             'icon' => 'clipboard',
-            'summary' => 'Invoices, receipts, and refunds.',
+            'summary' => 'Invoices and receipts.',
             'topics' => [
                 [
                     'heading' => 'Invoices',
@@ -332,10 +332,6 @@ return [
                 [
                     'heading' => 'Receipts',
                     'body' => 'Browse receipts generated from POS and other payment flows. Open a receipt for print-friendly view.',
-                ],
-                [
-                    'heading' => 'Refunds',
-                    'body' => 'Process and review refunded transactions when customers return services or products.',
                 ],
             ],
         ],
@@ -366,6 +362,10 @@ return [
                 [
                     'heading' => 'Revenue report',
                     'body' => 'Filter by From and To dates for a full income breakdown: collected vs billed, today/week/month snapshots, outstanding balances, payment method split, services vs products, daily trend, top items, and recent invoices. Click This Month to reset to the current month.',
+                ],
+                [
+                    'heading' => 'Profit & Loss report',
+                    'body' => 'Shows money in (customer payments received), money out (washer commissions paid and supplier purchases received), and net profit for the period. Also includes operating profit (revenue collected minus commissions earned) and a daily net profit trend.',
                 ],
                 [
                     'heading' => 'Customer report',

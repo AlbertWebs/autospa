@@ -13,14 +13,12 @@ use App\Http\Controllers\ManifestController;
 use App\Http\Controllers\ManualController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OnboardingController;
-use App\Http\Controllers\PackageController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\ReceiptController;
-use App\Http\Controllers\RefundController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ServiceCategoryController;
 use App\Http\Controllers\ServiceController;
@@ -33,6 +31,7 @@ use App\Http\Controllers\Settings\RoleController;
 use App\Http\Controllers\Settings\TestGroundController;
 use App\Http\Controllers\Settings\UserController as SettingsUserController;
 use App\Http\Controllers\SyncController;
+use App\Http\Controllers\FixedAssetController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\ProfileController;
@@ -121,12 +120,10 @@ Route::middleware(['installed', 'auth', 'verified', 'branch'])->group(function (
     Route::middleware('permission:services.manage')->group(function () {
         Route::resource('services/categories', ServiceCategoryController::class)->except(['index', 'show'])->names('services.categories');
         Route::resource('services', ServiceController::class)->only(['create', 'store', 'edit', 'update', 'destroy'])->whereNumber('service');
-        Route::resource('packages', PackageController::class)->only(['create', 'store', 'edit', 'update', 'destroy'])->whereNumber('package');
     });
     Route::middleware('permission:services.view')->group(function () {
         Route::resource('services/categories', ServiceCategoryController::class)->only(['index', 'show'])->names('services.categories');
         Route::resource('services', ServiceController::class)->only(['index', 'show'])->whereNumber('service');
-        Route::resource('packages', PackageController::class)->only(['index', 'show'])->whereNumber('package');
     });
 
     Route::middleware('permission:bookings.manage')->group(function () {
@@ -157,13 +154,15 @@ Route::middleware(['installed', 'auth', 'verified', 'branch'])->group(function (
     Route::middleware('permission:inventory.manage')->group(function () {
         Route::resource('products', ProductController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
         Route::resource('suppliers', SupplierController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
+        Route::resource('fixed-assets', FixedAssetController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
         Route::resource('purchase-orders', PurchaseOrderController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
-        Route::resource('stock-movements', StockMovementController::class)->only(['create', 'store'])->whereNumber('stock_movement');
+        Route::post('stock-movements', [StockMovementController::class, 'store'])->name('stock-movements.store');
     });
     Route::middleware('permission:inventory.view')->group(function () {
         Route::get('products/low-stock', [ProductController::class, 'lowStock'])->name('products.low-stock');
         Route::resource('products', ProductController::class)->only(['index', 'show']);
         Route::resource('suppliers', SupplierController::class)->only(['index', 'show']);
+        Route::resource('fixed-assets', FixedAssetController::class)->only(['index', 'show']);
         Route::resource('purchase-orders', PurchaseOrderController::class)->only(['index', 'show']);
         Route::resource('stock-movements', StockMovementController::class)->only(['index', 'show'])->whereNumber('stock_movement');
     });
@@ -175,12 +174,10 @@ Route::middleware(['installed', 'auth', 'verified', 'branch'])->group(function (
     });
     Route::middleware('permission:sales.manage')->group(function () {
         Route::resource('invoices', InvoiceController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
-        Route::resource('refunds', RefundController::class)->only(['create', 'store']);
     });
     Route::middleware('permission:sales.view')->group(function () {
         Route::resource('invoices', InvoiceController::class)->only(['index', 'show']);
         Route::get('receipts', [ReceiptController::class, 'index'])->name('receipts.index');
-        Route::resource('refunds', RefundController::class)->only(['index', 'show']);
     });
     Route::middleware('permission:pos.access,sales.view')->get('receipts/{receipt}', [ReceiptController::class, 'show'])->name('receipts.show');
 
@@ -221,6 +218,7 @@ Route::middleware(['installed', 'auth', 'verified', 'branch'])->group(function (
         Route::get('reports/weekly', [ReportController::class, 'weekly'])->name('reports.weekly');
         Route::get('reports/monthly', [ReportController::class, 'monthly'])->name('reports.monthly');
         Route::get('reports/revenue', [ReportController::class, 'revenue'])->name('reports.revenue');
+        Route::get('reports/profit', [ReportController::class, 'profit'])->name('reports.profit');
         Route::get('reports/customers', [ReportController::class, 'customers'])->name('reports.customers');
         Route::get('reports/staff', [ReportController::class, 'staff'])->name('reports.staff');
         Route::get('reports/inventory', [ReportController::class, 'inventory'])->name('reports.inventory');

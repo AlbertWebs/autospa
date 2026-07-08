@@ -25,18 +25,13 @@ class StockMovementTimestampTest extends TestCase
         $this->seed([RoleSeeder::class, BranchSeeder::class]);
     }
 
-    public function test_stock_movements_create_route_is_not_captured_by_show_route(): void
+    public function test_stock_movements_create_page_is_removed(): void
     {
         $user = $this->makeUserWithRole(RoleSlug::Manager);
 
-        $response = $this->actingAs($user)->get(route('stock-movements.create', [
-            'type' => 'in',
-            'product_id' => 1,
-            'return' => 'products',
-        ]));
-
-        $response->assertOk();
-        $response->assertSee('Add Stock');
+        $this->actingAs($user)
+            ->get('/stock-movements/create')
+            ->assertNotFound();
     }
 
     public function test_products_page_includes_add_stock_modal(): void

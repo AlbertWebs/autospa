@@ -21,6 +21,7 @@ class ReceiptController extends Controller
     {
         return view('receipts.show', [
             'receipt' => $receipt->load([
+                'branch',
                 'invoice.customer',
                 'invoice.vehicle',
                 'invoice.items',

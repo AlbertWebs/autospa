@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Enums\PaymentMethodType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class PosCheckoutRequest extends FormRequest
 {
@@ -36,5 +37,23 @@ class PosCheckoutRequest extends FormRequest
             'items.*.unit_price' => ['required', 'numeric', 'min:0'],
             'items.*.total' => ['required', 'numeric', 'min:0'],
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator): void {
+            if ($this->filled('job_card_id')) {
+                return;
+            }
+
+            foreach ($this->input('items', []) as $index => $item) {
+                if (($item['item_type'] ?? '') === 'service') {
+                    $validator->errors()->add(
+                        "items.{$index}.item_type",
+                        'Add wash services on the job card, then checkout from the job card.',
+                    );
+                }
+            }
+        });
     }
 }

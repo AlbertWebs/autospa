@@ -29,11 +29,17 @@
         </div>
     </div>
 
+    @php
+        $today = now()->toDateString();
+    @endphp
+
     <div class="asp-mobile-kpi-grid mb-6">
         <x-mobile.stat-tile variant="revenue" label="Today's Revenue" icon="payments"
-            :value="'KES ' . number_format($stats['today_revenue'], 0)" />
+            :value="'KES ' . number_format($stats['today_revenue'], 0)"
+            :href="route('mobile.reports.daily', ['date' => $today])" />
         <x-mobile.stat-tile variant="bookings" label="Bookings" icon="calendar_month"
-            :value="$stats['today_bookings']" />
+            :value="$stats['today_bookings']"
+            :href="route('mobile.bookings.index', ['date' => $today])" />
         <x-mobile.stat-tile variant="service" label="In Service" icon="build"
             :value="$stats['vehicles_in_service']"
             :href="route('mobile.job-cards.live')" />
@@ -41,7 +47,9 @@
             :value="$stats['vehicles_ready']"
             :href="route('mobile.vehicles.ready')" />
         <x-mobile.stat-tile variant="payments" label="Pending" icon="account_balance_wallet"
-            :value="'KES ' . number_format($stats['pending_payments'], 0)" />
+            :value="'KES ' . number_format($stats['pending_payments'], 0)"
+            :hint="'KES ' . number_format($stats['pending_commissions'] ?? 0, 0) . ' comm. · KES ' . number_format($stats['pending_supplier_payments'] ?? 0, 0) . ' sup.'"
+            :href="route('mobile.commissions.index')" />
         <x-mobile.stat-tile variant="stock" label="Low Stock" icon="inventory_2"
             :value="$stats['low_stock_count']"
             :href="route('mobile.products.low-stock')" />

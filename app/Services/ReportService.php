@@ -11,6 +11,7 @@ use App\Models\InvoiceItem;
 use App\Models\JobCard;
 use App\Models\Payment;
 use App\Models\Product;
+use App\Models\PurchaseOrder;
 use App\Models\StockMovement;
 use App\Models\Attendance;
 use App\Enums\BookingStatus;
@@ -315,14 +316,24 @@ class ReportService
             ->groupBy('job_cards.assigned_to')
             ->pluck('revenue', 'employee_id');
 
-        $commissionsByEmployee = Commission::query()
+        $commissionRows = Commission::query()
             ->where('branch_id', $branchId)
             ->whereBetween('earned_on', [$from->toDateString(), $to->toDateString()])
-            ->selectRaw('employee_id, SUM(amount) as total')
+            ->selectRaw(
+                'employee_id, SUM(amount) as total, SUM(CASE WHEN status = ? THEN amount ELSE 0 END) as paid, SUM(CASE WHEN status = ? THEN amount ELSE 0 END) as pending',
+                ['paid', 'pending']
+            )
             ->groupBy('employee_id')
-            ->pluck('total', 'employee_id');
+            ->get()
+            ->keyBy('employee_id');
+
+        $commissionsByEmployee = $commissionRows->map(fn ($row) => (float) $row->total);
+        $paidCommissionsByEmployee = $commissionRows->map(fn ($row) => (float) $row->paid);
+        $pendingCommissionsByEmployee = $commissionRows->map(fn ($row) => (float) $row->pending);
 
         $totalCommissions = (float) $commissionsByEmployee->sum();
+        $totalCommissionsPaid = (float) $paidCommissionsByEmployee->sum();
+        $totalCommissionsPending = (float) $pendingCommissionsByEmployee->sum();
 
         $completionTimes = JobCard::query()
             ->where('branch_id', $branchId)
@@ -354,6 +365,8 @@ class ReportService
             $inProgressByEmployee,
             $revenueByEmployee,
             $commissionsByEmployee,
+            $paidCommissionsByEmployee,
+            $pendingCommissionsByEmployee,
             $completionTimes,
             $attendanceByEmployee,
         ) {
@@ -363,6 +376,8 @@ class ReportService
                 'in_progress' => (int) ($inProgressByEmployee[$employee->id] ?? 0),
                 'revenue' => (float) ($revenueByEmployee[$employee->id] ?? 0),
                 'commissions' => (float) ($commissionsByEmployee[$employee->id] ?? 0),
+                'commissions_paid' => (float) ($paidCommissionsByEmployee[$employee->id] ?? 0),
+                'commissions_pending' => (float) ($pendingCommissionsByEmployee[$employee->id] ?? 0),
                 'avg_minutes' => $completionTimes[$employee->id] ?? null,
                 'attendance_days' => (int) ($attendanceByEmployee[$employee->id] ?? 0),
             ];
@@ -428,6 +443,8 @@ class ReportService
             'unassigned_completed' => $unassignedCompleted,
             'period_revenue' => $periodRevenue,
             'total_commissions' => $totalCommissions,
+            'total_commissions_paid' => $totalCommissionsPaid,
+            'total_commissions_pending' => $totalCommissionsPending,
             'avg_jobs_per_productive' => $productiveCount > 0
                 ? round($assignedCompleted / $productiveCount, 1)
                 : 0.0,
@@ -493,6 +510,223 @@ class ReportService
             'stock_in_quantity' => $movements->where('type', 'in')->sum('quantity'),
             'movements' => $movements,
             'stock_positions' => $stockPositions,
+        ];
+    }
+
+    public function profit(?int $branchId = null, ?Carbon $from = null, ?Carbon $to = null): array
+    {
+        $branchId = $branchId ?? $this->branchService->currentBranchId();
+        $from = $from ?? now()->copy()->startOfMonth()->startOfDay();
+        $to = $to ?? now()->copy()->endOfDay();
+
+        $paymentsQuery = Payment::query()
+            ->where('branch_id', $branchId)
+            ->where('status', 'completed')
+            ->where(function ($query) use ($from, $to) {
+                $query->whereBetween('paid_at', [$from, $to])
+                    ->orWhere(function ($fallback) use ($from, $to) {
+                        $fallback->whereNull('paid_at')
+                            ->whereBetween('created_at', [$from, $to]);
+                    });
+            });
+
+        $moneyIn = (float) (clone $paymentsQuery)->sum('amount');
+        $paymentCount = (int) (clone $paymentsQuery)->count();
+
+        $moneyInByMethod = Payment::query()
+            ->where('branch_id', $branchId)
+            ->where('status', 'completed')
+            ->where(function ($query) use ($from, $to) {
+                $query->whereBetween('paid_at', [$from, $to])
+                    ->orWhere(function ($fallback) use ($from, $to) {
+                        $fallback->whereNull('paid_at')
+                            ->whereBetween('created_at', [$from, $to]);
+                    });
+            })
+            ->selectRaw('method, SUM(amount) as total, COUNT(*) as payment_count')
+            ->groupBy('method')
+            ->orderByDesc('total')
+            ->get()
+            ->map(function ($row) {
+                $methodValue = $row->method instanceof PaymentMethodType
+                    ? $row->method->value
+                    : (string) $row->method;
+
+                return [
+                    'label' => PaymentMethodType::tryFrom($methodValue)?->label() ?? ucfirst($methodValue),
+                    'total' => (float) $row->total,
+                    'count' => (int) $row->payment_count,
+                ];
+            })
+            ->values();
+
+        $commissionsPaidQuery = Commission::query()
+            ->where('branch_id', $branchId)
+            ->where('status', 'paid')
+            ->whereBetween('paid_at', [$from, $to]);
+
+        $commissionsPaid = (float) (clone $commissionsPaidQuery)->sum('amount');
+        $commissionsPaidCount = (int) (clone $commissionsPaidQuery)->count();
+
+        $supplierPurchasesQuery = PurchaseOrder::query()
+            ->where('branch_id', $branchId)
+            ->whereNotNull('received_at')
+            ->whereBetween('received_at', [$from->toDateString(), $to->toDateString()]);
+
+        $supplierPurchases = (float) (clone $supplierPurchasesQuery)->sum('total_amount');
+        $supplierPurchaseCount = (int) (clone $supplierPurchasesQuery)->count();
+
+        $moneyOutBreakdown = collect([
+            [
+                'key' => 'commissions_paid',
+                'label' => 'Washer commissions paid',
+                'total' => $commissionsPaid,
+                'count' => $commissionsPaidCount,
+            ],
+            [
+                'key' => 'supplier_purchases',
+                'label' => 'Supplier purchases received',
+                'total' => $supplierPurchases,
+                'count' => $supplierPurchaseCount,
+            ],
+        ])->filter(fn (array $row) => $row['total'] > 0 || $row['count'] > 0)->values();
+
+        $moneyOut = $commissionsPaid + $supplierPurchases;
+        $netProfit = $moneyIn - $moneyOut;
+
+        $revenueCollected = $this->revenueForPeriod($branchId, $from, $to);
+        $commissionsEarned = CommissionSettings::enabled()
+            ? (float) Commission::query()
+                ->where('branch_id', $branchId)
+                ->whereDate('earned_on', '>=', $from->toDateString())
+                ->whereDate('earned_on', '<=', $to->toDateString())
+                ->sum('amount')
+            : 0.0;
+        $commissionsPending = CommissionSettings::enabled()
+            ? (float) Commission::query()
+                ->where('branch_id', $branchId)
+                ->where('status', 'pending')
+                ->whereDate('earned_on', '>=', $from->toDateString())
+                ->whereDate('earned_on', '<=', $to->toDateString())
+                ->sum('amount')
+            : 0.0;
+        $operatingProfit = $revenueCollected - $commissionsEarned;
+
+        $paymentDays = Payment::query()
+            ->where('branch_id', $branchId)
+            ->where('status', 'completed')
+            ->where(function ($query) use ($from, $to) {
+                $query->whereBetween('paid_at', [$from, $to])
+                    ->orWhere(function ($fallback) use ($from, $to) {
+                        $fallback->whereNull('paid_at')
+                            ->whereBetween('created_at', [$from, $to]);
+                    });
+            })
+            ->selectRaw("DATE(COALESCE(paid_at, created_at)) as day, SUM(amount) as total, COUNT(*) as payments")
+            ->groupBy('day')
+            ->orderBy('day')
+            ->get()
+            ->keyBy('day');
+
+        $commissionPaidDays = Commission::query()
+            ->where('branch_id', $branchId)
+            ->where('status', 'paid')
+            ->whereBetween('paid_at', [$from, $to])
+            ->selectRaw('DATE(paid_at) as day, SUM(amount) as total')
+            ->groupBy('day')
+            ->orderBy('day')
+            ->get()
+            ->keyBy('day');
+
+        $supplierDays = PurchaseOrder::query()
+            ->where('branch_id', $branchId)
+            ->whereNotNull('received_at')
+            ->whereBetween('received_at', [$from->toDateString(), $to->toDateString()])
+            ->selectRaw('DATE(received_at) as day, SUM(total_amount) as total')
+            ->groupBy('day')
+            ->orderBy('day')
+            ->get()
+            ->keyBy('day');
+
+        $allDays = $paymentDays->keys()
+            ->merge($commissionPaidDays->keys())
+            ->merge($supplierDays->keys())
+            ->unique()
+            ->sort()
+            ->values();
+
+        $dailyTrend = $allDays->map(function (string $day) use ($paymentDays, $commissionPaidDays, $supplierDays) {
+            $moneyIn = (float) ($paymentDays[$day]->total ?? 0);
+            $moneyOut = (float) ($commissionPaidDays[$day]->total ?? 0) + (float) ($supplierDays[$day]->total ?? 0);
+
+            return [
+                'day' => $day,
+                'label' => Carbon::parse($day)->format('M j'),
+                'money_in' => $moneyIn,
+                'money_out' => $moneyOut,
+                'net_profit' => $moneyIn - $moneyOut,
+            ];
+        });
+
+        $maxDailyNet = max(1.0, (float) $dailyTrend->max('net_profit') ?: 1);
+        $maxMoneyIn = max(1.0, (float) $moneyInByMethod->max('total') ?: 1);
+        $maxMoneyOut = max(1.0, (float) $moneyOutBreakdown->max('total') ?: 1);
+
+        $recentPayments = Payment::query()
+            ->with(['customer', 'paymentMethod'])
+            ->where('branch_id', $branchId)
+            ->where('status', 'completed')
+            ->where(function ($query) use ($from, $to) {
+                $query->whereBetween('paid_at', [$from, $to])
+                    ->orWhere(function ($fallback) use ($from, $to) {
+                        $fallback->whereNull('paid_at')
+                            ->whereBetween('created_at', [$from, $to]);
+                    });
+            })
+            ->latest('paid_at')
+            ->latest('id')
+            ->limit(10)
+            ->get();
+
+        $recentCommissionPayouts = Commission::query()
+            ->with('employee')
+            ->where('branch_id', $branchId)
+            ->where('status', 'paid')
+            ->whereBetween('paid_at', [$from, $to])
+            ->latest('paid_at')
+            ->limit(10)
+            ->get();
+
+        $recentSupplierPurchases = PurchaseOrder::query()
+            ->with('supplier')
+            ->where('branch_id', $branchId)
+            ->whereNotNull('received_at')
+            ->whereBetween('received_at', [$from->toDateString(), $to->toDateString()])
+            ->latest('received_at')
+            ->limit(10)
+            ->get();
+
+        return [
+            'from' => $from->toDateString(),
+            'to' => $to->toDateString(),
+            'money_in' => $moneyIn,
+            'money_in_count' => $paymentCount,
+            'money_in_breakdown' => $moneyInByMethod,
+            'money_out' => $moneyOut,
+            'money_out_breakdown' => $moneyOutBreakdown,
+            'net_profit' => $netProfit,
+            'revenue_collected' => $revenueCollected,
+            'commissions_earned' => $commissionsEarned,
+            'commissions_pending' => $commissionsPending,
+            'operating_profit' => $operatingProfit,
+            'commissions_enabled' => CommissionSettings::enabled(),
+            'daily_trend' => $dailyTrend,
+            'max_daily_net' => $maxDailyNet,
+            'max_money_in' => $maxMoneyIn,
+            'max_money_out' => $maxMoneyOut,
+            'recent_payments' => $recentPayments,
+            'recent_commission_payouts' => $recentCommissionPayouts,
+            'recent_supplier_purchases' => $recentSupplierPurchases,
         ];
     }
 

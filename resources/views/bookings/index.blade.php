@@ -2,19 +2,22 @@
     use App\Enums\BookingStatus;
     use App\Enums\BookingType;
 
-    $dayQuery = ['date' => $filters['date']];
+    $dayQuery = filled($filters['date'] ?? null) ? ['date' => $filters['date']] : [];
+    $createParams = filled($filters['date'] ?? null)
+        ? ['scheduled_at' => $filters['date']]
+        : [];
 @endphp
 
 <x-ui.index-page
     eyebrow="Operations"
     title="Bookings"
-    :subtitle="'Bookings for ' . $selectedDate->format('l, F j, Y') . '.'"
-    :create-route="route('bookings.create', ['scheduled_at' => $filters['date']])"
+    :subtitle="$selectedDate ? 'Bookings for ' . $selectedDate->format('l, F j, Y') . '.' : 'All bookings for this branch.'"
+    :create-route="route('bookings.create', $createParams)"
     create-label="New Booking"
 >
     <form method="GET" action="{{ route('bookings.index') }}" class="mb-6 rounded-2xl border border-slate-200/80 bg-white p-4 dark:border-brand-border/60 dark:bg-brand-surface-high">
         <div class="grid gap-4 md:grid-cols-4">
-            <x-ui.form-field label="Date" for="booking_date" hint="Show bookings scheduled on this day.">
+            <x-ui.form-field label="Date" for="booking_date" hint="Optional — leave empty to show all bookings.">
                 <x-ui.input id="booking_date" name="date" type="date" :value="$filters['date']" />
             </x-ui.form-field>
 
@@ -54,7 +57,7 @@
         :paginator="$bookings"
         :empty="$bookings->isEmpty()"
         empty-title="No bookings found"
-        empty-description="No bookings are scheduled for this day. Try another date or status."
+        :empty-description="$selectedDate ? 'No bookings are scheduled for this day. Try another date or status.' : 'No bookings yet. Create one to get started.'"
     >
         <x-slot name="header">
             <x-ui.th>Customer</x-ui.th>

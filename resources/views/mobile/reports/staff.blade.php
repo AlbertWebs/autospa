@@ -16,6 +16,8 @@
         <x-mobile.stat-tile label="Completed" icon="task_alt" :value="number_format($report['jobs_completed'] ?? 0)" />
         <x-mobile.stat-tile label="In Progress" icon="autorenew" :value="number_format($report['jobs_in_progress'] ?? 0)" />
         <x-mobile.stat-tile label="Revenue" icon="payments" :value="'KES ' . number_format($report['period_revenue'] ?? 0, 0)" />
+        <x-mobile.stat-tile label="Commission" icon="savings" :value="'KES ' . number_format($report['total_commissions'] ?? 0, 0)" />
+        <x-mobile.stat-tile label="Pending" icon="schedule" :value="'KES ' . number_format($report['total_commissions_pending'] ?? 0, 0)" />
     </div>
 
     @if (($report['leaderboard'] ?? collect())->isNotEmpty())
@@ -26,7 +28,15 @@
                     <div class="flex items-center justify-between gap-3 text-sm">
                         <div class="min-w-0">
                             <p class="truncate font-semibold">{{ $index + 1 }}. {{ $row['employee']->full_name }}</p>
-                            <p class="text-xs text-slate-500">{{ $row['completed'] }} jobs · KES {{ number_format($row['revenue'], 0) }}</p>
+                            <p class="text-xs text-slate-500">
+                                {{ $row['completed'] }} jobs · KES {{ number_format($row['revenue'], 0) }} revenue
+                            </p>
+                            <p class="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                                KES {{ number_format($row['commissions'], 0) }} earned
+                                @if ($row['commissions_pending'] > 0)
+                                    <span class="text-amber-600 dark:text-amber-400">· KES {{ number_format($row['commissions_pending'], 0) }} pending</span>
+                                @endif
+                            </p>
                         </div>
                         @if ($row['in_progress'] > 0)
                             <x-ui.badge color="sky">{{ $row['in_progress'] }} active</x-ui.badge>

@@ -67,7 +67,6 @@ return [
         'children' => [
             ['label' => 'Categories', 'route' => 'services.categories.index', 'permission' => 'services.view'],
             ['label' => 'Services', 'route' => 'services.index', 'permission' => 'services.view'],
-            ['label' => 'Packages', 'route' => 'packages.index', 'permission' => 'services.view'],
         ],
     ],
     [
@@ -88,6 +87,7 @@ return [
             ['label' => 'Suppliers', 'route' => 'suppliers.index', 'permission' => 'inventory.view'],
             ['label' => 'Purchases', 'route' => 'purchase-orders.index', 'permission' => 'inventory.view'],
             ['label' => 'Stock Movement', 'route' => 'stock-movements.index', 'permission' => 'inventory.view'],
+            ['label' => 'Fixed Assets', 'route' => 'fixed-assets.index', 'permission' => 'inventory.view'],
             ['label' => 'Low Stock', 'route' => 'products.low-stock', 'permission' => 'inventory.view'],
         ],
     ],
@@ -99,7 +99,6 @@ return [
             ['label' => 'POS', 'route' => 'pos.index', 'permission' => 'pos.access'],
             ['label' => 'Invoices', 'route' => 'invoices.index', 'permission' => 'sales.view'],
             ['label' => 'Receipts', 'route' => 'receipts.index', 'permission' => 'sales.view', 'minimalist' => true],
-            ['label' => 'Refunds', 'route' => 'refunds.index', 'permission' => 'sales.view'],
         ],
     ],
     [
@@ -121,6 +120,7 @@ return [
             ['label' => 'Weekly', 'route' => 'reports.weekly', 'permission' => 'reports.view'],
             ['label' => 'Monthly', 'route' => 'reports.monthly', 'permission' => 'reports.view'],
             ['label' => 'Revenue', 'route' => 'reports.revenue', 'permission' => 'reports.view'],
+            ['label' => 'Profit & Loss', 'route' => 'reports.profit', 'permission' => 'reports.view'],
             ['label' => 'Customers', 'route' => 'reports.customers', 'permission' => 'reports.view'],
             ['label' => 'Staff', 'route' => 'reports.staff', 'permission' => 'reports.view'],
             ['label' => 'Job Cards', 'route' => 'reports.job-cards', 'permission' => 'reports.view'],

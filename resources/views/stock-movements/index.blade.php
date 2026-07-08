@@ -1,15 +1,13 @@
 <x-ui.index-page
     eyebrow="Inventory"
     title="Stock Movements"
-    subtitle="Track stock in and out across your inventory."
-    :create-route="route('stock-movements.create')"
-    create-label="Record Movement"
+    subtitle="Audit trail of stock changes. Add stock from the Products page."
 >
     <x-ui.data-table
         :paginator="$movements"
         :empty="$movements->isEmpty()"
         empty-title="No stock movements"
-        empty-description="Record stock in/out movements here."
+        empty-description="Stock changes appear here when you add stock from Products."
     >
         <x-slot name="header">
             <x-ui.th>Product</x-ui.th>

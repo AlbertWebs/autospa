@@ -6,6 +6,7 @@
             ['Weekly', 'mobile.reports.weekly', 'date_range'],
             ['Monthly', 'mobile.reports.monthly', 'calendar_month'],
             ['Revenue', 'mobile.reports.revenue', 'payments'],
+            ['Profit & Loss', 'mobile.reports.profit', 'trending_up'],
             ['Customers', 'mobile.reports.customers', 'group'],
             ['Staff', 'mobile.reports.staff', 'groups'],
             ['Job Cards', 'mobile.reports.job-cards', 'assignment'],

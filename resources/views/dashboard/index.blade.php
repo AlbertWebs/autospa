@@ -42,26 +42,39 @@
     </header>
 
     {{-- KPI grid --}}
+    @php
+        $today = now()->toDateString();
+    @endphp
     <div class="relative mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
         <x-ui.stat-card variant="revenue" label="Today's Revenue" icon="payments"
-            :value="'KES ' . number_format($stats['today_revenue'], 0)" hint="Collected today" />
+            :value="'KES ' . number_format($stats['today_revenue'], 0)" hint="Collected today"
+            :href="route('reports.daily', ['date' => $today])" />
         <x-ui.stat-card variant="bookings" label="Today's Bookings" icon="calendar_month"
-            :value="$stats['today_bookings']" hint="Scheduled & walk-ins" />
+            :value="$stats['today_bookings']" hint="Scheduled & walk-ins"
+            :href="route('bookings.index', ['date' => $today])" />
         <x-ui.stat-card variant="service" label="In Service" icon="build"
-            :value="$stats['vehicles_in_service']" hint="On the floor now" />
+            :value="$stats['vehicles_in_service']" hint="On the floor now"
+            :href="route('job-cards.in-progress')" />
         <x-ui.stat-card variant="ready" label="Ready for Pickup" icon="check_circle"
-            :value="$stats['vehicles_ready']" hint="Completed today" />
+            :value="$stats['vehicles_ready']" hint="Completed today"
+            :href="route('vehicles.ready')" />
         <x-ui.stat-card variant="payments" label="Pending Payments" icon="account_balance_wallet"
-            :value="'KES ' . number_format($stats['pending_payments'], 0)" hint="Outstanding balance" />
+            :value="'KES ' . number_format($stats['pending_payments'], 0)"
+            :hint="'KES ' . number_format($stats['pending_commissions'] ?? 0, 0) . ' commissions · KES ' . number_format($stats['pending_supplier_payments'] ?? 0, 0) . ' suppliers'"
+            :href="route('commissions.index')" />
         <x-ui.stat-card variant="stock" label="Low Stock" icon="inventory_2"
-            :value="$stats['low_stock_count']" :hint="$stats['low_stock_count'] > 0 ? 'Needs reorder' : 'All healthy'" />
+            :value="$stats['low_stock_count']" :hint="$stats['low_stock_count'] > 0 ? 'Needs reorder' : 'All healthy'"
+            :href="route('products.low-stock')" />
         @if ($stats['commissions_enabled'] ?? false)
             <x-ui.stat-card variant="payments" label="Today's Commissions" icon="savings"
-                :value="'KES ' . number_format($stats['today_commissions'], 0)" hint="KES {{ number_format($stats['today_commissions_pending'], 0) }} pending payout" />
+                :value="'KES ' . number_format($stats['today_commissions'], 0)" hint="KES {{ number_format($stats['today_commissions_pending'], 0) }} pending payout"
+                :href="route('commissions.index', ['date' => $today])" />
             <x-ui.stat-card variant="revenue" label="Net Profit" icon="trending_up"
-                :value="'KES ' . number_format($stats['today_net_profit'], 0)" hint="Today's revenue minus commissions" />
+                :value="'KES ' . number_format($stats['today_net_profit'], 0)" hint="Today's revenue minus commissions earned"
+                :href="route('reports.profit', ['from' => $today, 'to' => $today])" />
             <x-ui.stat-card variant="bookings" label="Washers Today" icon="groups"
-                :value="$stats['today_washers']" hint="Staff who completed washes" />
+                :value="$stats['today_washers']" hint="Staff who completed washes"
+                :href="route('reports.staff', ['from' => $today, 'to' => $today])" />
         @endif
     </div>
 
@@ -89,7 +102,7 @@
                 <x-ui.quick-action href="{{ route('pos.index') }}" icon="point_of_sale" label="Open POS" description="Process a new sale" />
                 <x-ui.quick-action href="{{ route('bookings.walk-ins') }}" icon="directions_walk" label="New Walk-in" description="Register arrival" />
                 <x-ui.quick-action href="{{ route('vehicles.check-in') }}" icon="garage" label="Check In Vehicle" description="Start a job card" />
-                <x-ui.quick-action href="{{ route('commissions.index') }}" icon="savings" label="Daily Commissions" description="Pay washer commissions" />
+                <x-ui.quick-action href="{{ route('commissions.index') }}" icon="savings" :label="\App\Support\CommissionSettings::commissionsPageTitle()" description="Pay washer commissions" />
                 <x-ui.quick-action href="{{ route('customers.create') }}" icon="person_add" label="Add Customer" description="New client profile" />
             </div>
         </x-ui.panel>

@@ -20,13 +20,6 @@
         ];
     })->values();
 
-    $servicesJson = $services->map(fn ($s) => [
-        'id' => $s->id,
-        'name' => $s->name,
-        'price' => (float) $s->price,
-        'category' => $s->category?->name,
-    ])->values();
-
     $productsJson = $products->map(fn ($p) => [
         'id' => $p->id,
         'name' => $p->name,
@@ -47,7 +40,6 @@
         initialCustomerIds: @js($customersJson->pluck('id')->values()->all()),
         customerStoreUrl: @js(route('customers.store')),
         stkPushUrl: @js(route('pos.stk-push')),
-        services: @js($servicesJson),
         products: @js($productsJson),
         paymentMethods: @js($paymentMethodsJson),
         defaultCustomerId: @js(old('customer_id', ($jobCardCart ?? [])['customer_id'] ?? (($jobCardCart ?? [])['customer']['id'] ?? null) ?? $customers->first()?->id ?? '')),
@@ -88,22 +80,23 @@
             <div class="asp-panel overflow-hidden">
                 <div class="asp-panel-header">
                     <div>
-                        <h2 class="asp-panel-title">Catalog</h2>
-                        <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Tap an item to add it to the cart.</p>
+                        <h2 class="asp-panel-title">Products</h2>
+                        <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                            @if (! empty($jobCardCart))
+                                Add retail products to this job card checkout. Wash services come from the job card.
+                            @else
+                                Sell retail and consumable products. Add wash services on a job card first.
+                            @endif
+                        </p>
                     </div>
                     <span class="material-symbols-outlined text-brand-primary-dim dark:text-brand-primary">storefront</span>
                 </div>
 
                 <div class="border-b border-slate-200/80 px-5 py-4 dark:border-brand-border/60">
                     <div class="asp-pos-toolbar">
-                        <div class="asp-pos-tabs">
-                            <button type="button" class="asp-pos-tab" x-bind:class="{ 'asp-pos-tab--active': catalogTab === 'all' }" @click="catalogTab = 'all'">All</button>
-                            <button type="button" class="asp-pos-tab" x-bind:class="{ 'asp-pos-tab--active': catalogTab === 'service' }" @click="catalogTab = 'service'">Services</button>
-                            <button type="button" class="asp-pos-tab" x-bind:class="{ 'asp-pos-tab--active': catalogTab === 'product' }" @click="catalogTab = 'product'">Products</button>
-                        </div>
-                        <div class="asp-pos-search-wrap">
+                        <div class="asp-pos-search-wrap asp-pos-search-wrap--full">
                             <span class="material-symbols-outlined asp-pos-search-icon">search</span>
-                            <input type="search" x-model="search" placeholder="Search catalog…" class="asp-pos-search" />
+                            <input type="search" x-model="search" placeholder="Search products…" class="asp-pos-search" />
                         </div>
                     </div>
                 </div>
@@ -112,9 +105,8 @@
                     <template x-for="item in filteredItems" :key="item.itemType + '-' + item.id">
                         <button type="button" class="group asp-pos-tile" @click="addItem(item)">
                             <span class="asp-pos-tile-add material-symbols-outlined text-lg">add</span>
-                            <span class="asp-pos-tile-type" x-bind:class="item.itemType === 'service' ? 'asp-pos-tile-type--service' : 'asp-pos-tile-type--product'" x-text="item.itemType"></span>
+                            <span class="asp-pos-tile-type asp-pos-tile-type--product">product</span>
                             <span class="asp-pos-tile-name" x-text="item.name"></span>
-                            <span class="asp-pos-tile-meta" x-show="item.category" x-text="item.category" x-cloak></span>
                             <span class="asp-pos-tile-meta" x-show="item.sku" x-text="item.sku" x-cloak></span>
                             <span class="asp-pos-tile-price">KES <span x-text="formatMoney(item.price)"></span></span>
                         </button>
@@ -125,7 +117,7 @@
                     <div class="asp-pos-empty">
                         <span class="material-symbols-outlined mb-2 text-3xl text-slate-300">inventory_2</span>
                         <p class="text-sm font-medium text-slate-600 dark:text-slate-300">No items found</p>
-                        <p class="mt-1 text-xs text-slate-500">Try a different search or tab.</p>
+                        <p class="mt-1 text-xs text-slate-500">Try a different search term.</p>
                     </div>
                 </div>
             </div>
@@ -187,7 +179,13 @@
                         <p class="font-mono text-[10px] font-semibold uppercase tracking-widest text-slate-400">Checkout Steps</p>
                         <ol class="mt-2 space-y-1 text-sm text-slate-600 dark:text-slate-300">
                             <li>1. Select or create a customer.</li>
-                            <li>2. Add services or products to the cart.</li>
+                            <li>
+                                2. Add products to the cart
+                                @if (! empty($jobCardCart))
+                                    (services are already on this job card)
+                                @endif
+                                .
+                            </li>
                             <li>3. Choose a payment method.</li>
                             <li>4. Complete the sale to issue a receipt.</li>
                         </ol>
@@ -243,12 +241,19 @@
                         <template x-for="(item, index) in cart" :key="index">
                             <div class="asp-pos-line">
                                 <div class="asp-pos-line-info">
-                                    <p class="asp-pos-line-name" x-text="item.name"></p>
+                                    <p class="asp-pos-line-name">
+                                        <span x-text="item.name"></span>
+                                        <span
+                                            x-show="isLockedLine(item)"
+                                            x-cloak
+                                            class="ml-1 rounded bg-sky-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-sky-700 dark:bg-sky-900 dark:text-sky-200"
+                                        >Job card</span>
+                                    </p>
                                     <p class="asp-pos-line-meta">KES <span x-text="formatMoney(item.price)"></span> each</p>
                                 </div>
                                 <div class="flex flex-col items-end gap-2">
                                     <div class="asp-pos-qty">
-                                        <button type="button" class="asp-pos-qty-btn rounded-l-lg" @click="decrementItem(index)">
+                                        <button type="button" class="asp-pos-qty-btn rounded-l-lg" x-bind:disabled="isLockedLine(item)" @click="decrementItem(index)">
                                             <span class="material-symbols-outlined text-base">remove</span>
                                         </button>
                                         <span class="asp-pos-qty-value" x-text="item.qty"></span>
@@ -256,7 +261,7 @@
                                             <span class="material-symbols-outlined text-base">add</span>
                                         </button>
                                     </div>
-                                    <button type="button" class="text-xs text-rose-500" @click="removeItem(index)">Remove</button>
+                                    <button type="button" class="text-xs text-rose-500" x-show="!isLockedLine(item)" x-cloak @click="removeItem(index)">Remove</button>
                                 </div>
                             </div>
                         </template>

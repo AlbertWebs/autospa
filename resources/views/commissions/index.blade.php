@@ -5,21 +5,37 @@
         csrfToken: @js(csrf_token()),
     })"
 >
+@php
+    use App\Support\CommissionSettings;
+
+    $pageTitle = CommissionSettings::commissionsPageTitle();
+    $pageSubtitle = CommissionSettings::commissionsPageSubtitle();
+    $isWeekly = CommissionSettings::isWeeklyPayout();
+    $settlementHint = $isWeekly ? 'Awaiting weekly settlement' : 'Awaiting daily settlement';
+    $earnedHint = $date->isToday() && ! $isWeekly
+        ? 'All washer commissions today'
+        : ($isWeekly ? 'All washer commissions this week' : 'All washer commissions on this day');
+    $washersHint = $date->isToday() && ! $isWeekly
+        ? 'Completed washes today'
+        : ($isWeekly ? 'Completed washes this week' : 'Completed washes on this day');
+@endphp
 <x-ui.index-page
-    eyebrow="Daily Commissions"
-    title="Daily Commissions"
-    subtitle="Washers earn commission after each wash. Payouts are settled daily."
+    :eyebrow="$pageTitle"
+    :title="$pageTitle"
+    :subtitle="$pageSubtitle"
 >
     <x-slot name="actions">
         <form method="GET" action="{{ route('commissions.index') }}" class="flex items-center gap-2">
+            <label class="sr-only" for="commission-period-date">{{ $isWeekly ? 'Week containing' : 'Date' }}</label>
             <input
+                id="commission-period-date"
                 type="date"
                 name="date"
                 value="{{ $date->toDateString() }}"
                 class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-brand-border dark:bg-brand-surface"
             >
             <button type="submit" class="rounded-xl bg-brand-primary px-4 py-2 text-sm font-semibold text-brand-on-primary">
-                View day
+                {{ $isWeekly ? 'View week' : 'View day' }}
             </button>
         </form>
     </x-slot>
@@ -44,14 +60,14 @@
 
     <div class="mb-6 grid gap-4 sm:grid-cols-3">
         <x-ui.stat-card variant="payments" label="Earned" icon="payments"
-            :value="'KES ' . number_format($totals['earned'], 0)" :hint="$date->isToday() ? 'All washer commissions today' : 'All washer commissions on this day'" />
+            :value="'KES ' . number_format($totals['earned'], 0)" :hint="$earnedHint" />
         <x-ui.stat-card variant="revenue" label="Pending Payout" icon="schedule"
-            :value="'KES ' . number_format($totals['pending'], 0)" hint="Awaiting daily settlement" />
+            :value="'KES ' . number_format($totals['pending'], 0)" :hint="$settlementHint" />
         <x-ui.stat-card variant="service" label="Washers" icon="groups"
-            :value="$totals['washers']" :hint="$date->isToday() ? 'Completed washes today' : 'Completed washes on this day'" />
+            :value="$totals['washers']" :hint="$washersHint" />
     </div>
 
-    <x-ui.panel title="Washer payouts · {{ $date->format('l, M j, Y') }}" class="mb-8">
+    <x-ui.panel title="Washer payouts · {{ $periodLabel }}" class="mb-8">
         <div class="overflow-x-auto">
             <table class="min-w-full text-sm">
                 <thead>
@@ -130,7 +146,7 @@
         :paginator="$recentCommissions"
         :empty="$recentCommissions->isEmpty()"
         empty-title="No commission lines"
-        empty-description="Individual commission entries for this day will appear here."
+        empty-description="Individual commission entries for this {{ $isWeekly ? 'week' : 'day' }} will appear here."
     >
         <x-slot name="header">
             <x-ui.th>Washer</x-ui.th>

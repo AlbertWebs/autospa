@@ -28,7 +28,6 @@ class MobileNavigation
         'pos.index' => 'mobile.pos.index',
         'services.categories.index' => 'mobile.services.categories.index',
         'services.index' => 'mobile.services.index',
-        'packages.index' => 'mobile.packages.index',
         'employees.index' => 'mobile.employees.index',
         'attendance.index' => 'mobile.attendance.index',
         'performance.index' => 'mobile.performance.index',
@@ -38,9 +37,9 @@ class MobileNavigation
         'suppliers.index' => 'mobile.suppliers.index',
         'purchase-orders.index' => 'mobile.purchase-orders.index',
         'stock-movements.index' => 'mobile.stock-movements.index',
+        'fixed-assets.index' => 'mobile.fixed-assets.index',
         'invoices.index' => 'mobile.invoices.index',
         'receipts.index' => 'mobile.receipts.index',
-        'refunds.index' => 'mobile.refunds.index',
         'payments.index' => 'mobile.payments.index',
         'payments.cash' => 'mobile.payments.cash',
         'payments.mpesa' => 'mobile.payments.mpesa',
@@ -50,6 +49,7 @@ class MobileNavigation
         'reports.weekly' => 'mobile.reports.weekly',
         'reports.monthly' => 'mobile.reports.monthly',
         'reports.revenue' => 'mobile.reports.revenue',
+        'reports.profit' => 'mobile.reports.profit',
         'reports.customers' => 'mobile.reports.customers',
         'reports.staff' => 'mobile.reports.staff',
         'reports.job-cards' => 'mobile.reports.job-cards',
@@ -72,7 +72,7 @@ class MobileNavigation
             ['label' => 'Live', 'icon' => 'auto_awesome', 'route' => 'mobile.job-cards.live', 'permission' => 'job-cards.view', 'pattern' => 'mobile.job-cards.*'],
             ['label' => 'Bookings', 'icon' => 'calendar_month', 'route' => 'mobile.bookings.index', 'permission' => 'bookings.view', 'pattern' => 'mobile.bookings.*'],
             ['label' => 'POS', 'icon' => 'point_of_sale', 'route' => 'mobile.pos.index', 'permission' => 'pos.access', 'pattern' => 'mobile.pos.*'],
-            ['label' => 'More', 'icon' => 'grid_view', 'route' => 'mobile.menu', 'permission' => null, 'pattern' => 'mobile.menu|mobile.settings.*|mobile.reports.*|mobile.invoices.*|mobile.products.*|mobile.employees.*|mobile.services.*|mobile.suppliers.*|mobile.payments.*|mobile.receipts.*|mobile.refunds.*|mobile.commissions.*|mobile.attendance.*|mobile.performance.*|mobile.purchase-orders.*|mobile.stock-movements.*|mobile.customers.loyalty|mobile.customers.feedback'],
+            ['label' => 'More', 'icon' => 'grid_view', 'route' => 'mobile.menu', 'permission' => null, 'pattern' => 'mobile.menu|mobile.settings.*|mobile.reports.*|mobile.invoices.*|mobile.products.*|mobile.fixed-assets.*|mobile.employees.*|mobile.services.*|mobile.suppliers.*|mobile.payments.*|mobile.receipts.*|mobile.commissions.*|mobile.attendance.*|mobile.performance.*|mobile.purchase-orders.*|mobile.stock-movements.*|mobile.customers.loyalty|mobile.customers.feedback'],
         ];
 
         return array_values(array_filter($tabs, function (array $tab) use ($user) {

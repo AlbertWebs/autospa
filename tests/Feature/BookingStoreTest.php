@@ -28,7 +28,7 @@ class BookingStoreTest extends TestCase
         $this->seed([RoleSeeder::class, BranchSeeder::class]);
     }
 
-    public function test_manager_can_create_booking_and_see_it_on_index_for_scheduled_day(): void
+    public function test_manager_can_create_booking_and_see_it_on_index(): void
     {
         $user = $this->makeUserWithRole(RoleSlug::Manager);
         $branch = Branch::query()->firstOrFail();
@@ -51,14 +51,10 @@ class BookingStoreTest extends TestCase
             'notes' => 'Test booking',
         ]);
 
-        $response->assertRedirect(route('bookings.index', [
-            'date' => $scheduledAt->toDateString(),
-        ]));
+        $response->assertRedirect(route('bookings.index'));
         $response->assertSessionHas('success');
 
-        $index = $this->actingAs($user)->get(route('bookings.index', [
-            'date' => $scheduledAt->toDateString(),
-        ]));
+        $index = $this->actingAs($user)->get(route('bookings.index'));
 
         $index->assertOk();
         $index->assertSee($customer->full_name);
@@ -103,9 +99,7 @@ class BookingStoreTest extends TestCase
             'services' => [(string) $service->id],
         ]);
 
-        $response->assertRedirect(route('bookings.index', [
-            'date' => $scheduledAt->toDateString(),
-        ]));
+        $response->assertRedirect(route('bookings.index'));
 
         $this->assertDatabaseHas('booking_services', [
             'service_id' => $service->id,

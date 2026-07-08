@@ -5,6 +5,8 @@
     $commissionDefaultRatePercent = $commissionDefaultRatePercent ?? 0;
     $commissionTrigger = $commissionTrigger ?? 'job_completed';
     $commissionTriggerOptions = $commissionTriggerOptions ?? [];
+    $commissionPayoutCycle = $commissionPayoutCycle ?? 'daily';
+    $commissionPayoutCycleOptions = $commissionPayoutCycleOptions ?? [];
     $loyaltyEnabled = $loyaltyEnabled ?? true;
     $loyaltyWashesBeforeFree = $loyaltyWashesBeforeFree ?? 10;
     $attendanceEnabled = $attendanceEnabled ?? false;
@@ -86,6 +88,14 @@
             <x-ui.select id="commission_trigger" name="commission_trigger">
                 @foreach ($commissionTriggerOptions as $value => $label)
                     <option value="{{ $value }}" @selected(old('commission_trigger', $commissionTrigger) === $value)>{{ $label }}</option>
+                @endforeach
+            </x-ui.select>
+        </x-ui.form-field>
+
+        <x-ui.form-field label="Payout Schedule" for="commission_payout_cycle" name="commission_payout_cycle" hint="Whether washer commissions are settled every day or once per week (Monday–Sunday).">
+            <x-ui.select id="commission_payout_cycle" name="commission_payout_cycle">
+                @foreach ($commissionPayoutCycleOptions as $value => $label)
+                    <option value="{{ $value }}" @selected(old('commission_payout_cycle', $commissionPayoutCycle) === $value)>{{ $label }}</option>
                 @endforeach
             </x-ui.select>
         </x-ui.form-field>

@@ -52,6 +52,7 @@ class InventoryPagesTest extends TestCase
             'suppliers' => ['suppliers.index'],
             'purchase orders' => ['purchase-orders.index'],
             'stock movements' => ['stock-movements.index'],
+            'fixed assets' => ['fixed-assets.index'],
             'low stock' => ['products.low-stock'],
         ];
     }
@@ -62,7 +63,7 @@ class InventoryPagesTest extends TestCase
             'products' => ['products.create', 'Add Product'],
             'suppliers' => ['suppliers.create', 'Add Supplier'],
             'purchase orders' => ['purchase-orders.create', 'New Purchase Order'],
-            'stock movements' => ['stock-movements.create', 'Stock Movement Details'],
+            'fixed assets' => ['fixed-assets.create', 'Record Asset'],
         ];
     }
 

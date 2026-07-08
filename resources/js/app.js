@@ -270,6 +270,25 @@ Alpine.store('fullscreen', {
     },
 
     printDocument() {
+        document.body.classList.remove('asp-print-thermal');
+        this.runPrint();
+    },
+
+    printThermalDocument() {
+        document.body.classList.add('asp-print-thermal');
+
+        const pageStyle = document.createElement('style');
+        pageStyle.id = 'asp-thermal-print-page';
+        pageStyle.textContent = '@media print { @page { size: 80mm auto; margin: 2mm; } }';
+        document.head.appendChild(pageStyle);
+
+        this.runPrint(() => {
+            document.body.classList.remove('asp-print-thermal');
+            document.getElementById('asp-thermal-print-page')?.remove();
+        });
+    },
+
+    runPrint(onFinish) {
         const shouldRestore = this.preferred();
         let finished = false;
 
@@ -281,6 +300,7 @@ Alpine.store('fullscreen', {
             finished = true;
             this.printing = false;
             window.removeEventListener('afterprint', finishPrint);
+            onFinish?.();
 
             if (shouldRestore) {
                 this.gestureRestoreAttached = false;
@@ -1380,13 +1400,11 @@ document.addEventListener('alpine:init', () => {
         jobCardVehicleLabel: '',
         paymentMethodId: '',
         showCheckoutGuide: true,
-        catalogTab: 'all',
         search: '',
         customers: config.customers ?? [],
         initialCustomerIds: (config.initialCustomerIds ?? []).map(String),
         customerStoreUrl: config.customerStoreUrl ?? '/customers',
         stkPushUrl: config.stkPushUrl ?? '/pos/stk-push',
-        services: config.services ?? [],
         products: config.products ?? [],
         paymentMethods: config.paymentMethods ?? [],
         showCustomerModal: false,
@@ -1462,15 +1480,6 @@ document.addEventListener('alpine:init', () => {
 
                 if (!data) {
                     return;
-                }
-
-                if (Array.isArray(data.services) && data.services.length > 0) {
-                    this.services = data.services.map((service) => ({
-                        id: service.id,
-                        name: service.name,
-                        price: parseFloat(service.price),
-                        category: service.category?.name ?? null,
-                    }));
                 }
 
                 if (Array.isArray(data.products) && data.products.length > 0) {
@@ -1645,19 +1654,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         get filteredItems() {
-            let items = [];
-
-            if (this.catalogTab === 'all' || this.catalogTab === 'service') {
-                items = items.concat(
-                    this.services.map((service) => ({ ...service, itemType: 'service' })),
-                );
-            }
-
-            if (this.catalogTab === 'all' || this.catalogTab === 'product') {
-                items = items.concat(
-                    this.products.map((product) => ({ ...product, itemType: 'product' })),
-                );
-            }
+            let items = this.products.map((product) => ({ ...product, itemType: 'product' }));
 
             if (this.search.trim()) {
                 const query = this.search.trim().toLowerCase();
@@ -1665,6 +1662,10 @@ document.addEventListener('alpine:init', () => {
             }
 
             return items;
+        },
+
+        isLockedLine(item) {
+            return Boolean(this.jobCardId) && item.itemType === 'service';
         },
 
         get itemCount() {
@@ -2024,7 +2025,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         decrementItem(index) {
-            if (!this.cart[index]) {
+            if (!this.cart[index] || this.isLockedLine(this.cart[index])) {
                 return;
             }
 
@@ -2037,6 +2038,10 @@ document.addEventListener('alpine:init', () => {
         },
 
         removeItem(index) {
+            if (this.isLockedLine(this.cart[index])) {
+                return;
+            }
+
             this.cart.splice(index, 1);
         },
 

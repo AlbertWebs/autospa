@@ -23,6 +23,7 @@ class CoreSeeder extends Seeder
             ['group' => 'commission', 'key' => 'enabled', 'value' => 'false'],
             ['group' => 'commission', 'key' => 'default_rate', 'value' => '0.30'],
             ['group' => 'commission', 'key' => 'trigger', 'value' => 'job_completed'],
+            ['group' => 'commission', 'key' => 'payout_cycle', 'value' => 'daily'],
             ['group' => 'loyalty', 'key' => 'enabled', 'value' => 'true'],
             ['group' => 'loyalty', 'key' => 'washes_before_free', 'value' => '10'],
             ['group' => 'attendance', 'key' => 'enabled', 'value' => 'false'],

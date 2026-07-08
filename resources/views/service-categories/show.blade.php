@@ -6,8 +6,8 @@
     <div class="mb-6">
         @include('partials.crud.show-actions', [
             'backRoute' => route('services.categories.index'),
-            'editRoute' => route('services.categories.edit', $category),
-            'deleteRoute' => route('services.categories.destroy', $category),
+            'editRoute' => route('services.categories.edit', ['category' => $category]),
+            'deleteRoute' => route('services.categories.destroy', ['category' => $category]),
             'deleteConfirm' => 'Delete this category?',
         ])
     </div>

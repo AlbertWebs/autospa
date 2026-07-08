@@ -1,7 +1,7 @@
 <x-layouts.app>
     <x-slot name="header"><span class="hidden sm:inline">Sales</span></x-slot>
 
-    <x-ui.section-header eyebrow="Sales" />
+    <x-ui.section-header eyebrow="Sales" class="print:hidden" />
 
     @php
         $routeAccess = app(\App\Support\RouteAccess::class);
@@ -33,6 +33,10 @@
             <button type="button" @click="$store.fullscreen.printDocument()" class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-medium text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-200 dark:ring-slate-700 dark:hover:bg-slate-800">
                 <span class="material-symbols-outlined text-base">print</span>
                 Print Receipt
+            </button>
+            <button type="button" @click="$store.fullscreen.printThermalDocument()" class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-medium text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-200 dark:ring-slate-700 dark:hover:bg-slate-800">
+                <span class="material-symbols-outlined text-base">receipt</span>
+                Print Thermal
             </button>
         </div>
 
@@ -136,5 +140,7 @@
                 </div>
             </div>
         </article>
+
+        @include('receipts._thermal')
     </div>
 </x-layouts.app>

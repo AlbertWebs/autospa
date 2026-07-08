@@ -7,10 +7,9 @@ use App\Models\Branch;
 use App\Models\Customer;
 use App\Models\Permission;
 use App\Models\PaymentMethod;
+use App\Models\Product;
 use App\Models\Receipt;
 use App\Models\Role;
-use App\Models\Service;
-use App\Models\ServiceCategory;
 use App\Models\User;
 use Database\Seeders\BranchSeeder;
 use Database\Seeders\RoleSeeder;
@@ -63,18 +62,12 @@ class PosPageTest extends TestCase
             'branch_id' => $branch->id,
         ]);
 
-        $category = ServiceCategory::query()->create([
+        $product = Product::query()->create([
             'branch_id' => $branch->id,
-            'name' => 'Wash Bay',
-            'is_active' => true,
-        ]);
-
-        $service = Service::query()->create([
-            'branch_id' => $branch->id,
-            'service_category_id' => $category->id,
-            'name' => 'Exterior Wash',
-            'price' => 1500,
-            'duration_minutes' => 30,
+            'name' => 'Air Freshener',
+            'sku' => 'AF-001',
+            'selling_price' => 1500,
+            'cost_price' => 800,
             'is_active' => true,
         ]);
 
@@ -87,9 +80,9 @@ class PosPageTest extends TestCase
             'tax_amount' => 0,
             'total_amount' => 1500,
             'items' => [[
-                'item_type' => 'service',
-                'item_id' => $service->id,
-                'description' => $service->name,
+                'item_type' => 'product',
+                'item_id' => $product->id,
+                'description' => $product->name,
                 'quantity' => 1,
                 'unit_price' => 1500,
                 'total' => 1500,
@@ -101,11 +94,12 @@ class PosPageTest extends TestCase
         $response->assertOk();
         $response->assertSee($receipt->receipt_number);
         $response->assertSee('Print Receipt');
+        $response->assertSee('Print Thermal');
         $this->assertDatabaseHas('invoice_items', [
             'invoice_id' => $receipt->invoice_id,
-            'item_type' => 'service',
-            'item_id' => $service->id,
-            'description' => 'Exterior Wash',
+            'item_type' => 'product',
+            'item_id' => $product->id,
+            'description' => 'Air Freshener',
         ]);
         $this->assertDatabaseHas('receipts', [
             'id' => $receipt->id,
@@ -137,18 +131,12 @@ class PosPageTest extends TestCase
             'branch_id' => $branch->id,
         ]);
 
-        $category = ServiceCategory::query()->create([
+        $product = Product::query()->create([
             'branch_id' => $branch->id,
-            'name' => 'Interior',
-            'is_active' => true,
-        ]);
-
-        $service = Service::query()->create([
-            'branch_id' => $branch->id,
-            'service_category_id' => $category->id,
-            'name' => 'Interior Vacuum',
-            'price' => 800,
-            'duration_minutes' => 20,
+            'name' => 'Interior Vacuum Kit',
+            'sku' => 'IVK-001',
+            'selling_price' => 800,
+            'cost_price' => 400,
             'is_active' => true,
         ]);
 
@@ -161,9 +149,9 @@ class PosPageTest extends TestCase
             'tax_amount' => 0,
             'total_amount' => 800,
             'items' => [[
-                'item_type' => 'service',
-                'item_id' => $service->id,
-                'description' => $service->name,
+                'item_type' => 'product',
+                'item_id' => $product->id,
+                'description' => $product->name,
                 'quantity' => 1,
                 'unit_price' => 800,
                 'total' => 800,
@@ -226,18 +214,12 @@ class PosPageTest extends TestCase
             'branch_id' => $branch->id,
         ]);
 
-        $category = ServiceCategory::query()->create([
+        $product = Product::query()->create([
             'branch_id' => $branch->id,
-            'name' => 'Express',
-            'is_active' => true,
-        ]);
-
-        $service = Service::query()->create([
-            'branch_id' => $branch->id,
-            'service_category_id' => $category->id,
-            'name' => 'Quick Wash',
-            'price' => 500,
-            'duration_minutes' => 15,
+            'name' => 'Quick Shine',
+            'sku' => 'QS-001',
+            'selling_price' => 500,
+            'cost_price' => 250,
             'is_active' => true,
         ]);
 
@@ -250,9 +232,9 @@ class PosPageTest extends TestCase
             'tax_amount' => 0,
             'total_amount' => 500,
             'items' => [[
-                'item_type' => 'service',
-                'item_id' => $service->id,
-                'description' => $service->name,
+                'item_type' => 'product',
+                'item_id' => $product->id,
+                'description' => $product->name,
                 'quantity' => 1,
                 'unit_price' => 500,
                 'total' => 500,
@@ -261,6 +243,60 @@ class PosPageTest extends TestCase
 
         $response->assertRedirect(route('pos.index'));
         $response->assertSessionHasErrors(['payment_method_id', 'method']);
+        $this->assertDatabaseCount('receipts', 0);
+    }
+
+    public function test_standalone_checkout_rejects_service_items(): void
+    {
+        $branch = Branch::query()->firstOrFail();
+        $role = Role::query()->where('slug', RoleSlug::Manager->value)->firstOrFail();
+        $paymentMethod = PaymentMethod::query()->where('slug', 'cash')->firstOrFail();
+
+        $user = User::factory()->create([
+            'branch_id' => $branch->id,
+            'email_verified_at' => now(),
+        ]);
+        $user->roles()->attach($role);
+
+        $customer = Customer::factory()->create([
+            'branch_id' => $branch->id,
+        ]);
+
+        $category = \App\Models\ServiceCategory::query()->create([
+            'branch_id' => $branch->id,
+            'name' => 'Wash Bay',
+            'is_active' => true,
+        ]);
+
+        $service = \App\Models\Service::query()->create([
+            'branch_id' => $branch->id,
+            'service_category_id' => $category->id,
+            'name' => 'Exterior Wash',
+            'price' => 1500,
+            'duration_minutes' => 30,
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($user)->from(route('pos.index'))->post(route('pos.store'), [
+            'customer_id' => $customer->id,
+            'payment_method_id' => $paymentMethod->id,
+            'method' => 'cash',
+            'subtotal' => 1500,
+            'discount_amount' => 0,
+            'tax_amount' => 0,
+            'total_amount' => 1500,
+            'items' => [[
+                'item_type' => 'service',
+                'item_id' => $service->id,
+                'description' => $service->name,
+                'quantity' => 1,
+                'unit_price' => 1500,
+                'total' => 1500,
+            ]],
+        ]);
+
+        $response->assertRedirect(route('pos.index'));
+        $response->assertSessionHasErrors('items.0.item_type');
         $this->assertDatabaseCount('receipts', 0);
     }
 }

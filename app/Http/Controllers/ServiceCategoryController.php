@@ -33,29 +33,29 @@ class ServiceCategoryController extends Controller
             ->with('success', 'Category created.');
     }
 
-    public function show(ServiceCategory $serviceCategory): View
+    public function show(ServiceCategory $category): View
     {
         return view('service-categories.show', [
-            'category' => $serviceCategory->load('services'),
+            'category' => $category->load('services'),
         ]);
     }
 
-    public function edit(ServiceCategory $serviceCategory): View
+    public function edit(ServiceCategory $category): View
     {
-        return view('service-categories.edit', ['category' => $serviceCategory]);
+        return view('service-categories.edit', ['category' => $category]);
     }
 
-    public function update(UpdateServiceCategoryRequest $request, ServiceCategory $serviceCategory): RedirectResponse
+    public function update(UpdateServiceCategoryRequest $request, ServiceCategory $category): RedirectResponse
     {
-        $serviceCategory->update($request->validated());
+        $category->update($request->validated());
 
         return redirect()->route('services.categories.index')
             ->with('success', 'Category updated.');
     }
 
-    public function destroy(ServiceCategory $serviceCategory): RedirectResponse
+    public function destroy(ServiceCategory $category): RedirectResponse
     {
-        $serviceCategory->delete();
+        $category->delete();
 
         return redirect()->route('services.categories.index')
             ->with('success', 'Category deleted.');

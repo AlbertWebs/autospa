@@ -9,10 +9,10 @@ use App\Models\Employee;
 use App\Models\Invoice;
 use App\Models\JobCard;
 use App\Models\Product;
+use App\Models\PurchaseOrder;
 use App\Enums\BookingStatus;
 use App\Enums\InvoiceStatus;
 use App\Enums\JobCardStatus;
-use App\Enums\VehicleStatus;
 use App\Support\CommissionSettings;
 
 use Illuminate\Support\Collection;
@@ -54,15 +54,34 @@ class DashboardService
                 ->where('status', JobCardStatus::Completed)
                 ->whereDate('completed_at', $today)
                 ->count(),
-            'pending_payments' => Invoice::query()
-                ->where('branch_id', $branchId)
-                ->whereIn('status', [InvoiceStatus::Issued, InvoiceStatus::PartiallyPaid])
-                ->sum('balance_due'),
+            ...$this->pendingPaymentStats($branchId),
             'low_stock_count' => Product::query()
                 ->where('branch_id', $branchId)
                 ->whereColumn('quantity_on_hand', '<=', 'minimum_level')
                 ->count(),
             ...$this->commissionStats($branchId, $today, $todayRevenue),
+        ];
+    }
+
+    /** @return array{pending_payments: float, pending_commissions: float, pending_supplier_payments: float} */
+    protected function pendingPaymentStats(int $branchId): array
+    {
+        $pendingCommissions = CommissionSettings::enabled()
+            ? (float) Commission::query()
+                ->where('branch_id', $branchId)
+                ->where('status', CommissionService::STATUS_PENDING)
+                ->sum('amount')
+            : 0.0;
+
+        $pendingSupplierPayments = (float) PurchaseOrder::query()
+            ->where('branch_id', $branchId)
+            ->where('status', 'ordered')
+            ->sum('total_amount');
+
+        return [
+            'pending_commissions' => $pendingCommissions,
+            'pending_supplier_payments' => $pendingSupplierPayments,
+            'pending_payments' => $pendingCommissions + $pendingSupplierPayments,
         ];
     }
 
@@ -212,6 +231,8 @@ class DashboardService
             'vehicles_in_service' => 0,
             'vehicles_ready' => 0,
             'pending_payments' => 0,
+            'pending_commissions' => 0,
+            'pending_supplier_payments' => 0,
             'low_stock_count' => 0,
             'commissions_enabled' => false,
             'today_commissions' => 0,

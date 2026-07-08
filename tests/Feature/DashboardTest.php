@@ -41,6 +41,9 @@ class DashboardTest extends TestCase
         $response->assertOk();
         $response->assertSee("Today's Revenue");
         $response->assertSee('Mission Control');
+        $response->assertSee('href="' . route('reports.daily', ['date' => now()->toDateString()]) . '"', false);
+        $response->assertSee('href="' . route('bookings.index', ['date' => now()->toDateString()]) . '"', false);
+        $response->assertSee('href="' . route('products.low-stock') . '"', false);
     }
 
     public function test_guest_is_redirected_to_setup(): void

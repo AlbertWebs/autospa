@@ -6,6 +6,7 @@ use App\Enums\InvoiceStatus;
 use App\Enums\JobCardStatus;
 use App\Enums\RoleSlug;
 use App\Models\Branch;
+use App\Models\Commission;
 use App\Models\Customer;
 use App\Models\Employee;
 use App\Models\Invoice;
@@ -13,6 +14,8 @@ use App\Models\JobCard;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Services\CommissionService;
+use App\Support\CommissionSettings;
 use Carbon\Carbon;
 use Database\Seeders\BranchSeeder;
 use Database\Seeders\RoleSeeder;
@@ -79,6 +82,18 @@ class StaffReportTest extends TestCase
             'issued_at' => Carbon::parse('2026-06-20 11:00:00'),
         ]);
 
+        Commission::create([
+            'employee_id' => $employee->id,
+            'branch_id' => $branch->id,
+            'reference_type' => $jobCard->getMorphClass(),
+            'reference_id' => $jobCard->id,
+            'amount' => 540,
+            'rate' => 0.30,
+            'status' => CommissionService::STATUS_PENDING,
+            'earned_on' => '2026-06-20',
+            'trigger_event' => CommissionSettings::TRIGGER_JOB_COMPLETED,
+        ]);
+
         $response = $this->actingAs($user)->get(route('reports.staff', [
             'from' => '2026-06-01',
             'to' => '2026-06-30',
@@ -89,6 +104,8 @@ class StaffReportTest extends TestCase
         $response->assertSee('Staff Leaderboard');
         $response->assertSee('Top Washer');
         $response->assertSee('KES 1,800');
+        $response->assertSee('Commission Earned');
+        $response->assertSee('KES 540');
         $response->assertSee('Underutilized Staff');
         $response->assertSee('Idle Staff');
     }

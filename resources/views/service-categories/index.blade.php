@@ -31,8 +31,8 @@
                 </x-ui.td>
                 <x-ui.td align="right">
                     <x-ui.table-actions
-                        :view="route('services.categories.show', $category)"
-                        :edit="route('services.categories.edit', $category)"
+                        :view="route('services.categories.show', ['category' => $category])"
+                        :edit="route('services.categories.edit', ['category' => $category])"
                     />
                 </x-ui.td>
             </tr>

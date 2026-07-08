@@ -9,7 +9,6 @@ use App\Models\StockMovement;
 use App\Services\StockMovementService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class StockMovementController extends Controller
@@ -28,22 +27,6 @@ class StockMovementController extends Controller
                 ->orderByDesc('moved_at')
                 ->orderByDesc('id')
                 ->paginate(20),
-        ]);
-    }
-
-    public function create(Request $request): View
-    {
-        $type = in_array($request->query('type'), ['in', 'out', 'adjustment'], true)
-            ? $request->query('type')
-            : 'in';
-
-        return view('stock-movements.create', [
-            'products' => Product::query()->where('is_active', true)->orderBy('name')->get(),
-            'defaultType' => $type,
-            'defaultProductId' => $request->integer('product_id') ?: null,
-            'returnTo' => $request->query('return') === 'products' ? 'products' : 'stock-movements',
-            'isStockIn' => $type === 'in',
-            'defaultMovedAt' => now()->format('Y-m-d\TH:i'),
         ]);
     }
 

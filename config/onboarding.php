@@ -18,22 +18,22 @@ return [
     ],
     [
         'title' => 'Daily operations',
-        'body' => 'Operations covers Live job boards, Bookings (one day at a time), Vehicles, Customers, Job Cards, and POS. Move washes from Queued → Washing → Ready, then checkout.',
+        'body' => 'Operations covers Live job boards, Bookings, Vehicles, Customers, Job Cards, and POS. Move washes from Queued → Washing → Ready, then checkout.',
         'target' => 'sidebar',
     ],
     [
         'title' => 'Point of Sale',
-        'body' => 'Use POS to add services and products to a cart, select a customer, take cash or M-Pesa payment, and issue a receipt. Completed job cards open POS with the cart pre-filled.',
+        'body' => 'Use POS to sell products, select a customer, take cash or M-Pesa payment, and issue a receipt. Completed job cards open POS with wash services and products pre-filled.',
         'target' => null,
     ],
     [
         'title' => 'Services, staff & inventory',
-        'body' => 'Configure service categories, packages, and pricing. Manage attendees and supervisors, daily washer commissions (with M-Pesa OTP payout), attendance, and inventory.',
+        'body' => 'Configure service categories and pricing. Manage attendees and supervisors, daily washer commissions (with M-Pesa OTP payout), attendance, and inventory.',
         'target' => null,
     ],
     [
         'title' => 'Sales & payments',
-        'body' => 'Review invoices, receipts, and refunds. Track payments by channel (cash, M-Pesa, card, and bank) for reconciliation.',
+        'body' => 'Review invoices and receipts. Track payments by channel (cash, M-Pesa, card, and bank) for reconciliation.',
         'target' => null,
     ],
     [

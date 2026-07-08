@@ -6,6 +6,7 @@ use App\Enums\JobCardStatus;
 use App\Enums\RoleSlug;
 use App\Models\Branch;
 use App\Models\Commission;
+use App\Models\Company;
 use App\Models\Customer;
 use App\Models\Employee;
 use App\Models\JobCard;
@@ -174,6 +175,91 @@ class CommissionWorkflowTest extends TestCase
             'status' => CommissionService::STATUS_PAID,
             'payment_method' => CommissionService::PAYMENT_MANUAL,
         ]);
+    }
+
+    public function test_manager_can_pay_weekly_commissions_for_entire_week(): void
+    {
+        Setting::setValue('commission', 'payout_cycle', CommissionSettings::PAYOUT_WEEKLY);
+
+        $manager = $this->makeUserWithRole(RoleSlug::Manager);
+        $weekStart = now()->startOfWeek();
+        $weekEnd = now()->endOfWeek();
+
+        [$jobCardOne, $employee, $service] = $this->createAssignedWash($manager->branch_id, JobCardStatus::Completed);
+        $jobCardOne->update(['completed_at' => $weekStart->copy()->addDay()]);
+
+        $customer = Customer::factory()->create(['branch_id' => $manager->branch_id]);
+        $vehicle = Vehicle::create([
+            'branch_id' => $manager->branch_id,
+            'customer_id' => $customer->id,
+            'registration_number' => 'KAA 222B',
+        ]);
+        $jobCardTwo = JobCard::create([
+            'branch_id' => $manager->branch_id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'assigned_to' => $employee->id,
+            'status' => JobCardStatus::Completed,
+            'started_at' => $weekStart->copy()->addDays(3),
+            'completed_at' => $weekStart->copy()->addDays(3),
+        ]);
+        JobCardService::create([
+            'job_card_id' => $jobCardTwo->id,
+            'service_id' => $service->id,
+            'price' => 1500,
+        ]);
+
+        app(CommissionService::class)->syncMissingCommissions($manager->branch_id, $weekStart);
+
+        $this->assertDatabaseCount('commissions', 2);
+
+        $response = $this->actingAs($manager)->post(route('commissions.pay'), [
+            'employee_id' => $employee->id,
+            'date' => $weekEnd->toDateString(),
+        ]);
+
+        $response->assertRedirect(route('commissions.index', ['date' => $weekEnd->toDateString()]));
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseMissing('commissions', [
+            'employee_id' => $employee->id,
+            'status' => CommissionService::STATUS_PENDING,
+        ]);
+    }
+
+    public function test_commissions_index_reflects_weekly_payout_setting(): void
+    {
+        Setting::setValue('commission', 'payout_cycle', CommissionSettings::PAYOUT_WEEKLY);
+
+        $manager = $this->makeUserWithRole(RoleSlug::Manager);
+
+        $response = $this->actingAs($manager)->get(route('commissions.index'));
+
+        $response->assertOk();
+        $response->assertSee('Weekly Commissions');
+        $response->assertSee('View week');
+        $response->assertSee('Awaiting weekly settlement');
+    }
+
+    public function test_company_settings_can_update_commission_payout_cycle(): void
+    {
+        $manager = $this->makeUserWithRole(RoleSlug::Manager);
+
+        $response = $this->actingAs($manager)->put(route('settings.company.update'), [
+            'name' => Company::query()->value('name'),
+            'commissions_enabled' => '1',
+            'commission_default_rate' => 30,
+            'commission_trigger' => CommissionSettings::TRIGGER_JOB_COMPLETED,
+            'commission_payout_cycle' => CommissionSettings::PAYOUT_WEEKLY,
+            'loyalty_enabled' => '1',
+            'loyalty_washes_before_free' => 10,
+            'attendance_enabled' => '0',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $this->assertSame(CommissionSettings::PAYOUT_WEEKLY, CommissionSettings::payoutCycle());
     }
 
     public function test_manager_can_send_daily_commission_via_mpesa_with_admin_otp(): void
