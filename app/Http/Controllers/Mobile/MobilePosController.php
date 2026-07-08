@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\JobCard;
 use App\Services\BranchService;
 use App\Services\PosService;
+use App\Support\PosSettings;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -18,6 +19,8 @@ class MobilePosController extends Controller
 
     public function index(Request $request): View
     {
+        abort_unless(PosSettings::enabled(), 403);
+
         $branchId = $this->branchService->currentBranchId();
         $jobCard = null;
 

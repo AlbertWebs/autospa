@@ -17,6 +17,7 @@ class UpdateCompanyRequest extends FormRequest
             'commissions_enabled' => $this->boolean('commissions_enabled'),
             'loyalty_enabled' => $this->boolean('loyalty_enabled'),
             'attendance_enabled' => $this->boolean('attendance_enabled'),
+            'pos_enabled' => $this->boolean('pos_enabled'),
         ]);
     }
 
@@ -59,6 +60,7 @@ class UpdateCompanyRequest extends FormRequest
             'loyalty_enabled' => ['nullable', 'boolean'],
             'loyalty_washes_before_free' => ['nullable', 'integer', 'min:1', 'max:100'],
             'attendance_enabled' => ['nullable', 'boolean'],
+            'pos_enabled' => ['nullable', 'boolean'],
         ];
     }
 }

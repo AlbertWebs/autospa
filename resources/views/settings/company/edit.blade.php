@@ -18,5 +18,6 @@
         'loyaltyEnabled' => $loyaltyEnabled,
         'loyaltyWashesBeforeFree' => $loyaltyWashesBeforeFree,
         'attendanceEnabled' => $attendanceEnabled,
+        'posEnabled' => $posEnabled,
     ])
 </x-ui.form-page>

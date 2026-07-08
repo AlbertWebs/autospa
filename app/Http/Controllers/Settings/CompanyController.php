@@ -9,6 +9,7 @@ use App\Models\Setting;
 use App\Support\AttendanceSettings;
 use App\Support\CommissionSettings;
 use App\Support\LoyaltySettings;
+use App\Support\PosSettings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -33,6 +34,7 @@ class CompanyController extends Controller
             'loyaltyEnabled' => LoyaltySettings::enabled(),
             'loyaltyWashesBeforeFree' => LoyaltySettings::washesBeforeFree(),
             'attendanceEnabled' => AttendanceSettings::enabled(),
+            'posEnabled' => PosSettings::enabled(),
         ]);
     }
 
@@ -47,6 +49,7 @@ class CompanyController extends Controller
         $loyaltyEnabled = $request->boolean('loyalty_enabled');
         $loyaltyWashesBeforeFree = max(1, (int) ($validated['loyalty_washes_before_free'] ?? LoyaltySettings::DEFAULT_WASHES_BEFORE_FREE));
         $attendanceEnabled = $request->boolean('attendance_enabled');
+        $posEnabled = $request->boolean('pos_enabled');
 
         unset(
             $validated['sms_notifications_enabled'],
@@ -57,6 +60,7 @@ class CompanyController extends Controller
             $validated['loyalty_enabled'],
             $validated['loyalty_washes_before_free'],
             $validated['attendance_enabled'],
+            $validated['pos_enabled'],
         );
 
         Company::query()->firstOrFail()->update($validated);
@@ -68,6 +72,7 @@ class CompanyController extends Controller
         Setting::setValue('loyalty', 'enabled', $loyaltyEnabled, null, 'boolean');
         Setting::setValue('loyalty', 'washes_before_free', $loyaltyWashesBeforeFree, null, 'integer');
         Setting::setValue('attendance', 'enabled', $attendanceEnabled, null, 'boolean');
+        Setting::setValue('pos', 'enabled', $posEnabled, null, 'boolean');
 
         return back()->with('success', 'Company details updated.');
     }

@@ -103,8 +103,8 @@ class RouteAccess
             Str::startsWith($routeName, 'fixed-assets.') => $this->resourceRequirement($this->resourceAction($routeName), 'inventory.view', 'inventory.manage'),
             Str::startsWith($routeName, 'purchase-orders.') => $this->resourceRequirement($this->resourceAction($routeName), 'inventory.view', 'inventory.manage'),
             Str::startsWith($routeName, 'stock-movements.') => $this->resourceRequirement($this->resourceAction($routeName), 'inventory.view', 'inventory.manage'),
-            $routeName === 'pos.index' => $this->needs('pos.access'),
-            in_array($routeName, ['pos.store', 'pos.stk-push'], true) => $this->needs('pos.access'),
+            $routeName === 'pos.index' => PosSettings::enabled() ? $this->needs('pos.access') : $this->disabled(),
+            in_array($routeName, ['pos.store', 'pos.stk-push'], true) => PosSettings::enabled() ? $this->needs('pos.access') : $this->disabled(),
             Str::startsWith($routeName, 'invoices.') => $this->resourceRequirement($this->resourceAction($routeName), 'sales.view', 'sales.manage'),
             $routeName === 'receipts.index' => $this->needs('sales.view'),
             $routeName === 'receipts.show' => $this->needs('pos.access', 'sales.view'),
@@ -172,5 +172,13 @@ class RouteAccess
             'mobile.stock-movements.index' => 'stock-movements.index',
             default => substr($mobileRouteName, strlen('mobile.')),
         };
+    }
+
+    protected function disabled(): array
+    {
+        return [
+            'mode' => 'all',
+            'permissions' => ['__disabled__'],
+        ];
     }
 }

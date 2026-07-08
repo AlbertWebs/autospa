@@ -58,6 +58,7 @@ return [
         'icon' => 'shopping-cart',
         'route' => 'pos.index',
         'permission' => 'pos.access',
+        'feature' => 'pos',
         'minimalist' => true,
         'minimalist_only' => true,
     ],
@@ -96,7 +97,7 @@ return [
         'label' => 'Sales',
         'icon' => 'shopping-cart',
         'children' => [
-            ['label' => 'POS', 'route' => 'pos.index', 'permission' => 'pos.access'],
+            ['label' => 'POS', 'route' => 'pos.index', 'permission' => 'pos.access', 'feature' => 'pos'],
             ['label' => 'Invoices', 'route' => 'invoices.index', 'permission' => 'sales.view'],
             ['label' => 'Receipts', 'route' => 'receipts.index', 'permission' => 'sales.view', 'minimalist' => true],
         ],

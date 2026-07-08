@@ -7,6 +7,7 @@ use App\Http\Requests\PosStkPushRequest;
 use App\Models\JobCard;
 use App\Services\BranchService;
 use App\Services\PosService;
+use App\Support\PosSettings;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,6 +22,8 @@ class PosController extends Controller
 
     public function index(Request $request): View
     {
+        abort_unless(PosSettings::enabled(), 403);
+
         $branchId = $this->branchService->currentBranchId();
         $jobCard = null;
 
@@ -36,6 +39,8 @@ class PosController extends Controller
 
     public function store(PosCheckoutRequest $request): RedirectResponse|JsonResponse
     {
+        abort_unless(PosSettings::enabled(), 403);
+
         $branchId = $this->branchService->currentBranchId();
 
         if ($branchId === null) {
@@ -71,6 +76,8 @@ class PosController extends Controller
 
     public function stkPush(PosStkPushRequest $request): JsonResponse
     {
+        abort_unless(PosSettings::enabled(), 403);
+
         $result = $this->posService->initiateStkPush(
             $this->branchService->currentBranchId(),
             $request->validated(),

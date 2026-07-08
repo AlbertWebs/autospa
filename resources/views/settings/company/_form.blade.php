@@ -10,6 +10,7 @@
     $loyaltyEnabled = $loyaltyEnabled ?? true;
     $loyaltyWashesBeforeFree = $loyaltyWashesBeforeFree ?? 10;
     $attendanceEnabled = $attendanceEnabled ?? false;
+    $posEnabled = $posEnabled ?? true;
 @endphp
 
 <x-ui.form-section title="Company Information" description="Legal identity, contact details, and registration information.">
@@ -142,6 +143,21 @@
                     :checked="old('attendance_enabled', $attendanceEnabled)"
                 >
                     Enable staff attendance tracking
+                </x-ui.checkbox>
+            </div>
+        </x-ui.form-field>
+    </div>
+</x-ui.form-section>
+
+<x-ui.form-section title="Point of Sale" description="Control whether POS appears in navigation and can be accessed by staff.">
+    <div class="asp-form-grid">
+        <x-ui.form-field :col-span="2" name="pos_enabled">
+            <div class="asp-checkbox-group">
+                <x-ui.checkbox
+                    name="pos_enabled"
+                    :checked="old('pos_enabled', $posEnabled)"
+                >
+                    Enable POS module
                 </x-ui.checkbox>
             </div>
         </x-ui.form-field>

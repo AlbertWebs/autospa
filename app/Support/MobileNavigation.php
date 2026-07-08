@@ -71,11 +71,15 @@ class MobileNavigation
             ['label' => 'Home', 'icon' => 'home', 'route' => 'mobile.index', 'permission' => 'dashboard.view', 'pattern' => 'mobile.index'],
             ['label' => 'Live', 'icon' => 'auto_awesome', 'route' => 'mobile.job-cards.live', 'permission' => 'job-cards.view', 'pattern' => 'mobile.job-cards.*'],
             ['label' => 'Bookings', 'icon' => 'calendar_month', 'route' => 'mobile.bookings.index', 'permission' => 'bookings.view', 'pattern' => 'mobile.bookings.*'],
-            ['label' => 'POS', 'icon' => 'point_of_sale', 'route' => 'mobile.pos.index', 'permission' => 'pos.access', 'pattern' => 'mobile.pos.*'],
+            ['label' => 'POS', 'icon' => 'point_of_sale', 'route' => 'mobile.pos.index', 'permission' => 'pos.access', 'feature' => 'pos', 'pattern' => 'mobile.pos.*'],
             ['label' => 'More', 'icon' => 'grid_view', 'route' => 'mobile.menu', 'permission' => null, 'pattern' => 'mobile.menu|mobile.settings.*|mobile.reports.*|mobile.invoices.*|mobile.products.*|mobile.fixed-assets.*|mobile.employees.*|mobile.services.*|mobile.suppliers.*|mobile.payments.*|mobile.receipts.*|mobile.commissions.*|mobile.attendance.*|mobile.performance.*|mobile.purchase-orders.*|mobile.stock-movements.*|mobile.customers.loyalty|mobile.customers.feedback'],
         ];
 
         return array_values(array_filter($tabs, function (array $tab) use ($user) {
+            if (! PosSettings::navigationVisible($tab['feature'] ?? null)) {
+                return false;
+            }
+
             if ($tab['permission'] === null) {
                 return $user !== null;
             }
@@ -107,6 +111,10 @@ class MobileNavigation
                         continue;
                     }
 
+                    if (! PosSettings::navigationVisible($child['feature'] ?? null)) {
+                        continue;
+                    }
+
                     if ($child['route'] === 'pos.index' && ($item['minimalist_only'] ?? false)) {
                         continue;
                     }
@@ -118,6 +126,10 @@ class MobileNavigation
             }
 
             if (! $this->hasAccess($user, $item['permission'] ?? null)) {
+                continue;
+            }
+
+            if (! PosSettings::navigationVisible($item['feature'] ?? null)) {
                 continue;
             }
 
