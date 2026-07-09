@@ -22,3 +22,8 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+electron/dist/
+electron/node_modules/
+electron/php-runtime/
+.env.electron
+.desktop-env-initialized

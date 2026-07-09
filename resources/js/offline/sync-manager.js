@@ -17,6 +17,18 @@ function csrfToken() {
     return document.querySelector('meta[name="csrf-token"]')?.content ?? '';
 }
 
+function remoteSyncBaseUrl() {
+    const remote = document.querySelector('meta[name="desktop-remote-sync-url"]')?.content?.trim();
+
+    return remote ? remote.replace(/\/$/, '') : '';
+}
+
+function syncUrl(path) {
+    const base = remoteSyncBaseUrl();
+
+    return base ? `${base}${path}` : path;
+}
+
 function syncHeaders() {
     return {
         Accept: 'application/json',
@@ -26,14 +38,28 @@ function syncHeaders() {
     };
 }
 
+function syncFetchOptions(options = {}) {
+    const fetchOptions = {
+        ...options,
+        headers: {
+            ...syncHeaders(),
+            ...(options.headers ?? {}),
+        },
+    };
+
+    if (remoteSyncBaseUrl()) {
+        fetchOptions.credentials = 'include';
+    }
+
+    return fetchOptions;
+}
+
 export async function pullBootstrap() {
     if (!isOnline()) {
         return getBootstrap();
     }
 
-    const response = await fetch('/sync/bootstrap', {
-        headers: syncHeaders(),
-    });
+    const response = await fetch(syncUrl('/sync/bootstrap'), syncFetchOptions());
 
     if (!response.ok) {
         throw new Error('Could not download offline data.');
@@ -73,9 +99,8 @@ export async function syncPendingMutations() {
     syncing = true;
 
     try {
-        const response = await fetch('/sync/push', {
+        const response = await fetch(syncUrl('/sync/push'), syncFetchOptions({
             method: 'POST',
-            headers: syncHeaders(),
             body: JSON.stringify({
                 mutations: pending.map((entry) => ({
                     id: entry.id,
@@ -85,7 +110,7 @@ export async function syncPendingMutations() {
                     created_at: entry.created_at,
                 })),
             }),
-        });
+        }));
 
         const data = await response.json();
 

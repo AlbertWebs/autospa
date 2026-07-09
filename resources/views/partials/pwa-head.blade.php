@@ -1,3 +1,4 @@
+@include('partials.desktop-meta')
 <link rel="manifest" href="{{ route('manifest') }}">
 <meta name="theme-color" content="{{ config('pwa.theme_color') }}">
 <meta name="application-name" content="{{ config('pwa.short_name') }}">
@@ -8,6 +9,7 @@
 <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
 <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('logo.png') }}">
 <link rel="apple-touch-icon" href="{{ asset('logo.png') }}">
+@unless (config('desktop.enabled'))
 <script>
     (function () {
         if (!('serviceWorker' in navigator)) {
@@ -19,3 +21,4 @@
         });
     })();
 </script>
+@endunless

@@ -2390,7 +2390,10 @@ window.addEventListener('pageshow', () => {
     Alpine.store('fullscreen').prepareRestore();
 });
 
-if (document.querySelector('meta[name="csrf-token"]')) {
+if (
+    document.querySelector('meta[name="csrf-token"]')
+    && document.querySelector('meta[name="app-runtime"]')?.content !== 'electron'
+) {
     registerServiceWorker().then(() => startOfflinePrecache());
 }
 

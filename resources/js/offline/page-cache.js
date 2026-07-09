@@ -31,8 +31,12 @@ function readMetaArray(name) {
     }
 }
 
+function isDesktopRuntime() {
+    return document.querySelector('meta[name="app-runtime"]')?.content === 'electron';
+}
+
 export async function registerServiceWorker() {
-    if (!('serviceWorker' in navigator)) {
+    if (isDesktopRuntime() || !('serviceWorker' in navigator)) {
         return null;
     }
 

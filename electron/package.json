@@ -1,0 +1,77 @@
+{
+    "name": "autospa-desktop",
+    "version": "1.0.0",
+    "description": "AutoSpa Pro desktop app (offline-first Electron shell)",
+    "private": true,
+    "type": "module",
+    "main": "main.js",
+    "author": "AutoSpa",
+    "scripts": {
+        "electron:dev": "electron .",
+        "electron:build": "electron-builder",
+        "electron:build:win": "electron-builder --win",
+        "electron:build:mac": "electron-builder --mac",
+        "electron:build:linux": "electron-builder --linux"
+    },
+    "devDependencies": {
+        "electron": "^35.0.0",
+        "electron-builder": "^25.1.8"
+    },
+    "build": {
+        "appId": "com.autospa.desktop",
+        "productName": "AutoSpa Pro",
+        "directories": {
+            "output": "dist",
+            "buildResources": "build"
+        },
+        "files": [
+            "main.js",
+            "preload.js",
+            "setup.js",
+            "package.json"
+        ],
+        "extraResources": [
+            {
+                "from": "../",
+                "to": "app",
+                "filter": [
+                    "**/*",
+                    "!electron/dist/**",
+                    "!electron/node_modules/**",
+                    "!node_modules/**",
+                    "!.git/**",
+                    "!tests/**",
+                    "!storage/logs/**",
+                    "!storage/framework/cache/**",
+                    "!storage/framework/sessions/**",
+                    "!storage/framework/views/**",
+                    "!.env",
+                    "!.env.*",
+                    "!**/.DS_Store"
+                ]
+            }
+        ],
+        "win": {
+            "target": [
+                "nsis"
+            ],
+            "artifactName": "${productName}-Setup-${version}.${ext}"
+        },
+        "mac": {
+            "target": [
+                "dmg"
+            ],
+            "category": "public.app-category.business"
+        },
+        "linux": {
+            "target": [
+                "AppImage"
+            ],
+            "category": "Office"
+        },
+        "nsis": {
+            "oneClick": false,
+            "allowToChangeInstallationDirectory": true
+        }
+    }
+}
