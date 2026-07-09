@@ -479,6 +479,14 @@ Alpine.store('offline', {
             startOfflinePrecache().then((result) => {
                 if (result?.cached) {
                     this.pagesCached = result.cached;
+
+                    if (!sessionStorage.getItem('autospa-offline-precache-notified')) {
+                        sessionStorage.setItem('autospa-offline-precache-notified', '1');
+                        Alpine.store('toast').show(
+                            `${result.cached} page${result.cached === 1 ? '' : 's'} saved for offline use.`,
+                            'success',
+                        );
+                    }
                 }
             });
             this.bootstrap();

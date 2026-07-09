@@ -1,11 +1,27 @@
-const STATIC_CACHE = 'autospa-static-v3';
-const PAGES_CACHE = 'autospa-pages-v3';
+const STATIC_CACHE = 'autospa-static-v4';
+const PAGES_CACHE = 'autospa-pages-v4';
 
-const OFFLINE_FALLBACK_PATHS = ['/dashboard', '/mobile', '/pos', '/mobile/pos'];
+const OFFLINE_FALLBACK_PATHS = [
+    '/pos',
+    '/mobile/pos',
+    '/job-cards/live',
+    '/mobile/job-cards/live',
+    '/dashboard',
+    '/mobile',
+];
 
 const INSTALL_ASSETS = [
     '/logo.png',
 ];
+
+function requestsForUrl(urlString) {
+    const parsed = new URL(urlString, self.location.origin);
+
+    return [
+        new Request(parsed.href, { credentials: 'same-origin' }),
+        new Request(`${parsed.origin}${parsed.pathname}`, { credentials: 'same-origin' }),
+    ];
+}
 
 function isHtmlRequest(request) {
     const accept = request.headers.get('accept') || '';
@@ -24,26 +40,47 @@ function isStaticAsset(url) {
 function shouldBypassCache(url) {
     return url.pathname.startsWith('/sync/')
         || url.pathname.startsWith('/api/')
-        || url.pathname.startsWith('/livewire/')
-        || url.pathname.startsWith('/login')
-        || url.pathname.startsWith('/logout');
+        || url.pathname.startsWith('/livewire/');
 }
 
-function cacheKeysForUrl(url) {
-    const parsed = new URL(url, self.location.origin);
+function offlineHtmlResponse(message) {
+    const text = message || 'Open AutoSpa while online once so pages are saved for offline use.';
 
-    return [
-        parsed.href,
-        `${parsed.origin}${parsed.pathname}`,
-    ];
+    return new Response(
+        `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Offline — AutoSpa</title>
+    <style>
+        body { font-family: system-ui, sans-serif; margin: 0; padding: 2rem; background: #0f172a; color: #e2e8f0; }
+        main { max-width: 28rem; margin: 4rem auto; }
+        h1 { font-size: 1.5rem; margin-bottom: 0.75rem; }
+        p { line-height: 1.5; color: #94a3b8; }
+        a { color: #818cf8; }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>You are offline</h1>
+        <p>${text}</p>
+        <p><a href="/dashboard">Open dashboard</a> · <a href="/pos">Open POS</a></p>
+    </main>
+</body>
+</html>`,
+        {
+            status: 200,
+            headers: { 'Content-Type': 'text/html; charset=utf-8' },
+        },
+    );
 }
 
 async function matchCachedPage(request) {
     const cache = await caches.open(PAGES_CACHE);
-    const keys = cacheKeysForUrl(request.url);
 
-    for (const key of keys) {
-        const match = await cache.match(key);
+    for (const req of requestsForUrl(request.url)) {
+        const match = await cache.match(req);
 
         if (match) {
             return match;
@@ -53,10 +90,12 @@ async function matchCachedPage(request) {
     const origin = new URL(request.url).origin;
 
     for (const path of OFFLINE_FALLBACK_PATHS) {
-        const fallback = await cache.match(`${origin}${path}`);
+        for (const req of requestsForUrl(`${origin}${path}`)) {
+            const fallback = await cache.match(req);
 
-        if (fallback) {
-            return fallback;
+            if (fallback) {
+                return fallback;
+            }
         }
     }
 
@@ -71,8 +110,8 @@ async function cachePageResponse(request, response) {
     const cache = await caches.open(PAGES_CACHE);
     const clone = response.clone();
 
-    for (const key of cacheKeysForUrl(request.url)) {
-        await cache.put(key, clone.clone());
+    for (const req of requestsForUrl(request.url)) {
+        await cache.put(req, clone.clone());
     }
 }
 
@@ -98,8 +137,8 @@ async function precacheUrls(urls) {
 
             const clone = response.clone();
 
-            for (const key of cacheKeysForUrl(rawUrl)) {
-                await cache.put(key, clone.clone());
+            for (const req of requestsForUrl(rawUrl)) {
+                await cache.put(req, clone.clone());
             }
 
             cached += 1;
@@ -109,6 +148,71 @@ async function precacheUrls(urls) {
     }
 
     return { cached, failed };
+}
+
+async function serveHtml(request) {
+    const cached = await matchCachedPage(request);
+
+    try {
+        const response = await fetch(request);
+
+        if (response.ok) {
+            await cachePageResponse(request, response);
+
+            return response;
+        }
+
+        if (cached) {
+            return cached;
+        }
+    } catch {
+        if (cached) {
+            return cached;
+        }
+    }
+
+    return offlineHtmlResponse();
+}
+
+async function serveStatic(request) {
+    const cache = await caches.open(STATIC_CACHE);
+    const cached = await cache.match(request);
+
+    if (cached) {
+        return cached;
+    }
+
+    try {
+        const response = await fetch(request);
+
+        if (response.ok) {
+            await cache.put(request, response.clone());
+        }
+
+        return response;
+    } catch {
+        if (cached) {
+            return cached;
+        }
+
+        const url = new URL(request.url);
+
+        if (url.pathname.endsWith('.css')) {
+            return new Response('/* offline */', {
+                status: 200,
+                headers: { 'Content-Type': 'text/css; charset=utf-8' },
+            });
+        }
+
+        if (url.pathname.endsWith('.js')) {
+            return new Response('/* offline */', {
+                status: 200,
+                headers: { 'Content-Type': 'application/javascript; charset=utf-8' },
+            });
+        }
+
+        return new Response('', { status: 503 });
+    }
 }
 
 self.addEventListener('install', (event) => {
@@ -156,73 +260,28 @@ self.addEventListener('fetch', (event) => {
     }
 
     if (isStaticAsset(url)) {
-        event.respondWith(
-            caches.open(STATIC_CACHE).then(async (cache) => {
-                const cached = await cache.match(event.request);
-
-                if (cached) {
-                    return cached;
-                }
-
-                try {
-                    const response = await fetch(event.request);
-
-                    if (response.ok) {
-                        await cache.put(event.request, response.clone());
-                    }
-
-                    return response;
-                } catch {
-                    return cached ?? Response.error();
-                }
-            }),
-        );
+        event.respondWith(serveStatic(event.request));
 
         return;
     }
 
     if (isHtmlRequest(event.request)) {
-        event.respondWith(
-            (async () => {
-                const cached = await matchCachedPage(event.request);
-
-                if (!navigator.onLine) {
-                    if (cached) {
-                        return cached;
-                    }
-
-                    return new Response(
-                        '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Offline</title></head><body style="font-family:sans-serif;padding:2rem"><h1>You are offline</h1><p>Open AutoSpa while online once so pages can be saved for offline use.</p><p><a href="/dashboard">Try dashboard</a></p></body></html>',
-                        { headers: { 'Content-Type': 'text/html; charset=utf-8' } },
-                    );
-                }
-
-                try {
-                    const response = await fetch(event.request);
-
-                    await cachePageResponse(event.request, response);
-
-                    return response;
-                } catch {
-                    if (cached) {
-                        return cached;
-                    }
-
-                    throw new Error('Offline and no cached page available.');
-                }
-            })(),
-        );
+        event.respondWith(serveHtml(event.request));
 
         return;
     }
 
     event.respondWith(
-        caches.match(event.request).then((cached) => {
+        caches.match(event.request).then(async (cached) => {
             if (cached) {
                 return cached;
             }
 
-            return fetch(event.request).catch(() => Response.error());
+            try {
+                return await fetch(event.request);
+            } catch {
+                return cached ?? new Response('', { status: 503 });
+            }
         }),
     );
 });

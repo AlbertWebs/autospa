@@ -7,6 +7,7 @@ use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\JobCardController;
 use App\Http\Controllers\ManifestController;
@@ -22,6 +23,7 @@ use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ServiceCategoryController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\ServiceWorkerController;
 use App\Http\Controllers\StockMovementController;
 use App\Http\Controllers\Settings\BranchController as SettingsBranchController;
 use App\Http\Controllers\Settings\BusinessHourController;
@@ -48,6 +50,7 @@ Route::get('/', function () {
 });
 
 Route::get('manifest.webmanifest', ManifestController::class)->name('manifest');
+Route::get('sw.js', ServiceWorkerController::class)->name('service-worker');
 
 Route::middleware(['guest', 'not.installed'])->prefix('setup')->name('setup.')->group(function () {
     Route::redirect('/', '/setup/welcome');
@@ -214,6 +217,13 @@ Route::middleware(['installed', 'auth', 'verified', 'branch'])->group(function (
     });
 
     Route::middleware('permission:reports.view')->group(function () {
+        Route::get('finance', [FinanceController::class, 'index'])->name('finance.index');
+        Route::get('finance/income', [FinanceController::class, 'income'])->name('finance.income');
+        Route::get('finance/expenses', [FinanceController::class, 'expenses'])->name('finance.expenses');
+        Route::post('finance/expenses', [FinanceController::class, 'storeExpense'])->name('finance.expenses.store');
+        Route::get('finance/profit-loss', [FinanceController::class, 'profitLoss'])->name('finance.profit-loss');
+        Route::post('finance/close-accounts', [FinanceController::class, 'closeAccounts'])->name('finance.close-accounts');
+
         Route::get('reports/daily', [ReportController::class, 'daily'])->name('reports.daily');
         Route::get('reports/weekly', [ReportController::class, 'weekly'])->name('reports.weekly');
         Route::get('reports/monthly', [ReportController::class, 'monthly'])->name('reports.monthly');

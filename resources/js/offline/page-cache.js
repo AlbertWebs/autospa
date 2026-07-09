@@ -1,18 +1,34 @@
 import { isOnline } from './connectivity';
 
-export const PAGES_CACHE = 'autospa-pages-v3';
-export const STATIC_CACHE = 'autospa-static-v3';
+export const PAGES_CACHE = 'autospa-pages-v4';
+export const STATIC_CACHE = 'autospa-static-v4';
 
 let serviceWorkerRegistration = null;
 let precacheStarted = false;
 
-function cacheKeysForUrl(url) {
+function requestsForUrl(url) {
     const parsed = new URL(url, window.location.origin);
 
     return [
-        parsed.href,
-        `${parsed.origin}${parsed.pathname}`,
+        new Request(parsed.href, { credentials: 'same-origin' }),
+        new Request(`${parsed.origin}${parsed.pathname}`, { credentials: 'same-origin' }),
     ];
+}
+
+function readMetaArray(name) {
+    const meta = document.querySelector(`meta[name="${name}"]`);
+
+    if (!meta?.content) {
+        return [];
+    }
+
+    try {
+        const value = JSON.parse(meta.content);
+
+        return Array.isArray(value) ? value : [];
+    } catch {
+        return [];
+    }
 }
 
 export async function registerServiceWorker() {
@@ -25,8 +41,27 @@ export async function registerServiceWorker() {
     }
 
     try {
-        serviceWorkerRegistration = await navigator.serviceWorker.register('/sw.js');
+        serviceWorkerRegistration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
         await navigator.serviceWorker.ready;
+
+        if (!navigator.serviceWorker.controller) {
+            await new Promise((resolve) => {
+                const worker = serviceWorkerRegistration.installing
+                    ?? serviceWorkerRegistration.waiting
+                    ?? serviceWorkerRegistration.active;
+
+                if (!worker || worker.state === 'activated') {
+                    resolve();
+                    return;
+                }
+
+                worker.addEventListener('statechange', () => {
+                    if (worker.state === 'activated') {
+                        resolve();
+                    }
+                });
+            });
+        }
     } catch {
         serviceWorkerRegistration = null;
     }
@@ -34,8 +69,9 @@ export async function registerServiceWorker() {
     return serviceWorkerRegistration;
 }
 
-async function cachePageUrl(url) {
-    const response = await fetch(url, {
+export async function cachePageUrl(url) {
+    const normalized = url.split('#')[0];
+    const response = await fetch(normalized, {
         credentials: 'same-origin',
         headers: {
             Accept: 'text/html,application/xhtml+xml',
@@ -50,18 +86,30 @@ async function cachePageUrl(url) {
     const cache = await caches.open(PAGES_CACHE);
     const clone = response.clone();
 
-    for (const key of cacheKeysForUrl(url)) {
-        await cache.put(key, clone.clone());
+    for (const request of requestsForUrl(normalized)) {
+        await cache.put(request, clone.clone());
     }
 
     return true;
 }
 
+export async function cacheCurrentPage() {
+    if (!isOnline()) {
+        return false;
+    }
+
+    try {
+        return await cachePageUrl(window.location.href);
+    } catch {
+        return false;
+    }
+}
+
 async function isPageCached(url) {
     const cache = await caches.open(PAGES_CACHE);
 
-    for (const key of cacheKeysForUrl(url)) {
-        const match = await cache.match(key);
+    for (const request of requestsForUrl(url)) {
+        const match = await cache.match(request);
 
         if (match) {
             return true;
@@ -179,38 +227,48 @@ export async function precacheCurrentAssets() {
 }
 
 export function readPrecacheUrlsFromMeta() {
-    const meta = document.querySelector('meta[name="offline-precache-urls"]');
+    return readMetaArray('offline-precache-urls');
+}
 
-    if (!meta?.content) {
-        return [];
-    }
-
-    try {
-        const urls = JSON.parse(meta.content);
-
-        return Array.isArray(urls) ? urls : [];
-    } catch {
-        return [];
-    }
+export function readPriorityPrecacheUrlsFromMeta() {
+    return readMetaArray('offline-priority-urls');
 }
 
 export async function startOfflinePrecache(extraUrls = []) {
-    if (!isOnline() || precacheStarted) {
+    if (!isOnline()) {
         return null;
+    }
+
+    await registerServiceWorker();
+    await cacheCurrentPage();
+    await precacheCurrentAssets();
+
+    const priorityUrls = readPriorityPrecacheUrlsFromMeta();
+    const allUrls = [...new Set([
+        ...readPrecacheUrlsFromMeta(),
+        ...extraUrls,
+        window.location.href.split('#')[0],
+    ])];
+
+    let priorityResult = { cached: 0, failed: 0, skipped: 0 };
+
+    if (priorityUrls.length > 0) {
+        priorityResult = await precachePages(priorityUrls, { concurrency: 4 });
+    }
+
+    if (precacheStarted) {
+        return priorityResult;
     }
 
     precacheStarted = true;
 
-    await registerServiceWorker();
-    await precacheCurrentAssets();
+    const remaining = await precachePages(allUrls, { concurrency: 6 });
 
-    const urls = [...new Set([
-        ...readPrecacheUrlsFromMeta(),
-        ...extraUrls,
-        window.location.href,
-    ])];
-
-    return precachePages(urls, { concurrency: 6 });
+    return {
+        cached: priorityResult.cached + remaining.cached,
+        failed: priorityResult.failed + remaining.failed,
+        skipped: priorityResult.skipped + remaining.skipped,
+    };
 }
 
 export function registerOfflineFormGuard() {
@@ -247,4 +305,10 @@ export function registerOfflineFormGuard() {
             'error',
         );
     }, true);
+}
+
+if (typeof document !== 'undefined') {
+    document.addEventListener('turbo:load', () => {
+        cacheCurrentPage();
+    });
 }

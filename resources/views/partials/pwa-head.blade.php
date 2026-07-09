@@ -8,3 +8,14 @@
 <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
 <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('logo.png') }}">
 <link rel="apple-touch-icon" href="{{ asset('logo.png') }}">
+<script>
+    (function () {
+        if (!('serviceWorker' in navigator)) {
+            return;
+        }
+
+        navigator.serviceWorker.register(@json(url('/sw.js')), { scope: '/' }).catch(function () {
+            // Service worker registration is optional for local development.
+        });
+    })();
+</script>

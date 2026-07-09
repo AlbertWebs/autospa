@@ -32,14 +32,23 @@ class PwaTest extends TestCase
         $response->assertJsonCount(3, 'icons');
     }
 
+    public function test_service_worker_route_is_publicly_accessible(): void
+    {
+        $response = $this->get(route('service-worker'));
+
+        $response->assertOk();
+        $response->assertHeader('Content-Type', 'application/javascript; charset=utf-8');
+        $response->assertSee('autospa-pages-v4', false);
+    }
+
     public function test_service_worker_file_is_publicly_accessible(): void
     {
         $this->assertFileExists(public_path('sw.js'));
 
         $contents = file_get_contents(public_path('sw.js'));
 
-        $this->assertStringContainsString('autospa-pages-v3', $contents);
-        $this->assertStringContainsString('precacheUrls', $contents);
+        $this->assertStringContainsString('autospa-pages-v4', $contents);
+        $this->assertStringContainsString('serveHtml', $contents);
         $this->assertStringContainsString('matchCachedPage', $contents);
     }
 
