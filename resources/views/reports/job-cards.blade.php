@@ -71,8 +71,7 @@
             :count="($report['job_cards'] ?? collect())->count()"
         >
             <x-slot name="header">
-                <x-ui.th>#</x-ui.th>
-                <x-ui.th>Customer</x-ui.th>
+<x-ui.th>Customer</x-ui.th>
                 <x-ui.th>Vehicle</x-ui.th>
                 <x-ui.th>Assignee</x-ui.th>
                 <x-ui.th>Status</x-ui.th>
@@ -83,7 +82,7 @@
 
             @foreach ($report['job_cards'] ?? [] as $jobCard)
                 <tr class="asp-table-row">
-                    <x-ui.td mono primary>#{{ $jobCard->id }}</x-ui.td>
+                <x-ui.table-number-td :loop="$loop" />
                     <x-ui.td>{{ $jobCard->customer?->full_name ?? 'N/A' }}</x-ui.td>
                     <x-ui.td mono>{{ $jobCard->vehicle?->registration_number ?? 'N/A' }}</x-ui.td>
                     <x-ui.td>{{ $jobCard->assignee?->displayName() ?? 'Unassigned' }}</x-ui.td>

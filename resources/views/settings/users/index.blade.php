@@ -21,6 +21,7 @@
 
         @foreach ($users as $user)
             <tr class="asp-table-row">
+                <x-ui.table-number-td :loop="$loop" :paginator="$users" />
                 <x-ui.td primary>{{ $user->name }}</x-ui.td>
                 <x-ui.td muted>{{ $user->email }}</x-ui.td>
                 <x-ui.td>{{ $user->branch?->name ?? 'N/A' }}</x-ui.td>

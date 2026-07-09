@@ -173,6 +173,7 @@
                 </x-slot>
                 @foreach ($report['recent_payments'] ?? [] as $payment)
                     <tr class="asp-table-row">
+                <x-ui.table-number-td :loop="$loop" />
                         <x-ui.td primary>{{ $payment->customer?->full_name ?? 'Walk-in' }}</x-ui.td>
                         <x-ui.td muted>{{ $payment->paymentMethod?->name ?? $payment->method?->label() ?? 'Payment' }}</x-ui.td>
                         <x-ui.td muted>{{ ($payment->paid_at ?? $payment->created_at)?->format('M j, Y') }}</x-ui.td>

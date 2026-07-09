@@ -19,6 +19,7 @@
 
         @foreach ($invoices as $invoice)
             <tr class="asp-table-row">
+                <x-ui.table-number-td :loop="$loop" :paginator="$invoices" />
                 <x-ui.td primary mono>{{ $invoice->invoice_number }}</x-ui.td>
                 <x-ui.td>{{ $invoice->customer?->full_name ?? 'N/A' }}</x-ui.td>
                 <x-ui.td>{{ number_format((float) $invoice->total_amount, 2) }}</x-ui.td>

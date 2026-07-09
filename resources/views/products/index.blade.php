@@ -47,6 +47,7 @@
 
             @foreach ($products as $product)
                 <tr class="asp-table-row">
+                <x-ui.table-number-td :loop="$loop" :paginator="$products" />
                     <x-ui.td primary>{{ $product->name }}</x-ui.td>
                     <x-ui.td mono muted>{{ $product->sku }}</x-ui.td>
                     <x-ui.td>{{ number_format($product->quantity_on_hand, 2) }}</x-ui.td>

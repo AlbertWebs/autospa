@@ -21,6 +21,7 @@
 
         @foreach ($vehicles as $vehicle)
             <tr class="asp-table-row">
+                <x-ui.table-number-td :loop="$loop" :paginator="$vehicles" />
                 <x-ui.td mono primary>{{ $vehicle->registration_number }}</x-ui.td>
                 <x-ui.td>{{ $vehicle->make }} {{ $vehicle->model }}</x-ui.td>
                 <x-ui.td>{{ $vehicle->customer?->full_name ?? 'N/A' }}</x-ui.td>

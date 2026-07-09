@@ -21,6 +21,7 @@
 
         @foreach ($branches as $branch)
             <tr class="asp-table-row">
+                <x-ui.table-number-td :loop="$loop" :paginator="$branches" />
                 <x-ui.td primary>{{ $branch->name }}</x-ui.td>
                 <x-ui.td mono muted>{{ $branch->code }}</x-ui.td>
                 <x-ui.td>{{ $branch->phone ?? 'N/A' }}</x-ui.td>

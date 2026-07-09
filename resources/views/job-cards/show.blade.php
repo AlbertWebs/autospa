@@ -254,6 +254,10 @@
                         </dd>
                     </div>
                     <div>
+                        <dt class="asp-detail-dt">Logged by</dt>
+                        <dd class="asp-detail-dd">{{ $jobCard->creator?->name ?? '—' }}</dd>
+                    </div>
+                    <div>
                         <dt class="asp-detail-dt">Assigned washer</dt>
                         <dd class="asp-detail-dd">
                             @if ($jobCard->assignee && $routeAccess->allows($user, 'employees.show'))
@@ -443,6 +447,7 @@
 
     <footer class="asp-meta-line mt-6">
         <span>Job card #{{ $jobCard->id }}</span>
+        <span>Logged by {{ $jobCard->creator?->name ?? 'Unknown' }}</span>
         <span>Created {{ $jobCard->created_at?->format('M j, Y g:i A') }}</span>
         @if ($jobCard->started_at)
             <span>Wash started {{ $jobCard->started_at->format('g:i A') }}</span>

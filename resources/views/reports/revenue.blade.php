@@ -181,6 +181,7 @@
                     </x-slot>
                     @foreach ($report['top_services'] ?? [] as $row)
                         <tr class="asp-table-row">
+                <x-ui.table-number-td :loop="$loop" />
                             <x-ui.td primary>{{ $row->description }}</x-ui.td>
                             <x-ui.td align="right" mono>{{ number_format($row->quantity, 0) }}</x-ui.td>
                             <x-ui.td align="right" mono>{{ $formatKes($row->total) }}</x-ui.td>
@@ -207,6 +208,7 @@
                     </x-slot>
                     @foreach ($report['top_products'] ?? [] as $row)
                         <tr class="asp-table-row">
+                <x-ui.table-number-td :loop="$loop" />
                             <x-ui.td primary>{{ $row->description }}</x-ui.td>
                             <x-ui.td align="right" mono>{{ number_format($row->quantity, 0) }}</x-ui.td>
                             <x-ui.td align="right" mono>{{ $formatKes($row->total) }}</x-ui.td>
@@ -237,6 +239,7 @@
             </x-slot>
             @foreach ($report['recent_invoices'] ?? [] as $invoice)
                 <tr class="asp-table-row">
+                <x-ui.table-number-td :loop="$loop" />
                     <x-ui.td primary>
                         <a href="{{ route('invoices.show', $invoice) }}" class="text-brand-primary hover:underline">
                             {{ $invoice->invoice_number }}

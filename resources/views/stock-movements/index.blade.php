@@ -21,6 +21,7 @@
 
         @foreach ($movements as $movement)
             <tr class="asp-table-row">
+                <x-ui.table-number-td :loop="$loop" :paginator="$movements" />
                 <x-ui.td primary>{{ $movement->product?->name ?? 'N/A' }}</x-ui.td>
                 <x-ui.td>
                     <x-ui.badge color="indigo">{{ ucfirst($movement->type) }}</x-ui.badge>

@@ -159,6 +159,7 @@
 
         @foreach ($recentCommissions as $commission)
             <tr class="asp-table-row">
+                <x-ui.table-number-td :loop="$loop" :paginator="$recentCommissions" />
                 <x-ui.td primary>{{ $commission->employee?->full_name ?? 'N/A' }}</x-ui.td>
                 <x-ui.td muted>
                     @if ($commission->reference)

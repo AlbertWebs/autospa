@@ -17,6 +17,7 @@
 
         @foreach ($roles as $role)
             <tr class="asp-table-row">
+                <x-ui.table-number-td :loop="$loop" />
                 <x-ui.td primary>{{ $role->name }}</x-ui.td>
                 <x-ui.td muted>{{ $role->permissions_count }} permissions</x-ui.td>
                 <x-ui.td align="right">

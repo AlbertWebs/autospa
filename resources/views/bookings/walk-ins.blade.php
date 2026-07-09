@@ -21,6 +21,7 @@
 
         @foreach ($bookings as $booking)
             <tr class="asp-table-row">
+                <x-ui.table-number-td :loop="$loop" :paginator="$bookings" />
                 <x-ui.td primary>{{ $booking->customer?->full_name ?? 'N/A' }}</x-ui.td>
                 <x-ui.td mono>{{ $booking->vehicle?->registration_number ?? 'N/A' }}</x-ui.td>
                 <x-ui.td>{{ $booking->scheduled_at?->format('M j, Y g:i A') ?? 'N/A' }}</x-ui.td>

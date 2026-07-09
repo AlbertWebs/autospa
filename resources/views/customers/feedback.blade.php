@@ -18,6 +18,7 @@
 
         @foreach ($notes as $note)
             <tr class="asp-table-row">
+                <x-ui.table-number-td :loop="$loop" :paginator="$notes" />
                 <x-ui.td primary>{{ $note->customer?->full_name ?? 'N/A' }}</x-ui.td>
                 <x-ui.td>{{ $note->rating ?? 'N/A' }}</x-ui.td>
                 <x-ui.td muted>{{ Str::limit($note->content ?? $note->notes ?? '', 80) }}</x-ui.td>

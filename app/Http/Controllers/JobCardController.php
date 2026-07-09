@@ -27,7 +27,7 @@ class JobCardController extends Controller
     public function index(): View
     {
         $today = today();
-        $query = fn () => JobCard::query()->forDay($today)->with(['customer', 'vehicle', 'assignee'])->latest();
+        $query = fn () => JobCard::query()->forDay($today)->with(['customer', 'vehicle', 'assignee', 'creator'])->latest();
         $countQuery = fn () => JobCard::query()->forDay($today);
 
         return view('job-cards.index', [
@@ -67,7 +67,9 @@ class JobCardController extends Controller
         $serviceIds = $validated['service_ids'];
         unset($validated['service_ids']);
 
-        $jobCard = JobCard::create($this->withBranchId($validated));
+        $jobCard = JobCard::create($this->withBranchId(array_merge($validated, [
+            'created_by' => $request->user()->id,
+        ])));
         $this->syncJobCardServices($jobCard, $serviceIds);
 
         if ($request->wantsJson()) {
@@ -87,6 +89,7 @@ class JobCardController extends Controller
             'customer',
             'vehicle',
             'assignee',
+            'creator',
             'booking',
             'services.service',
             'products.product',

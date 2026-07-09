@@ -20,6 +20,7 @@
 
         @foreach ($categories as $category)
             <tr class="asp-table-row">
+                <x-ui.table-number-td :loop="$loop" :paginator="$categories" />
                 <x-ui.td primary>{{ $category->name }}</x-ui.td>
                 <x-ui.td muted>{{ $category->sort_order }}</x-ui.td>
                 <x-ui.td>

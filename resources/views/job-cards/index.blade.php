@@ -76,20 +76,21 @@
                     :count="$section['jobCards']->count()"
                 >
                     <x-slot name="header">
-                        <x-ui.th>#</x-ui.th>
                         <x-ui.th>Customer</x-ui.th>
                         <x-ui.th>Vehicle</x-ui.th>
                         <x-ui.th>Assignee</x-ui.th>
+                        <x-ui.th>Logged By</x-ui.th>
                         <x-ui.th>Status</x-ui.th>
                         <x-ui.th align="right">Actions</x-ui.th>
                     </x-slot>
 
                     @foreach ($section['jobCards'] as $jobCard)
                         <tr class="asp-table-row">
-                            <x-ui.td mono primary>#{{ $jobCard->id }}</x-ui.td>
+                            <x-ui.table-number-td :loop="$loop" />
                             <x-ui.td>{{ $jobCard->customer?->full_name ?? 'N/A' }}</x-ui.td>
                             <x-ui.td mono>{{ $jobCard->vehicle?->registration_number ?? 'N/A' }}</x-ui.td>
                             <x-ui.td>{{ $jobCard->assignee?->displayName() ?? 'Unassigned' }}</x-ui.td>
+                            <x-ui.td muted>{{ $jobCard->creator?->name ?? '—' }}</x-ui.td>
                             <x-ui.td>
                                 <x-ui.badge :color="$statusBadgeColor($jobCard->status)">{{ $jobCard->status->label() }}</x-ui.badge>
                             </x-ui.td>

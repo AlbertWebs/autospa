@@ -20,6 +20,7 @@
 
         @foreach ($purchaseOrders as $purchaseOrder)
             <tr class="asp-table-row">
+                <x-ui.table-number-td :loop="$loop" :paginator="$purchaseOrders" />
                 <x-ui.td primary mono>{{ $purchaseOrder->reference ?? '#'.$purchaseOrder->id }}</x-ui.td>
                 <x-ui.td>{{ $purchaseOrder->supplier?->name ?? 'N/A' }}</x-ui.td>
                 <x-ui.td>

@@ -19,7 +19,7 @@
 
         @foreach ($payments as $payment)
             <tr class="asp-table-row">
-                <x-ui.td primary mono>#{{ $payment->id }}</x-ui.td>
+                <x-ui.table-number-td :loop="$loop" :paginator="$payments" />
                 <x-ui.td>{{ $payment->customer?->full_name ?? 'N/A' }}</x-ui.td>
                 <x-ui.td>{{ number_format($payment->amount ?? 0, 2) }}</x-ui.td>
                 <x-ui.td>

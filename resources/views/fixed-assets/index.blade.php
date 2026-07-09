@@ -37,6 +37,7 @@
 
         @foreach ($assets as $asset)
             <tr class="asp-table-row">
+                <x-ui.table-number-td :loop="$loop" :paginator="$assets" />
                 <x-ui.td mono muted>{{ $asset->asset_tag }}</x-ui.td>
                 <x-ui.td primary>{{ $asset->name }}</x-ui.td>
                 <x-ui.td>{{ $asset->category?->label() ?? '—' }}</x-ui.td>

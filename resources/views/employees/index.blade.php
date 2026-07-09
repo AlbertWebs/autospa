@@ -22,6 +22,7 @@
 
         @foreach ($employees as $employee)
             <tr class="asp-table-row">
+                <x-ui.table-number-td :loop="$loop" :paginator="$employees" />
                 <x-ui.td primary>{{ $employee->full_name }}</x-ui.td>
                 <x-ui.td mono>{{ $employee->employee_number ?? 'N/A' }}</x-ui.td>
                 <x-ui.td>{{ $employee->typeLabel() }}</x-ui.td>

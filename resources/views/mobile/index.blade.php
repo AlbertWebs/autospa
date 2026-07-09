@@ -5,10 +5,22 @@
             <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Mission Control</h1>
             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                 Good {{ now()->hour < 12 ? 'morning' : (now()->hour < 17 ? 'afternoon' : 'evening') }}, {{ auth()->user()->name }}.
-                {{ now()->format('l, M j') }}
+                {{ $selectedDate->format('l, M j') }}
             </p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
+            <form method="GET" action="{{ route('mobile.index') }}" class="flex items-center gap-2">
+                <label for="mobile-dashboard-date" class="sr-only">Overview date</label>
+                <input
+                    id="mobile-dashboard-date"
+                    type="date"
+                    name="date"
+                    value="{{ $selectedDate->toDateString() }}"
+                    max="{{ now()->toDateString() }}"
+                    class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-brand-border dark:bg-brand-surface"
+                    onchange="this.form.submit()"
+                >
+            </form>
             @include('partials.sync-status-badge')
             <span
                 x-show="$store.offline.online"
@@ -30,11 +42,12 @@
     </div>
 
     @php
-        $today = now()->toDateString();
+        $today = $selectedDate->toDateString();
+        $dateLabel = $selectedDate->isToday() ? "Today's" : $selectedDate->format('M j')."'s";
     @endphp
 
     <div class="asp-mobile-kpi-grid mb-6">
-        <x-mobile.stat-tile variant="revenue" label="Today's Revenue" icon="payments"
+        <x-mobile.stat-tile variant="revenue" :label="$dateLabel . ' Revenue'" icon="payments"
             :value="'KES ' . number_format($stats['today_revenue'], 0)"
             :href="route('mobile.reports.daily', ['date' => $today])" />
         <x-mobile.stat-tile variant="bookings" label="Bookings" icon="calendar_month"

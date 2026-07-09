@@ -116,14 +116,13 @@
                 :count="($report['top_spenders'] ?? collect())->count()"
             >
                 <x-slot name="header">
-                    <x-ui.th>#</x-ui.th>
-                    <x-ui.th>Customer</x-ui.th>
+<x-ui.th>Customer</x-ui.th>
                     <x-ui.th>Invoices</x-ui.th>
                     <x-ui.th align="right">Spent</x-ui.th>
                 </x-slot>
                 @foreach ($report['top_spenders'] ?? [] as $index => $row)
                     <tr class="asp-table-row">
-                        <x-ui.td muted>{{ $index + 1 }}</x-ui.td>
+                <x-ui.table-number-td :loop="$loop" />
                         <x-ui.td primary>
                             <a href="{{ route('customers.show', $row->customer) }}" class="hover:text-indigo-600 dark:hover:text-indigo-400">
                                 {{ $row->customer->full_name }}
@@ -158,6 +157,7 @@
                 </x-slot>
                 @foreach ($report['new_customers'] ?? [] as $customer)
                     <tr class="asp-table-row">
+                <x-ui.table-number-td :loop="$loop" />
                         <x-ui.td primary>{{ $customer->full_name }}</x-ui.td>
                         <x-ui.td muted>{{ $customer->created_at->format('M j, Y') }}</x-ui.td>
                         <x-ui.td>{{ $customer->vehicles_count }}</x-ui.td>
@@ -194,6 +194,7 @@
             </x-slot>
             @foreach ($report['at_risk_customers'] ?? [] as $customer)
                 <tr class="asp-table-row">
+                <x-ui.table-number-td :loop="$loop" />
                     <x-ui.td primary>
                         {{ $customer->full_name }}
                         @if ($customer->phone)

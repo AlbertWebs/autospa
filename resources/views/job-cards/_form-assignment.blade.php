@@ -3,6 +3,12 @@
 @endphp
 
 <div class="asp-form-grid">
+    @if (! $jobCard)
+        <x-ui.form-field label="Created by" for="created_by_display" :col-span="2">
+            <x-ui.input id="created_by_display" :value="auth()->user()->name" readonly disabled />
+        </x-ui.form-field>
+    @endif
+
     <x-ui.form-field
         label="Assign vehicle to employee"
         for="assigned_to"

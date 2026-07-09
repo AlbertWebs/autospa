@@ -24,6 +24,7 @@ class JobCard extends Model
         'customer_id',
         'vehicle_id',
         'booking_id',
+        'created_by',
         'assigned_to',
         'status',
         'notes',
@@ -53,6 +54,11 @@ class JobCard extends Model
     public function booking(): BelongsTo
     {
         return $this->belongsTo(Booking::class);
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function assignee(): BelongsTo

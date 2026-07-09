@@ -163,8 +163,7 @@
             :count="($report['leaderboard'] ?? collect())->count()"
         >
             <x-slot name="header">
-                <x-ui.th>#</x-ui.th>
-                <x-ui.th>Employee</x-ui.th>
+<x-ui.th>Employee</x-ui.th>
                 <x-ui.th>Completed</x-ui.th>
                 <x-ui.th>In Progress</x-ui.th>
                 <x-ui.th align="right">Revenue</x-ui.th>
@@ -179,7 +178,7 @@
             </x-slot>
             @foreach ($report['leaderboard'] ?? [] as $index => $row)
                 <tr class="asp-table-row">
-                    <x-ui.td muted>{{ $index + 1 }}</x-ui.td>
+                <x-ui.table-number-td :loop="$loop" />
                     <x-ui.td primary>
                         {{ $row['employee']->full_name }}
                         @if ($row['employee']->position)
@@ -226,6 +225,7 @@
                 </x-slot>
                 @foreach ($report['underutilized'] ?? [] as $row)
                     <tr class="asp-table-row">
+                <x-ui.table-number-td :loop="$loop" />
                         <x-ui.td primary>{{ $row['employee']->full_name }}</x-ui.td>
                         <x-ui.td muted>{{ $row['employee']->position ?? '—' }}</x-ui.td>
                         <x-ui.td>{{ $row['in_progress'] }}</x-ui.td>

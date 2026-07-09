@@ -15,6 +15,7 @@ use App\Enums\InvoiceStatus;
 use App\Enums\JobCardStatus;
 use App\Support\CommissionSettings;
 
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 class DashboardService
@@ -23,7 +24,7 @@ class DashboardService
         protected BranchService $branchService,
     ) {}
 
-    public function stats(?int $branchId = null): array
+    public function stats(?int $branchId = null, ?Carbon $date = null): array
     {
         $branchId = $branchId ?? $this->branchService->currentBranchId();
 
@@ -31,7 +32,9 @@ class DashboardService
             return $this->emptyStats();
         }
 
-        $today = now()->toDateString();
+        $date = ($date ?? now())->copy()->startOfDay();
+        $today = $date->toDateString();
+        $isToday = $date->isToday();
 
         $todayRevenue = (float) Invoice::query()
             ->where('branch_id', $branchId)
@@ -45,10 +48,16 @@ class DashboardService
                 ->where('branch_id', $branchId)
                 ->whereDate('scheduled_at', $today)
                 ->count(),
-            'vehicles_in_service' => JobCard::query()
-                ->where('branch_id', $branchId)
-                ->where('status', JobCardStatus::InProgress)
-                ->count(),
+            'vehicles_in_service' => $isToday
+                ? JobCard::query()
+                    ->where('branch_id', $branchId)
+                    ->where('status', JobCardStatus::InProgress)
+                    ->count()
+                : JobCard::query()
+                    ->where('branch_id', $branchId)
+                    ->forDay($date)
+                    ->where('status', JobCardStatus::InProgress)
+                    ->count(),
             'vehicles_ready' => JobCard::query()
                 ->where('branch_id', $branchId)
                 ->where('status', JobCardStatus::Completed)
@@ -162,7 +171,7 @@ class DashboardService
             ->get();
     }
 
-    public function operationsSnapshot(?int $branchId = null): array
+    public function operationsSnapshot(?int $branchId = null, ?Carbon $date = null): array
     {
         $branchId = $branchId ?? $this->branchService->currentBranchId();
 
@@ -176,7 +185,7 @@ class DashboardService
             ];
         }
 
-        $today = now()->startOfDay();
+        $today = ($date ?? now())->copy()->startOfDay();
 
         return [
             'job_cards_open' => JobCard::query()

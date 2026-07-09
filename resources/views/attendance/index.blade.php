@@ -21,6 +21,7 @@
 
         @foreach ($attendance as $record)
             <tr class="asp-table-row">
+                <x-ui.table-number-td :loop="$loop" :paginator="$attendance" />
                 <x-ui.td primary>{{ $record->employee?->full_name ?? 'N/A' }}</x-ui.td>
                 <x-ui.td>{{ $record->date?->format('M j, Y') }}</x-ui.td>
                 <x-ui.td muted>{{ $record->clock_in ?? 'N/A' }} / {{ $record->clock_out ?? 'N/A' }}</x-ui.td>

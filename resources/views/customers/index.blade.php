@@ -20,6 +20,7 @@
 
         @foreach ($customers as $customer)
             <tr class="asp-table-row">
+                <x-ui.table-number-td :loop="$loop" :paginator="$customers" />
                 <x-ui.td primary>{{ $customer->full_name }}</x-ui.td>
                 <x-ui.td>{{ $customer->phone }}</x-ui.td>
                 <x-ui.td muted>{{ $customer->email ?? 'N/A' }}</x-ui.td>

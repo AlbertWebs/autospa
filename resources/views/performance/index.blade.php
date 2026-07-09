@@ -28,6 +28,7 @@
 
         @foreach ($metrics['employees'] ?? [] as $row)
             <tr class="asp-table-row">
+                <x-ui.table-number-td :loop="$loop" />
                 <x-ui.td primary>{{ $row['name'] ?? 'N/A' }}</x-ui.td>
                 <x-ui.td>{{ $row['jobs'] ?? 0 }}</x-ui.td>
                 <x-ui.td>{{ number_format($row['revenue'] ?? 0, 2) }}</x-ui.td>

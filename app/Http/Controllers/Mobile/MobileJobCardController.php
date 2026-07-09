@@ -38,7 +38,7 @@ class MobileJobCardController extends Controller
 
         $jobCards = JobCard::query()
             ->forDay($today)
-            ->with(['customer', 'vehicle', 'assignee'])
+            ->with(['customer', 'vehicle', 'assignee', 'creator'])
             ->where('status', $status)
             ->latest()
             ->get();
@@ -83,7 +83,7 @@ class MobileJobCardController extends Controller
     public function show(JobCard $jobCard): View
     {
         return view('mobile.job-cards.show', [
-            'jobCard' => $jobCard->load(['customer', 'vehicle', 'assignee', 'services.service', 'products']),
+            'jobCard' => $jobCard->load(['customer', 'vehicle', 'assignee', 'creator', 'services.service', 'products']),
         ]);
     }
 
@@ -109,7 +109,9 @@ class MobileJobCardController extends Controller
         $serviceIds = $validated['service_ids'];
         unset($validated['service_ids']);
 
-        $jobCard = JobCard::create($this->withBranchId($validated));
+        $jobCard = JobCard::create($this->withBranchId(array_merge($validated, [
+            'created_by' => $request->user()->id,
+        ])));
         $this->syncJobCardServices($jobCard, $serviceIds);
 
         if ($request->wantsJson()) {

@@ -11,10 +11,29 @@
             <h1 class="asp-page-title">Mission Control</h1>
             <p class="asp-page-subtitle">
                 Good {{ now()->hour < 12 ? 'morning' : (now()->hour < 17 ? 'afternoon' : 'evening') }}, {{ auth()->user()->name }}.
-                {{ now()->format('l, F j, Y') }}
+                {{ $selectedDate->format('l, F j, Y') }}
+                @if (! $selectedDate->isToday())
+                    <span class="text-slate-400">(not today)</span>
+                @endif
             </p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
+            <form method="GET" action="{{ route('dashboard') }}" class="flex items-center gap-2">
+                <label for="dashboard-date" class="sr-only">Overview date</label>
+                <input
+                    id="dashboard-date"
+                    type="date"
+                    name="date"
+                    value="{{ $selectedDate->toDateString() }}"
+                    max="{{ now()->toDateString() }}"
+                    class="rounded-xl border border-slate-200/80 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm transition focus:border-brand-primary/50 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 dark:border-brand-border/60 dark:bg-brand-surface-high dark:text-slate-200"
+                    onchange="this.form.submit()"
+                >
+                @if (! $selectedDate->isToday())
+                    <a href="{{ route('dashboard') }}" class="asp-btn asp-btn-secondary !px-3 !py-2 text-sm">Today</a>
+                @endif
+            </form>
+
             @include('partials.sync-status-badge')
 
             <span
@@ -43,20 +62,26 @@
 
     {{-- KPI grid --}}
     @php
-        $today = now()->toDateString();
+        $today = $selectedDate->toDateString();
+        $dateLabel = $selectedDate->isToday() ? 'Today' : $selectedDate->format('M j, Y');
+        $revenueLabel = $dateLabel."'s Revenue";
+        $bookingsLabel = $dateLabel.' Bookings';
+        $commissionsLabel = $dateLabel.' Commissions';
+        $washersLabel = 'Washers '.$dateLabel;
+        $netProfitHint = $dateLabel."'s revenue minus commissions earned";
     @endphp
     <div class="relative mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
-        <x-ui.stat-card variant="revenue" label="Today's Revenue" icon="payments"
-            :value="'KES ' . number_format($stats['today_revenue'], 0)" hint="Collected today"
+        <x-ui.stat-card variant="revenue" :label="$revenueLabel" icon="payments"
+            :value="'KES ' . number_format($stats['today_revenue'], 0)" :hint="'Collected on ' . $selectedDate->format('M j, Y')"
             :href="route('reports.daily', ['date' => $today])" />
-        <x-ui.stat-card variant="bookings" label="Today's Bookings" icon="calendar_month"
+        <x-ui.stat-card variant="bookings" :label="$bookingsLabel" icon="calendar_month"
             :value="$stats['today_bookings']" hint="Scheduled & walk-ins"
             :href="route('bookings.index', ['date' => $today])" />
         <x-ui.stat-card variant="service" label="In Service" icon="build"
-            :value="$stats['vehicles_in_service']" hint="On the floor now"
+            :value="$stats['vehicles_in_service']" :hint="$selectedDate->isToday() ? 'On the floor now' : 'In progress on this day'"
             :href="route('job-cards.in-progress')" />
         <x-ui.stat-card variant="ready" label="Ready for Pickup" icon="check_circle"
-            :value="$stats['vehicles_ready']" hint="Completed today"
+            :value="$stats['vehicles_ready']" :hint="'Completed on ' . $selectedDate->format('M j, Y')"
             :href="route('vehicles.ready')" />
         <x-ui.stat-card variant="payments" label="Pending Payments" icon="account_balance_wallet"
             :value="'KES ' . number_format($stats['pending_payments'], 0)"
@@ -66,13 +91,13 @@
             :value="$stats['low_stock_count']" :hint="$stats['low_stock_count'] > 0 ? 'Needs reorder' : 'All healthy'"
             :href="route('products.low-stock')" />
         @if ($stats['commissions_enabled'] ?? false)
-            <x-ui.stat-card variant="payments" label="Today's Commissions" icon="savings"
+            <x-ui.stat-card variant="payments" :label="$commissionsLabel" icon="savings"
                 :value="'KES ' . number_format($stats['today_commissions'], 0)" hint="KES {{ number_format($stats['today_commissions_pending'], 0) }} pending payout"
                 :href="route('commissions.index', ['date' => $today])" />
             <x-ui.stat-card variant="revenue" label="Net Profit" icon="trending_up"
-                :value="'KES ' . number_format($stats['today_net_profit'], 0)" hint="Today's revenue minus commissions earned"
+                :value="'KES ' . number_format($stats['today_net_profit'], 0)" :hint="$netProfitHint"
                 :href="route('reports.profit', ['from' => $today, 'to' => $today])" />
-            <x-ui.stat-card variant="bookings" label="Washers Today" icon="groups"
+            <x-ui.stat-card variant="bookings" :label="$washersLabel" icon="groups"
                 :value="$stats['today_washers']" hint="Staff who completed washes"
                 :href="route('reports.staff', ['from' => $today, 'to' => $today])" />
         @endif

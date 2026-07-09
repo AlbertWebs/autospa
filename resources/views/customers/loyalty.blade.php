@@ -72,6 +72,7 @@
                 };
             @endphp
             <tr class="asp-table-row {{ $rowTint }}">
+                <x-ui.table-number-td :loop="$loop" :paginator="$vehicles" />
                 <x-ui.td primary>
                     <div class="font-semibold">{{ $vehicle->registration_number }}</div>
                     @if ($vehicle->make || $vehicle->model)

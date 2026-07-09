@@ -4,6 +4,7 @@
     'emptyTitle' => 'No records yet',
     'emptyDescription' => null,
     'count' => null,
+    'numbered' => true,
 ])
 
 @php
@@ -14,7 +15,12 @@
     <div class="asp-table-wrap">
         <table class="asp-table">
             <thead class="asp-table-head">
-                <tr>{{ $header }}</tr>
+                <tr>
+                    @if ($numbered)
+                        <x-ui.table-number-th />
+                    @endif
+                    {{ $header }}
+                </tr>
             </thead>
             <tbody class="asp-table-body">
                 {{ $slot }}

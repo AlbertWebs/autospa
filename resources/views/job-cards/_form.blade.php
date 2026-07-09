@@ -79,6 +79,10 @@
                 @if ($ajax)
                     <dl class="asp-job-card-summary-meta">
                         <div>
+                            <dt>Created by</dt>
+                            <dd>{{ auth()->user()->name }}</dd>
+                        </div>
+                        <div>
                             <dt>Customer</dt>
                             <dd x-text="selectedCustomerName || 'Not selected'"></dd>
                         </div>
@@ -111,6 +115,10 @@
                     </div>
                 @else
                     <dl class="asp-job-card-summary-meta">
+                        <div>
+                            <dt>Created by</dt>
+                            <dd>{{ auth()->user()->name }}</dd>
+                        </div>
                         <div>
                             <dt>Services selected</dt>
                             <dd>{{ count($selectedServiceIds) }}</dd>

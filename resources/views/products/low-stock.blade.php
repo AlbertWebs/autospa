@@ -19,6 +19,7 @@
 
         @foreach ($products as $product)
             <tr class="asp-table-row">
+                <x-ui.table-number-td :loop="$loop" :paginator="$products" />
                 <x-ui.td primary>
                     {{ $product->name }}
                     <x-ui.badge color="red">Low</x-ui.badge>

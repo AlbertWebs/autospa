@@ -12,6 +12,10 @@
                 <span class="font-semibold">{{ $jobCard->status?->label() }}</span>
             </div>
             <div class="flex justify-between text-sm">
+                <span class="text-slate-500">Logged by</span>
+                <span class="font-semibold">{{ $jobCard->creator?->name ?? '—' }}</span>
+            </div>
+            <div class="flex justify-between text-sm">
                 <span class="text-slate-500">Assigned to</span>
                 <span class="font-semibold">{{ $jobCard->assignee?->displayName() ?? 'Unassigned' }}</span>
             </div>
