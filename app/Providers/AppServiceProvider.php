@@ -78,6 +78,12 @@ class AppServiceProvider extends ServiceProvider
         $observer = $this->app->make(ModelActivityObserver::class);
 
         foreach (config('activity_log.observed_models', []) as $modelClass) {
+            $modelPath = base_path(str_replace(['App\\', '\\'], ['app/', '/'], $modelClass).'.php');
+
+            if (! is_file($modelPath)) {
+                continue;
+            }
+
             $modelClass::observe($observer);
         }
 
