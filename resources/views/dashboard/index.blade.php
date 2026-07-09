@@ -3,7 +3,9 @@
 @section('title', 'Mission Control')
 
 @section('content')
-@php($offlineOperableMenu = \App\Support\OfflineRoutes::operableMenuForUser(auth()->user()))
+@php
+    $offlineOperableMenu = \App\Support\OfflineRoutes::operableMenuForUser(auth()->user());
+@endphp
 <div class="asp-main">
     {{-- Page header --}}
     <header class="asp-page-header">
@@ -65,13 +67,15 @@
         <x-ui.panel title="Offline Tools" subtitle="These workflows queue changes and sync when you reconnect">
             <div class="grid gap-2 sm:grid-cols-2">
                 @foreach ($offlineOperableMenu as $item)
-                    @php($offlineIcon = match ($item['icon']) {
-                        'shopping-cart' => 'point_of_sale',
-                        'sparkles' => 'auto_awesome',
-                        'clipboard' => 'assignment',
-                        'truck' => 'garage',
-                        default => 'offline_bolt',
-                    })
+                    @php
+                        $offlineIcon = match ($item['icon']) {
+                            'shopping-cart' => 'point_of_sale',
+                            'sparkles' => 'auto_awesome',
+                            'clipboard' => 'assignment',
+                            'truck' => 'garage',
+                            default => 'offline_bolt',
+                        };
+                    @endphp
                     <x-ui.quick-action :href="$item['url']" :icon="$offlineIcon" :label="$item['label']" description="Works offline" />
                 @endforeach
             </div>
