@@ -36,9 +36,9 @@ class IntegrationTestGroundTest extends TestCase
         $response = $this->actingAs($user)->get(route('settings.test-ground.index'));
 
         $response->assertOk();
-        $response->assertSee('Integration Test Ground');
-        $response->assertSee('Send test email');
-        $response->assertSee('Send test SMS');
+        $response->assertSee('M-Pesa STK Push');
+        $response->assertSee('Send test B2C request');
+        $response->assertSee('Request account balance');
     }
 
     public function test_admin_can_send_test_sms_via_stub_driver(): void
@@ -54,6 +54,34 @@ class IntegrationTestGroundTest extends TestCase
         $response->assertRedirect(route('settings.test-ground.index'));
         $response->assertSessionHas('success');
         $response->assertSessionHas('test_result.details.driver', 'SmsStubDriver');
+    }
+
+    public function test_admin_can_send_test_mpesa_b2c_via_stub_driver(): void
+    {
+        $user = $this->makeUserWithRole(RoleSlug::SuperAdmin);
+
+        $response = $this->actingAs($user)->from(route('settings.test-ground.index'))->post(route('settings.test-ground.send'), [
+            'channel' => 'mpesa_b2c',
+            'recipient' => '0712345678',
+            'amount' => 1500,
+        ]);
+
+        $response->assertRedirect(route('settings.test-ground.index'));
+        $response->assertSessionHas('success');
+        $response->assertSessionHas('test_result.details.driver', 'MpesaStubDriver');
+    }
+
+    public function test_admin_can_request_mpesa_balance_via_stub_driver(): void
+    {
+        $user = $this->makeUserWithRole(RoleSlug::SuperAdmin);
+
+        $response = $this->actingAs($user)->from(route('settings.test-ground.index'))->post(route('settings.test-ground.send'), [
+            'channel' => 'mpesa_balance',
+        ]);
+
+        $response->assertRedirect(route('settings.test-ground.index'));
+        $response->assertSessionHas('success');
+        $response->assertSessionHas('test_result.details.driver', 'MpesaStubDriver');
     }
 
     public function test_admin_can_send_test_email_even_when_notifications_disabled(): void

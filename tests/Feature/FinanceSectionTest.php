@@ -35,6 +35,18 @@ class FinanceSectionTest extends TestCase
         $this->seed([RoleSeeder::class, BranchSeeder::class, SettingSeeder::class]);
     }
 
+    public function test_manager_can_view_finance_overview_page(): void
+    {
+        $manager = $this->makeUserWithRole(RoleSlug::Manager);
+
+        $response = $this->actingAs($manager)->get(route('finance.index'));
+
+        $response->assertOk();
+        $response->assertSee('Finance Overview');
+        $response->assertSee('Close Accounts');
+        $response->assertDontSee('Checkout · Job', false);
+    }
+
     public function test_manager_can_record_manual_expense_from_finance_expenses_page(): void
     {
         $manager = $this->makeUserWithRole(RoleSlug::Manager);

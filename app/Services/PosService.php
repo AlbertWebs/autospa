@@ -168,6 +168,7 @@ class PosService
                 'metadata' => array_filter([
                     'stk_phone' => $data['stk_phone'] ?? null,
                     'stk_status' => $data['stk_status'] ?? null,
+                    'stk_checkout_request_id' => $data['stk_reference'] ?? null,
                 ], fn ($value) => filled($value)),
                 'paid_at' => now(),
             ]);

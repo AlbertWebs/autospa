@@ -2,7 +2,10 @@
 
 namespace App\Services;
 
+use App\Contracts\Integrations\MpesaDriverInterface;
 use App\Contracts\Integrations\SmsDriverInterface;
+use App\Integrations\Mpesa\DarajaMpesaDriver;
+use App\Integrations\Mpesa\MpesaStubDriver;
 use App\Integrations\Sms\RebueTextSmsDriver;
 use App\Integrations\Sms\SmsStubDriver;
 use App\Models\Integration;
@@ -16,6 +19,7 @@ class IntegrationService
         $integration = Integration::withoutGlobalScope(BranchScope::class)
             ->where('provider', 'sms')
             ->whereNull('branch_id')
+            ->latest('id')
             ->first();
 
         $driver = $integration?->driver ?? config('integrations.sms.driver', 'stub');
@@ -59,12 +63,54 @@ class IntegrationService
         );
     }
 
-    public function mpesa(): \App\Contracts\Integrations\MpesaDriverInterface
+    public function mpesa(): MpesaDriverInterface
     {
-        return match (config('integrations.mpesa.driver')) {
-            'stub' => new \App\Integrations\Mpesa\MpesaStubDriver(),
-            default => new \App\Integrations\Mpesa\MpesaStubDriver(),
-        };
+        $integration = Integration::withoutGlobalScope(BranchScope::class)
+            ->where('provider', 'mpesa')
+            ->whereNull('branch_id')
+            ->latest('id')
+            ->first();
+
+        $driver = $integration?->driver ?? config('integrations.mpesa.driver', 'stub');
+        $enabled = (bool) ($integration?->is_enabled ?? false);
+
+        if ($driver === 'daraja' && $enabled) {
+            return $this->darajaDriver($integration);
+        }
+
+        if (config('integrations.mpesa.driver') === 'daraja' && $this->darajaConfigValue($integration, 'consumer_key') !== '') {
+            return $this->darajaDriver($integration);
+        }
+
+        return new MpesaStubDriver();
+    }
+
+    protected function darajaDriver(?Integration $integration): DarajaMpesaDriver
+    {
+        return new DarajaMpesaDriver(
+            consumerKey: $this->darajaConfigValue($integration, 'consumer_key'),
+            consumerSecret: $this->darajaConfigValue($integration, 'consumer_secret'),
+            shortCode: $this->darajaConfigValue($integration, 'shortcode'),
+            passkey: $this->darajaConfigValue($integration, 'passkey'),
+            initiatorName: $this->darajaConfigValue($integration, 'initiator_name'),
+            securityCredential: $this->darajaConfigValue($integration, 'security_credential'),
+            queueTimeoutUrl: $this->darajaConfigValue($integration, 'queue_timeout_url'),
+            resultUrl: $this->darajaConfigValue($integration, 'result_url'),
+            stkResultUrl: $this->darajaConfigValue($integration, 'stk_result_url'),
+            balanceResultUrl: $this->darajaConfigValue($integration, 'balance_result_url'),
+            balanceTimeoutUrl: $this->darajaConfigValue($integration, 'balance_timeout_url'),
+            baseUrl: $this->darajaConfigValue($integration, 'base_url'),
+        );
+    }
+
+    protected function darajaConfigValue(?Integration $integration, string $key): string
+    {
+        return (string) (
+            $integration?->credentials[$key]
+            ?? $integration?->settings[$key]
+            ?? config("integrations.mpesa.daraja.{$key}")
+            ?? ''
+        );
     }
 
     public function whatsapp(): \App\Contracts\Integrations\WhatsAppDriverInterface

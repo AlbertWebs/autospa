@@ -43,10 +43,36 @@ class IntegrationController extends Controller
                 $credentials['access_token'] = $data['access_token'];
             }
 
+            foreach ([
+                'consumer_key',
+                'consumer_secret',
+                'shortcode',
+                'passkey',
+                'initiator_name',
+                'security_credential',
+            ] as $credentialKey) {
+                if (! empty($data[$credentialKey])) {
+                    $credentials[$credentialKey] = $data[$credentialKey];
+                }
+            }
+
             $settings = $integration->settings ?? [];
 
             if (! empty($data['sender_id'])) {
                 $settings['sender_id'] = $data['sender_id'];
+            }
+
+            foreach ([
+                'base_url',
+                'stk_result_url',
+                'queue_timeout_url',
+                'result_url',
+                'balance_result_url',
+                'balance_timeout_url',
+            ] as $settingKey) {
+                if (! empty($data[$settingKey])) {
+                    $settings[$settingKey] = $data[$settingKey];
+                }
             }
 
             $integration->update([

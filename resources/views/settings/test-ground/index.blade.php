@@ -1,7 +1,7 @@
 <x-ui.index-page
     eyebrow="Settings"
     title="Integration Test Ground"
-    subtitle="Send test emails, SMS, WhatsApp messages, and M-Pesa STK pushes to verify configuration."
+    subtitle="Send test emails, SMS, WhatsApp messages, and M-Pesa requests (STK, B2C, balance) to verify configuration."
     :create-visible="false"
 >
     @if ($details = session('test_result.details'))
@@ -124,6 +124,52 @@
                     <x-ui.input id="mpesa_amount" name="amount" type="number" min="1" step="1" :value="old('amount', 1)" required />
                 </x-ui.form-field>
                 <button type="submit" class="asp-btn asp-btn-primary !py-2.5">Send test STK push</button>
+            </form>
+        </x-ui.card>
+
+        <x-ui.card>
+            <div class="mb-4 flex items-start justify-between gap-3">
+                <div>
+                    <h2 class="text-lg font-semibold">M-Pesa B2C</h2>
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                        Driver: <span class="font-mono">{{ $status['mpesa']['driver'] }}</span>
+                    </p>
+                </div>
+                <x-ui.badge :color="$status['mpesa']['enabled'] ? 'green' : 'slate'">
+                    {{ $status['mpesa']['enabled'] ? 'Enabled' : 'Disabled' }}
+                </x-ui.badge>
+            </div>
+            <p class="mb-4 text-xs text-slate-500 dark:text-slate-400">Initiates a B2C payout request to verify commission payout readiness.</p>
+            <form method="POST" action="{{ route('settings.test-ground.send') }}" class="space-y-4">
+                @csrf
+                <input type="hidden" name="channel" value="mpesa_b2c">
+                <x-ui.form-field label="Phone" for="mpesa_b2c_recipient" name="recipient" :required="true">
+                    <x-ui.input id="mpesa_b2c_recipient" name="recipient" type="tel" placeholder="254712345678" :value="old('recipient')" required />
+                </x-ui.form-field>
+                <x-ui.form-field label="Amount (KES)" for="mpesa_b2c_amount" name="amount" :required="true">
+                    <x-ui.input id="mpesa_b2c_amount" name="amount" type="number" min="1" step="1" :value="old('amount', 1)" required />
+                </x-ui.form-field>
+                <button type="submit" class="asp-btn asp-btn-primary !py-2.5">Send test B2C request</button>
+            </form>
+        </x-ui.card>
+
+        <x-ui.card>
+            <div class="mb-4 flex items-start justify-between gap-3">
+                <div>
+                    <h2 class="text-lg font-semibold">M-Pesa Account Balance</h2>
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                        Driver: <span class="font-mono">{{ $status['mpesa']['driver'] }}</span>
+                    </p>
+                </div>
+                <x-ui.badge :color="$status['mpesa']['enabled'] ? 'green' : 'slate'">
+                    {{ $status['mpesa']['enabled'] ? 'Enabled' : 'Disabled' }}
+                </x-ui.badge>
+            </div>
+            <p class="mb-4 text-xs text-slate-500 dark:text-slate-400">Initiates an account balance query against the configured shortcode.</p>
+            <form method="POST" action="{{ route('settings.test-ground.send') }}" class="space-y-4">
+                @csrf
+                <input type="hidden" name="channel" value="mpesa_balance">
+                <button type="submit" class="asp-btn asp-btn-primary !py-2.5">Request account balance</button>
             </form>
         </x-ui.card>
     </div>

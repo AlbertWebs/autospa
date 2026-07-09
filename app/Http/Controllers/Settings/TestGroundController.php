@@ -46,6 +46,11 @@ class TestGroundController extends Controller
                 $request->validated('recipient'),
                 (float) $request->validated('amount'),
             ),
+            'mpesa_b2c' => $this->testGroundService->sendMpesaB2c(
+                $request->validated('recipient'),
+                (float) $request->validated('amount'),
+            ),
+            'mpesa_balance' => $this->testGroundService->requestMpesaBalance(),
         };
 
         return back()

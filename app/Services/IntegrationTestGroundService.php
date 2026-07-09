@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Data\Integrations\SmsMessage;
+use App\Data\Integrations\B2cPaymentData;
 use App\Data\Integrations\StkPushData;
 use App\Data\Integrations\WhatsAppMessage;
 use App\Models\Integration;
@@ -154,6 +155,64 @@ class IntegrationTestGroundService
             return [
                 'success' => false,
                 'message' => 'M-Pesa test failed: '.$e->getMessage(),
+            ];
+        }
+    }
+
+    /**
+     * @return array{success: bool, message: string, details?: array<string, mixed>}
+     */
+    public function sendMpesaB2c(string $phone, float $amount): array
+    {
+        try {
+            $driver = $this->integrationService->mpesa();
+            $reference = 'B2C-TEST-'.Str::upper(Str::random(6));
+            $result = $driver->initiateB2cPayment(new B2cPaymentData(
+                phone: $phone,
+                amount: $amount,
+                reference: $reference,
+                description: 'AutoSpa integration B2C test',
+            ));
+
+            return [
+                'success' => $result->successful,
+                'message' => $result->message ?? ($result->successful ? 'B2C payout initiated.' : 'B2C payout failed.'),
+                'details' => [
+                    'driver' => class_basename($driver),
+                    'reference' => $result->reference ?? $reference,
+                    'recipient' => $phone,
+                    'amount' => $amount,
+                ],
+            ];
+        } catch (Throwable $e) {
+            return [
+                'success' => false,
+                'message' => 'M-Pesa B2C test failed: '.$e->getMessage(),
+            ];
+        }
+    }
+
+    /**
+     * @return array{success: bool, message: string, details?: array<string, mixed>}
+     */
+    public function requestMpesaBalance(): array
+    {
+        try {
+            $driver = $this->integrationService->mpesa();
+            $result = $driver->initiateAccountBalance('AutoSpa integration balance test');
+
+            return [
+                'success' => $result->successful,
+                'message' => $result->message ?? ($result->successful ? 'Account balance request initiated.' : 'Account balance request failed.'),
+                'details' => [
+                    'driver' => class_basename($driver),
+                    'reference' => $result->reference,
+                ],
+            ];
+        } catch (Throwable $e) {
+            return [
+                'success' => false,
+                'message' => 'M-Pesa balance test failed: '.$e->getMessage(),
             ];
         }
     }

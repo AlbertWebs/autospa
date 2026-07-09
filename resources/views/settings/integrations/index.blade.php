@@ -12,6 +12,7 @@
                 @php
                     $label = str_replace('_', ' ', $provider);
                     $isSms = $provider === 'sms';
+                    $isMpesa = $provider === 'mpesa';
                 @endphp
 
                 <div class="rounded-xl border border-slate-200 p-4 dark:border-slate-700">
@@ -71,6 +72,74 @@
                                     maxlength="11"
                                 />
                                 <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Must be approved on your RebueText account.</p>
+                            </div>
+                        </div>
+                    @elseif ($isMpesa)
+                        <div class="space-y-4">
+                            <div>
+                                <x-input-label for="integrations_{{ $provider }}_driver" value="Driver" />
+                                <select
+                                    id="integrations_{{ $provider }}_driver"
+                                    name="integrations[{{ $provider }}][driver]"
+                                    class="mt-1 block w-full rounded-xl border-slate-200 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                                >
+                                    <option value="stub" @selected(old("integrations.{$provider}.driver", $integration->driver) === 'stub')>Stub (no send)</option>
+                                    <option value="daraja" @selected(old("integrations.{$provider}.driver", $integration->driver) === 'daraja')>Safaricom Daraja</option>
+                                </select>
+                            </div>
+
+                            <div class="grid gap-4 sm:grid-cols-2">
+                                <div>
+                                    <x-input-label for="integrations_{{ $provider }}_consumer_key" value="Consumer Key" />
+                                    <x-text-input id="integrations_{{ $provider }}_consumer_key" name="integrations[{{ $provider }}][consumer_key]" class="mt-1 block w-full" :value="old('integrations.'.$provider.'.consumer_key', $integration->credentials['consumer_key'] ?? '')" />
+                                </div>
+                                <div>
+                                    <x-input-label for="integrations_{{ $provider }}_consumer_secret" value="Consumer Secret" />
+                                    <x-text-input id="integrations_{{ $provider }}_consumer_secret" name="integrations[{{ $provider }}][consumer_secret]" type="password" class="mt-1 block w-full" placeholder="{{ filled($integration->credentials['consumer_secret'] ?? null) ? '••••••••••••••••' : 'Paste Daraja consumer secret' }}" />
+                                </div>
+                                <div>
+                                    <x-input-label for="integrations_{{ $provider }}_shortcode" value="Shortcode / Paybill" />
+                                    <x-text-input id="integrations_{{ $provider }}_shortcode" name="integrations[{{ $provider }}][shortcode]" class="mt-1 block w-full" :value="old('integrations.'.$provider.'.shortcode', $integration->credentials['shortcode'] ?? '')" />
+                                </div>
+                                <div>
+                                    <x-input-label for="integrations_{{ $provider }}_passkey" value="Lipa Na M-Pesa Passkey" />
+                                    <x-text-input id="integrations_{{ $provider }}_passkey" name="integrations[{{ $provider }}][passkey]" type="password" class="mt-1 block w-full" placeholder="{{ filled($integration->credentials['passkey'] ?? null) ? '••••••••••••••••' : 'Paste LNM passkey' }}" />
+                                </div>
+                                <div>
+                                    <x-input-label for="integrations_{{ $provider }}_initiator_name" value="B2C Initiator Name" />
+                                    <x-text-input id="integrations_{{ $provider }}_initiator_name" name="integrations[{{ $provider }}][initiator_name]" class="mt-1 block w-full" :value="old('integrations.'.$provider.'.initiator_name', $integration->credentials['initiator_name'] ?? '')" />
+                                </div>
+                                <div>
+                                    <x-input-label for="integrations_{{ $provider }}_security_credential" value="Security Credential" />
+                                    <x-text-input id="integrations_{{ $provider }}_security_credential" name="integrations[{{ $provider }}][security_credential]" type="password" class="mt-1 block w-full" placeholder="{{ filled($integration->credentials['security_credential'] ?? null) ? '••••••••••••••••' : 'Paste encrypted initiator password' }}" />
+                                </div>
+                            </div>
+
+                            <div class="grid gap-4 sm:grid-cols-2">
+                                <div class="sm:col-span-2">
+                                    <x-input-label for="integrations_{{ $provider }}_base_url" value="Daraja Base URL" />
+                                    <x-text-input id="integrations_{{ $provider }}_base_url" name="integrations[{{ $provider }}][base_url]" class="mt-1 block w-full" :value="old('integrations.'.$provider.'.base_url', $integration->settings['base_url'] ?? config('integrations.mpesa.daraja.base_url'))" />
+                                </div>
+                                <div>
+                                    <x-input-label for="integrations_{{ $provider }}_stk_result_url" value="STK Result URL" />
+                                    <x-text-input id="integrations_{{ $provider }}_stk_result_url" name="integrations[{{ $provider }}][stk_result_url]" class="mt-1 block w-full" :value="old('integrations.'.$provider.'.stk_result_url', $integration->settings['stk_result_url'] ?? config('integrations.mpesa.daraja.stk_result_url'))" />
+                                </div>
+                                <div>
+                                    <x-input-label for="integrations_{{ $provider }}_result_url" value="B2C Result URL" />
+                                    <x-text-input id="integrations_{{ $provider }}_result_url" name="integrations[{{ $provider }}][result_url]" class="mt-1 block w-full" :value="old('integrations.'.$provider.'.result_url', $integration->settings['result_url'] ?? config('integrations.mpesa.daraja.result_url'))" />
+                                </div>
+                                <div>
+                                    <x-input-label for="integrations_{{ $provider }}_queue_timeout_url" value="Queue Timeout URL" />
+                                    <x-text-input id="integrations_{{ $provider }}_queue_timeout_url" name="integrations[{{ $provider }}][queue_timeout_url]" class="mt-1 block w-full" :value="old('integrations.'.$provider.'.queue_timeout_url', $integration->settings['queue_timeout_url'] ?? config('integrations.mpesa.daraja.queue_timeout_url'))" />
+                                </div>
+                                <div>
+                                    <x-input-label for="integrations_{{ $provider }}_balance_result_url" value="Balance Result URL" />
+                                    <x-text-input id="integrations_{{ $provider }}_balance_result_url" name="integrations[{{ $provider }}][balance_result_url]" class="mt-1 block w-full" :value="old('integrations.'.$provider.'.balance_result_url', $integration->settings['balance_result_url'] ?? config('integrations.mpesa.daraja.balance_result_url'))" />
+                                </div>
+                                <div>
+                                    <x-input-label for="integrations_{{ $provider }}_balance_timeout_url" value="Balance Timeout URL" />
+                                    <x-text-input id="integrations_{{ $provider }}_balance_timeout_url" name="integrations[{{ $provider }}][balance_timeout_url]" class="mt-1 block w-full" :value="old('integrations.'.$provider.'.balance_timeout_url', $integration->settings['balance_timeout_url'] ?? config('integrations.mpesa.daraja.balance_timeout_url'))" />
+                                </div>
                             </div>
                         </div>
                     @else

@@ -17,21 +17,22 @@ class SendIntegrationTestRequest extends FormRequest
         $channel = $this->input('channel');
 
         return [
-            'channel' => ['required', Rule::in(['email', 'sms', 'whatsapp', 'mpesa'])],
+            'channel' => ['required', Rule::in(['email', 'sms', 'whatsapp', 'mpesa', 'mpesa_b2c', 'mpesa_balance'])],
             'recipient' => match ($channel) {
                 'email' => ['required', 'email', 'max:255'],
-                'sms', 'whatsapp', 'mpesa' => ['required', 'string', 'max:30'],
+                'sms', 'whatsapp', 'mpesa', 'mpesa_b2c' => ['required', 'string', 'max:30'],
+                'mpesa_balance' => ['nullable', 'string', 'max:30'],
                 default => ['required', 'string', 'max:255'],
             },
             'subject' => ['nullable', 'string', 'max:255'],
             'message' => [
-                Rule::requiredIf(fn () => $this->input('channel') !== 'mpesa'),
+                Rule::requiredIf(fn () => ! in_array($this->input('channel'), ['mpesa', 'mpesa_b2c', 'mpesa_balance'], true)),
                 'nullable',
                 'string',
                 'max:1000',
             ],
             'amount' => [
-                Rule::requiredIf(fn () => $this->input('channel') === 'mpesa'),
+                Rule::requiredIf(fn () => in_array($this->input('channel'), ['mpesa', 'mpesa_b2c'], true)),
                 'nullable',
                 'numeric',
                 'min:1',

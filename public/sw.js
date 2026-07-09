@@ -1,12 +1,13 @@
-const STATIC_CACHE = 'autospa-static-v4';
-const PAGES_CACHE = 'autospa-pages-v4';
+const STATIC_CACHE = 'autospa-static-v5';
+const PAGES_CACHE = 'autospa-pages-v5';
 
 const OFFLINE_FALLBACK_PATHS = [
+    '/finance',
+    '/dashboard',
     '/pos',
     '/mobile/pos',
     '/job-cards/live',
     '/mobile/job-cards/live',
-    '/dashboard',
     '/mobile',
 ];
 
@@ -76,7 +77,7 @@ function offlineHtmlResponse(message) {
     );
 }
 
-async function matchCachedPage(request) {
+async function matchExactCachedPage(request) {
     const cache = await caches.open(PAGES_CACHE);
 
     for (const req of requestsForUrl(request.url)) {
@@ -87,7 +88,12 @@ async function matchCachedPage(request) {
         }
     }
 
+    return null;
+}
+
+async function findOfflineFallbackPage(request) {
     const origin = new URL(request.url).origin;
+    const cache = await caches.open(PAGES_CACHE);
 
     for (const path of OFFLINE_FALLBACK_PATHS) {
         for (const req of requestsForUrl(`${origin}${path}`)) {
@@ -151,8 +157,6 @@ async function precacheUrls(urls) {
 }
 
 async function serveHtml(request) {
-    const cached = await matchCachedPage(request);
-
     try {
         const response = await fetch(request);
 
@@ -162,12 +166,22 @@ async function serveHtml(request) {
             return response;
         }
 
-        if (cached) {
-            return cached;
+        const exactCached = await matchExactCachedPage(request);
+
+        if (exactCached) {
+            return exactCached;
         }
     } catch {
-        if (cached) {
-            return cached;
+        const exactCached = await matchExactCachedPage(request);
+
+        if (exactCached) {
+            return exactCached;
+        }
+
+        const fallback = await findOfflineFallbackPage(request);
+
+        if (fallback) {
+            return fallback;
         }
     }
 
