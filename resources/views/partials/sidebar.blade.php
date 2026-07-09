@@ -1,5 +1,6 @@
 @php
     use App\Support\AttendanceSettings;
+    use App\Support\OfflineRoutes;
     use App\Support\PosSettings;
 
     $branchService = app(\App\Services\BranchService::class);
@@ -50,6 +51,7 @@
     }
 
     $navigation = $visibleNavigation;
+    $offlineOperableMenu = OfflineRoutes::operableMenuForUser($user);
 @endphp
 
 <aside data-tour="sidebar" class="sidebar fixed inset-y-0 left-0 z-50 flex w-64 transform flex-col border-r border-slate-800/80 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 shadow-xl shadow-black/20 transition-transform duration-300 ease-out lg:translate-x-0"
@@ -67,7 +69,8 @@
 
     {{-- Search + Nav --}}
     <div class="flex min-h-0 flex-1 flex-col px-4 pt-4" x-data="{ query: '' }">
-        <div class="relative shrink-0">
+        <div x-show="$store.offline.online" class="flex min-h-0 flex-1 flex-col">
+            <div class="relative shrink-0">
             <x-ui.nav-icon name="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
             <input
                 type="search"
@@ -180,6 +183,15 @@
                     @endif
                 @endforeach
             </ul>
+        </nav>
+        </div>
+
+        <nav
+            x-show="! $store.offline.online"
+            x-cloak
+            class="sidebar-nav mt-3 min-h-0 flex-1 overflow-y-auto pb-2"
+        >
+            @include('partials.offline-operable-nav', ['items' => $offlineOperableMenu])
         </nav>
     </div>
 

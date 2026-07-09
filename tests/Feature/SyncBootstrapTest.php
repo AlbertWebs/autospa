@@ -73,12 +73,20 @@ class SyncBootstrapTest extends TestCase
             'employees',
             'customers',
             'vehicles',
+            'pages',
+            'operable_routes',
+            'operable_menu',
+            'operable_menu_mobile',
+            'syncable_mutations',
         ]);
         $response->assertJsonPath('branch_id', $branch->id);
         $response->assertJsonFragment(['name' => 'Premium Wash']);
         $response->assertJsonFragment(['name' => 'Air Freshener']);
         $response->assertJsonFragment(['full_name' => 'Bootstrap Customer']);
         $response->assertJsonFragment(['slug' => 'cash']);
+        $this->assertContains(route('dashboard'), $response->json('pages'));
+        $this->assertContains('pos.index', $response->json('operable_routes'));
+        $this->assertContains('customer.create', $response->json('syncable_mutations'));
     }
 
     public function test_guest_cannot_access_bootstrap(): void

@@ -14,7 +14,9 @@ import {
     isOnline,
     newUuid,
     onConnectivityChange,
+    precachePages,
     pullBootstrap,
+    registerOfflineFormGuard,
     syncPendingMutations,
 } from './offline';
 
@@ -341,25 +343,69 @@ Alpine.store('offline', {
     pending: 0,
     syncing: false,
     bootstrapped: false,
+    precaching: false,
+    pagesCached: 0,
+    operableRoutes: [],
     _initialized: false,
+
+    isOperable(routeName) {
+        return this.operableRoutes.includes(routeName);
+    },
+
+    applyBootstrapData(data) {
+        if (Array.isArray(data?.operable_routes)) {
+            this.operableRoutes = data.operable_routes;
+        }
+    },
 
     async refreshPending() {
         this.pending = await getPendingMutationCount();
     },
 
+    async precachePagesFromBootstrap(data = null) {
+        if (!this.online || this.precaching) {
+            return;
+        }
+
+        const bootstrap = data ?? await getBootstrap();
+
+        if (!bootstrap?.pages?.length) {
+            return;
+        }
+
+        this.precaching = true;
+
+        try {
+            const result = await precachePages(bootstrap.pages);
+            this.pagesCached = result.cached;
+        } finally {
+            this.precaching = false;
+        }
+    },
+
     async bootstrap() {
-        if (!this.online || this.bootstrapped) {
+        let data = null;
+
+        if (!this.online) {
             return getBootstrap();
         }
 
         try {
-            await pullBootstrap();
+            data = await pullBootstrap();
             this.bootstrapped = true;
         } catch {
-            // Keep working with any cached bootstrap data.
+            data = await getBootstrap();
         }
 
-        return getBootstrap();
+        if (this.online && data?.pages?.length) {
+            await this.precachePagesFromBootstrap(data);
+        }
+
+        if (data) {
+            this.applyBootstrapData(data);
+        }
+
+        return data ?? getBootstrap();
     },
 
     async syncNow() {
@@ -401,6 +447,17 @@ Alpine.store('offline', {
 
         this._initialized = true;
         initConnectivity();
+        registerOfflineFormGuard();
+
+        const operableMeta = document.querySelector('meta[name="offline-operable-routes"]');
+
+        if (operableMeta?.content) {
+            try {
+                this.operableRoutes = JSON.parse(operableMeta.content);
+            } catch {
+                // Ignore invalid bootstrap meta.
+            }
+        }
 
         onConnectivityChange(async (online) => {
             this.online = online;
@@ -417,6 +474,12 @@ Alpine.store('offline', {
 
         if (this.online) {
             this.bootstrap();
+        } else {
+            getBootstrap().then((data) => {
+                if (data) {
+                    this.applyBootstrapData(data);
+                }
+            });
         }
     },
 });

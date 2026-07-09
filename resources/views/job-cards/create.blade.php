@@ -49,6 +49,7 @@
                     method="POST"
                     action="{{ route('job-cards.store') }}"
                     class="asp-form"
+                    data-offline-capable="true"
                     @submit.prevent="submit"
                 >
                     @csrf

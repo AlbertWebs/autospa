@@ -9,7 +9,7 @@
             </p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-            <form method="GET" action="{{ route('mobile.index') }}" class="flex items-center gap-2">
+            <form method="GET" action="{{ route('mobile.index') }}" x-show="$store.offline.online" x-cloak class="flex items-center gap-2">
                 <label for="mobile-dashboard-date" class="sr-only">Overview date</label>
                 <input
                     id="mobile-dashboard-date"
@@ -41,6 +41,16 @@
         </div>
     </div>
 
+    <div x-show="! $store.offline.online" x-cloak class="mb-6">
+        <h2 class="asp-mobile-section-title">Offline Tools</h2>
+        <p class="mb-3 text-sm text-slate-500 dark:text-slate-400">Only workflows that queue changes for sync</p>
+        @include('partials.offline-operable-nav', [
+            'items' => \App\Support\OfflineRoutes::operableMenuForUser(auth()->user(), true),
+            'variant' => 'mobile',
+        ])
+    </div>
+
+    <div x-show="$store.offline.online">
     @php
         $today = $selectedDate->toDateString();
         $dateLabel = $selectedDate->isToday() ? "Today's" : $selectedDate->format('M j')."'s";
@@ -168,5 +178,6 @@
                 @endforelse
             </div>
         </section>
+    </div>
     </div>
 </x-layouts.mobile>

@@ -15,6 +15,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @include('partials.pwa-head')
+    @include('partials.offline-meta')
     <title>{{ $title ?? config('app.name') }}</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700&display=swap" rel="stylesheet" />
@@ -49,7 +50,7 @@
                         <span class="material-symbols-outlined text-[20px]" x-show="$store.theme.dark" x-cloak>light_mode</span>
                     </button>
 
-                    <a href="{{ route('notifications.index') }}" class="asp-mobile-icon-btn" aria-label="Notifications">
+                    <a href="{{ route('notifications.index') }}" x-show="$store.offline.online" x-cloak class="asp-mobile-icon-btn" aria-label="Notifications">
                         <span class="material-symbols-outlined text-[20px]">notifications</span>
                     </a>
 

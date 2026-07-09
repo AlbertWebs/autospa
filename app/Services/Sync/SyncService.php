@@ -19,6 +19,7 @@ use App\Models\Vehicle;
 use App\Services\ActivityLogService;
 use App\Services\PosService;
 use App\Services\VehicleSmsNotificationService;
+use App\Support\OfflineRoutes;
 use App\Support\RegistrationNumber;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -33,7 +34,7 @@ class SyncService
         protected ActivityLogService $activityLogService,
     ) {}
 
-    public function bootstrap(int $branchId): array
+    public function bootstrap(int $branchId, ?User $user = null): array
     {
         $customers = Customer::query()
             ->where('branch_id', $branchId)
@@ -83,6 +84,11 @@ class SyncService
                 ->orderByDesc('id')
                 ->limit(500)
                 ->get(['id', 'uuid', 'customer_id', 'registration_number', 'make', 'model', 'color']),
+            'pages' => OfflineRoutes::urlsForUser($user),
+            'operable_routes' => OfflineRoutes::operableRouteNames(),
+            'operable_menu' => OfflineRoutes::operableMenuForUser($user, false),
+            'operable_menu_mobile' => OfflineRoutes::operableMenuForUser($user, true),
+            'syncable_mutations' => OfflineRoutes::syncableMutations(),
         ];
     }
 
@@ -178,7 +184,7 @@ class SyncService
         return match ($type) {
             'customer.create' => $this->createCustomer($branchId, $payload, $clientEntityUuid, $idMap),
             'vehicle.create' => $this->createVehicle($branchId, $payload, $clientEntityUuid, $idMap),
-            'job_card.create' => $this->createJobCard($branchId, $payload, $clientEntityUuid, $idMap),
+            'job_card.create' => $this->createJobCard($branchId, $user->id, $payload, $clientEntityUuid, $idMap),
             'job_card.update_status' => $this->updateJobCardStatus($branchId, $payload, $idMap),
             'pos.checkout' => $this->checkoutPos($branchId, $user->id, $payload, $idMap),
             default => throw new InvalidArgumentException("Unsupported mutation type [{$type}]."),
@@ -305,6 +311,7 @@ class SyncService
      */
     protected function createJobCard(
         int $branchId,
+        int $userId,
         array $payload,
         ?string $clientEntityUuid,
         array &$idMap,
@@ -329,6 +336,7 @@ class SyncService
             'customer_id' => $customerId,
             'vehicle_id' => $vehicleId,
             'booking_id' => $this->resolveReference($payload['booking_id'] ?? null, $idMap),
+            'created_by' => $userId,
             'assigned_to' => $this->resolveReference($payload['assigned_to'] ?? null, $idMap),
             'status' => $payload['status'] ?? JobCardStatus::Open,
             'notes' => $payload['notes'] ?? null,

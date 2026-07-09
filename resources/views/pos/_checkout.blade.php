@@ -155,7 +155,7 @@
                     </button>
                 </div>
 
-                <form method="POST" action="{{ route('pos.store') }}" class="asp-pos-cart-body asp-form !space-y-4" @submit="handleCheckout">
+                <form method="POST" action="{{ route('pos.store') }}" class="asp-pos-cart-body asp-form !space-y-4" data-offline-capable="true" @submit="handleCheckout">
                     @csrf
 
                     <input type="hidden" name="customer_id" x-model="customerId">

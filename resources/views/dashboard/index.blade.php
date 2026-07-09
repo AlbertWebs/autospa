@@ -3,6 +3,7 @@
 @section('title', 'Mission Control')
 
 @section('content')
+@php($offlineOperableMenu = \App\Support\OfflineRoutes::operableMenuForUser(auth()->user()))
 <div class="asp-main">
     {{-- Page header --}}
     <header class="asp-page-header">
@@ -18,7 +19,7 @@
             </p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-            <form method="GET" action="{{ route('dashboard') }}" class="flex items-center gap-2">
+            <form method="GET" action="{{ route('dashboard') }}" x-show="$store.offline.online" x-cloak class="flex items-center gap-2">
                 <label for="dashboard-date" class="sr-only">Overview date</label>
                 <input
                     id="dashboard-date"
@@ -53,14 +54,31 @@
                 Systems Offline
             </span>
 
-            <a href="{{ route('pos.index') }}" class="inline-flex items-center gap-2 rounded-xl bg-brand-primary px-4 py-2.5 text-sm font-semibold text-brand-on-primary shadow-glow-sm transition hover:shadow-glow active:scale-[0.98]">
+            <a href="{{ route('pos.index') }}" x-show="$store.offline.online" x-cloak class="inline-flex items-center gap-2 rounded-xl bg-brand-primary px-4 py-2.5 text-sm font-semibold text-brand-on-primary shadow-glow-sm transition hover:shadow-glow active:scale-[0.98]">
                 <span class="material-symbols-outlined text-[18px]">point_of_sale</span>
                 Open POS
             </a>
         </div>
     </header>
 
-    {{-- KPI grid --}}
+    <div x-show="! $store.offline.online" x-cloak class="relative mb-8">
+        <x-ui.panel title="Offline Tools" subtitle="These workflows queue changes and sync when you reconnect">
+            <div class="grid gap-2 sm:grid-cols-2">
+                @foreach ($offlineOperableMenu as $item)
+                    @php($offlineIcon = match ($item['icon']) {
+                        'shopping-cart' => 'point_of_sale',
+                        'sparkles' => 'auto_awesome',
+                        'clipboard' => 'assignment',
+                        'truck' => 'garage',
+                        default => 'offline_bolt',
+                    })
+                    <x-ui.quick-action :href="$item['url']" :icon="$offlineIcon" :label="$item['label']" description="Works offline" />
+                @endforeach
+            </div>
+        </x-ui.panel>
+    </div>
+
+    <div x-show="$store.offline.online">
     @php
         $today = $selectedDate->toDateString();
         $dateLabel = $selectedDate->isToday() ? 'Today' : $selectedDate->format('M j, Y');
@@ -176,6 +194,7 @@
                 @endforelse
             </div>
         </x-ui.panel>
+    </div>
     </div>
 </div>
 @endsection

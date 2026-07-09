@@ -6,6 +6,7 @@ use App\Http\Requests\SyncPushRequest;
 use App\Services\BranchService;
 use App\Services\Sync\SyncService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class SyncController extends Controller
 {
@@ -14,7 +15,7 @@ class SyncController extends Controller
         protected BranchService $branchService,
     ) {}
 
-    public function bootstrap(): JsonResponse
+    public function bootstrap(Request $request): JsonResponse
     {
         $branchId = $this->branchService->currentBranchId();
 
@@ -23,7 +24,7 @@ class SyncController extends Controller
         }
 
         return response()->json(
-            $this->syncService->bootstrap($branchId)
+            $this->syncService->bootstrap($branchId, $request->user())
         );
     }
 

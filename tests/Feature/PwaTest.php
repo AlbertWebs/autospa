@@ -35,6 +35,11 @@ class PwaTest extends TestCase
     public function test_service_worker_file_is_publicly_accessible(): void
     {
         $this->assertFileExists(public_path('sw.js'));
+
+        $contents = file_get_contents(public_path('sw.js'));
+
+        $this->assertStringContainsString('autospa-pages-v2', $contents);
+        $this->assertStringContainsString('matchCachedPage', $contents);
     }
 
     public function test_pwa_icons_are_publicly_accessible(): void

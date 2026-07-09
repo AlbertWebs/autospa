@@ -32,7 +32,7 @@
             successMessage: 'Job card created.',
         })"
     >
-        <form method="POST" action="{{ route('mobile.job-cards.store') }}" class="asp-form asp-mobile-card" @submit.prevent="submit">
+        <form method="POST" action="{{ route('mobile.job-cards.store') }}" class="asp-form asp-mobile-card" data-offline-capable="true" @submit.prevent="submit">
             @csrf
             @include('job-cards._form', ['ajax' => true, 'employees' => $employees, 'bookings' => $bookings])
 

@@ -7,6 +7,8 @@
                 $isActive = request()->routeIs($tab['pattern'] ?? $tab['route']);
             @endphp
             <a href="{{ route($tab['route']) }}"
+                x-show="$store.offline.online || $store.offline.isOperable('{{ $tab['route'] }}')"
+                x-cloak
                 @class([
                     'asp-mobile-tab',
                     'asp-mobile-tab--active' => $isActive,

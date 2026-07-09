@@ -37,7 +37,7 @@ return [
                 ],
                 [
                     'heading' => 'Working offline',
-                    'body' => 'AutoSpa keeps working when the internet drops. A banner appears when you are offline. POS cash checkout, job card creation, and quick customer/vehicle creation queue locally and sync when connectivity returns. The pending-sync badge shows how many changes are waiting to upload. M-Pesa STK push is disabled offline—use cash or sync later.',
+                    'body' => 'AutoSpa keeps working when the internet drops. After one online visit, your allowed pages are cached for offline browsing. POS cash checkout, job card creation, live status updates, and quick customer/vehicle creation queue locally and sync when connectivity returns. The pending-sync badge shows how many changes are waiting to upload. M-Pesa STK push is disabled offline—use cash or sync later.',
                 ],
             ],
         ],

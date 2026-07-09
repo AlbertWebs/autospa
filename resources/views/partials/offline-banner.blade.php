@@ -6,7 +6,7 @@
     <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2">
         <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
             <p x-show="! $store.offline.online" class="font-medium">
-                Offline — changes will sync when connected
+                Offline — only tools that queue changes for sync are shown
             </p>
             <p x-show="$store.offline.pending > 0" class="text-amber-800 dark:text-amber-200">
                 <span x-text="$store.offline.pending"></span>
