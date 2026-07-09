@@ -17,6 +17,8 @@ import {
     precachePages,
     pullBootstrap,
     registerOfflineFormGuard,
+    registerServiceWorker,
+    startOfflinePrecache,
     syncPendingMutations,
 } from './offline';
 
@@ -25,6 +27,7 @@ import 'tom-select/dist/css/tom-select.css';
 
 window.Alpine = Alpine;
 window.Chart = Chart;
+window.Turbo = Turbo;
 window.flatpickr = flatpickr;
 window.TomSelect = TomSelect;
 
@@ -473,6 +476,11 @@ Alpine.store('offline', {
         this.refreshPending();
 
         if (this.online) {
+            startOfflinePrecache().then((result) => {
+                if (result?.cached) {
+                    this.pagesCached = result.cached;
+                }
+            });
             this.bootstrap();
         } else {
             getBootstrap().then((data) => {
@@ -505,12 +513,6 @@ Alpine.store('pwa', {
             this.deferredPrompt = null;
             Alpine.store('toast').show('AutoSpa installed successfully.', 'success');
         });
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js').catch(() => {
-                // Service worker registration is optional for local development.
-            });
-        }
     },
 
     async install() {
@@ -2379,5 +2381,9 @@ window.addEventListener('pageshow', () => {
     Alpine.store('fullscreen').gestureRestoreAttached = false;
     Alpine.store('fullscreen').prepareRestore();
 });
+
+if (document.querySelector('meta[name="csrf-token"]')) {
+    registerServiceWorker().then(() => startOfflinePrecache());
+}
 
 Alpine.start();

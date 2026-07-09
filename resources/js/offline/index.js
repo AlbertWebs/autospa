@@ -11,4 +11,11 @@ export {
 } from './sync-manager';
 
 export { initConnectivity, onConnectivityChange } from './connectivity';
-export { precachePages, registerOfflineFormGuard } from './page-cache';
+export {
+    precachePages,
+    precacheCurrentAssets,
+    readPrecacheUrlsFromMeta,
+    registerOfflineFormGuard,
+    registerServiceWorker,
+    startOfflinePrecache,
+} from './page-cache';

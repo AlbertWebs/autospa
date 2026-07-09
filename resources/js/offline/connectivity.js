@@ -4,6 +4,14 @@ export function isOnline() {
     return navigator.onLine;
 }
 
+function setTurboDrive(enabled) {
+    const turbo = window.Turbo?.session;
+
+    if (turbo) {
+        turbo.drive = enabled;
+    }
+}
+
 export function onConnectivityChange(callback) {
     listeners.add(callback);
 
@@ -11,10 +19,14 @@ export function onConnectivityChange(callback) {
 }
 
 function notify() {
-    listeners.forEach((callback) => callback(isOnline()));
+    const online = isOnline();
+
+    setTurboDrive(online);
+    listeners.forEach((callback) => callback(online));
 }
 
 export function initConnectivity() {
+    setTurboDrive(isOnline());
     window.addEventListener('online', notify);
     window.addEventListener('offline', notify);
 }

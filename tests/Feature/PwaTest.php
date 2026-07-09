@@ -38,7 +38,8 @@ class PwaTest extends TestCase
 
         $contents = file_get_contents(public_path('sw.js'));
 
-        $this->assertStringContainsString('autospa-pages-v2', $contents);
+        $this->assertStringContainsString('autospa-pages-v3', $contents);
+        $this->assertStringContainsString('precacheUrls', $contents);
         $this->assertStringContainsString('matchCachedPage', $contents);
     }
 
