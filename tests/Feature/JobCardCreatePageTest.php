@@ -141,6 +141,93 @@ class JobCardCreatePageTest extends TestCase
         $this->assertDatabaseCount('job_cards', 0);
     }
 
+    public function test_creating_a_job_card_without_vehicle_is_allowed(): void
+    {
+        $user = $this->makeUserWithRole(RoleSlug::Manager);
+
+        $customer = Customer::factory()->create([
+            'branch_id' => $user->branch_id,
+        ]);
+
+        $service = $this->createService($user->branch_id);
+
+        $response = $this->actingAs($user)->post(route('job-cards.store'), [
+            'customer_id' => $customer->id,
+            'vehicle_id' => null,
+            'status' => 'open',
+            'service_ids' => [$service->id],
+        ]);
+
+        $response->assertRedirect(route('job-cards.live'));
+
+        $jobCard = JobCard::query()->firstOrFail();
+
+        $this->assertNull($jobCard->vehicle_id);
+        $this->assertSame($customer->id, $jobCard->customer_id);
+        $this->assertDatabaseHas('job_card_services', [
+            'job_card_id' => $jobCard->id,
+            'service_id' => $service->id,
+        ]);
+    }
+
+    public function test_job_card_without_vehicle_appears_on_live_and_pos(): void
+    {
+        $user = $this->makeUserWithRole(RoleSlug::Manager);
+        session(['current_branch_id' => $user->branch_id]);
+
+        $customer = Customer::factory()->create([
+            'branch_id' => $user->branch_id,
+            'full_name' => 'Carpet Customer',
+        ]);
+
+        $service = $this->createService($user->branch_id);
+
+        $openJob = JobCard::query()->create([
+            'branch_id' => $user->branch_id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => null,
+            'status' => \App\Enums\JobCardStatus::Open,
+        ]);
+
+        \App\Models\JobCardService::query()->create([
+            'job_card_id' => $openJob->id,
+            'service_id' => $service->id,
+            'price' => $service->price,
+            'status' => 'pending',
+        ]);
+
+        $live = $this->actingAs($user)->get(route('job-cards.live'));
+        $live->assertOk();
+        $live->assertSee('Carpet Customer');
+        $live->assertSee('No vehicle');
+
+        $completedJob = JobCard::query()->create([
+            'branch_id' => $user->branch_id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => null,
+            'status' => \App\Enums\JobCardStatus::Completed,
+            'completed_at' => now(),
+        ]);
+
+        \App\Models\JobCardService::query()->create([
+            'job_card_id' => $completedJob->id,
+            'service_id' => $service->id,
+            'price' => $service->price,
+            'status' => 'pending',
+        ]);
+
+        $show = $this->actingAs($user)->get(route('job-cards.show', $completedJob));
+        $show->assertOk();
+        $show->assertSee('No vehicle');
+        $show->assertSee('Carpet Customer');
+
+        $pos = $this->actingAs($user)->get(route('pos.index', ['job_card' => $completedJob->id]));
+        $pos->assertOk();
+        $pos->assertSee('Checkout · Job #'.$completedJob->id);
+        $pos->assertSee('Carpet Customer');
+        $pos->assertSee($service->name);
+    }
+
     public function test_creating_a_job_card_redirects_to_live_page(): void
     {
         $user = $this->makeUserWithRole(RoleSlug::Manager);

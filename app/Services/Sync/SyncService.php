@@ -320,8 +320,8 @@ class SyncService
         $customerId = $this->resolveReference($payload['customer_id'] ?? null, $idMap);
         $vehicleId = $this->resolveReference($payload['vehicle_id'] ?? null, $idMap);
 
-        if ($customerId === null || $vehicleId === null) {
-            throw new InvalidArgumentException('Job card create requires valid customer_id and vehicle_id.');
+        if ($customerId === null) {
+            throw new InvalidArgumentException('Job card create requires a valid customer_id.');
         }
 
         if (JobCard::query()->where('uuid', $uuid)->exists()) {

@@ -42,11 +42,11 @@
         @endif
     </x-ui.form-field>
 
-    <x-ui.form-field label="Vehicle" for="vehicle_id" name="vehicle_id" :required="true" :ajax="$ajax" hint="Filtered by selected customer." :col-span="2">
+    <x-ui.form-field label="Vehicle" for="vehicle_id" name="vehicle_id" :ajax="$ajax" hint="Optional — leave blank for carpet wash or non-vehicle jobs." :col-span="2">
         @if ($ajax)
             <div class="asp-field-addon">
-                <x-ui.select id="vehicle_id" name="vehicle_id" :ajax="$ajax" x-model="vehicleId" required>
-                    <option value="">Select vehicle…</option>
+                <x-ui.select id="vehicle_id" name="vehicle_id" :ajax="$ajax" x-model="vehicleId">
+                    <option value="">No vehicle (optional)</option>
                     <template x-for="vehicle in filteredVehicles" :key="vehicle.id">
                         <option :value="vehicle.id" x-text="vehicleLabel(vehicle)"></option>
                     </template>
@@ -73,8 +73,8 @@
                 <span x-show="!customerId" class="text-slate-400">: select a customer first</span>
             </p>
         @else
-            <x-ui.select id="vehicle_id" name="vehicle_id" x-model="vehicleId" required>
-                <option value="">Select vehicle…</option>
+            <x-ui.select id="vehicle_id" name="vehicle_id" x-model="vehicleId">
+                <option value="">No vehicle (optional)</option>
                 <template x-for="vehicle in filteredVehicles" :key="vehicle.id">
                     <option :value="vehicle.id" x-text="vehicleLabel(vehicle)"></option>
                 </template>

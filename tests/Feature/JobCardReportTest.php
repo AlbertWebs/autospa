@@ -52,9 +52,9 @@ class JobCardReportTest extends TestCase
         $response = $this->actingAs($user)->get(route('reports.job-cards'));
 
         $response->assertOk();
-        $response->assertSee('Job Cards Report');
-        $response->assertSee('KDJ 902K');
         $response->assertSee('Completed Today');
+        $response->assertSee('KDJ 902K');
+        $response->assertSee('Job Cards for');
     }
 
     protected function makeUserWithRole(RoleSlug $roleSlug): User

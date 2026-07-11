@@ -16,11 +16,18 @@ class StoreJobCardRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->input('vehicle_id') === '' || $this->input('vehicle_id') === null) {
+            $this->merge(['vehicle_id' => null]);
+        }
+    }
+
     public function rules(): array
     {
         return array_merge([
             'customer_id' => ['required', 'exists:customers,id'],
-            'vehicle_id' => ['required', 'exists:vehicles,id'],
+            'vehicle_id' => ['nullable', 'exists:vehicles,id'],
             'booking_id' => ['nullable', 'exists:bookings,id'],
             'assigned_to' => ['nullable', 'exists:employees,id'],
             'status' => ['nullable', Rule::enum(JobCardStatus::class)],

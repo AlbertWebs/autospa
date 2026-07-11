@@ -250,11 +250,13 @@ class JobCardController extends Controller
     {
         return [
             'id' => $jobCard->id,
-            'registration_number' => $jobCard->vehicle?->registration_number ?? 'No vehicle assigned',
-            'vehicle_summary' => trim(implode(' ', array_filter([
-                $jobCard->vehicle?->make,
-                $jobCard->vehicle?->model,
-            ]))) ?: 'Vehicle details unavailable',
+            'registration_number' => $jobCard->vehicle?->registration_number ?? 'No vehicle',
+            'vehicle_summary' => $jobCard->vehicle
+                ? (trim(implode(' ', array_filter([
+                    $jobCard->vehicle->make,
+                    $jobCard->vehicle->model,
+                ]))) ?: $jobCard->vehicle->registration_number)
+                : 'No vehicle',
             'customer_name' => $jobCard->customer?->full_name ?? 'Walk-in',
             'assignee_name' => $jobCard->assignee?->displayName() ?? 'Unassigned',
             'status' => $jobCard->status?->value ?? JobCardStatus::Open->value,

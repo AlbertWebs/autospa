@@ -1190,7 +1190,7 @@ document.addEventListener('alpine:init', () => {
                     const uuid = newUuid();
                     await enqueueMutation('job_card.create', {
                         customer_id: this.customerId,
-                        vehicle_id: this.vehicleId,
+                        vehicle_id: this.vehicleId || null,
                         assigned_to: formData.get('assigned_to') || null,
                         status: formData.get('status') || 'open',
                         notes: formData.get('notes') || null,

@@ -1,0 +1,1421 @@
+﻿PHPUnit 11.5.55 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.4.13
+Configuration: C:\projects\autospa\phpunit.xml
+
+F                                                                   1 / 1 (100%)
+
+Time: 00:06.299, Memory: 50.00 MB
+
+Job Card Report (Tests\Feature\JobCardReport)
+ Γ£ÿ Manager can view job cards report
+   Γöé
+   Γöé Failed asserting that '<!DOCTYPE html>\n
+   Γöé <html lang="en">\n
+   Γöé <head>\n
+   Γöé     <script>\n
+   Γöé     (function () {\n
+   Γöé         if (localStorage.getItem('darkMode') === 'true') {\n
+   Γöé             document.documentElement.classList.add('dark');\n
+   Γöé         }\n
+   Γöé \n
+   Γöé         if (localStorage.getItem('fullscreenPreferred') === 'true') {\n
+   Γöé             document.documentElement.classList.add('asp-app-fullscreen');\n
+   Γöé         }\n
+   Γöé     })();\n
+   Γöé </script>\n
+   Γöé     <meta charset="utf-8">\n
+   Γöé     <meta name="viewport" content="width=device-width, initial-scale=1">\n
+   Γöé     <meta name="csrf-token" content="w5CmAAL2wWAU3fRvCMBONcXmFtSrTus1PPOQmBUJ">\n
+   Γöé     <link rel="manifest" href="http://localhost/manifest.webmanifest">\n
+   Γöé <meta name="theme-color" content="#6366f1">\n
+   Γöé <meta name="application-name" content="AutoSpa">\n
+   Γöé <meta name="mobile-web-app-capable" content="yes">\n
+   Γöé <meta name="apple-mobile-web-app-capable" content="yes">\n
+   Γöé <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n
+   Γöé <meta name="apple-mobile-web-app-title" content="AutoSpa">\n
+   Γöé <link rel="icon" type="image/png" href="http://localhost/logo.png">\n
+   Γöé <link rel="icon" type="image/png" sizes="192x192" href="http://localhost/logo.png">\n
+   Γöé <link rel="apple-touch-icon" href="http://localhost/logo.png">\n
+   Γöé <script>\n
+   Γöé     (function () {\n
+   Γöé         if (!('serviceWorker' in navigator)) {\n
+   Γöé             return;\n
+   Γöé         }\n
+   Γöé \n
+   Γöé         navigator.serviceWorker.register("http:\/\/localhost\/sw.js", { scope: '/' }).catch(function () {\n
+   Γöé             // Service worker registration is optional for local development.\n
+   Γöé         });\n
+   Γöé     })();\n
+   Γöé </script>\n
+   Γöé     <title>AutoSpa Management System</title>\n
+   Γöé     <link rel="preconnect" href="https://fonts.bunny.net">\n
+   Γöé     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700&display=swap" rel="stylesheet" />\n
+   Γöé     <script type="module" src="http://[::1]:5173/@vite/client"></script><link rel="stylesheet" href="http://[::1]:5173/resources/css/app.css" /><script type="module" src="http://[::1]:5173/resources/js/app.js"></script></head>\n
+   Γöé <body class="font-sans antialiased bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">\n
+   Γöé     <div class="flex min-h-screen" x-data="{ sidebarOpen: false }">\n
+   Γöé         <aside data-tour="sidebar" class="sidebar fixed inset-y-0 left-0 z-50 flex w-64 transform flex-col border-r border-slate-800/80 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 shadow-xl shadow-black/20 transition-transform duration-300 ease-out lg:translate-x-0"\n
+   Γöé     :class="{ '-translate-x-full': !sidebarOpen, 'translate-x-0': sidebarOpen }">\n
+   Γöé \n
+   Γöé     \n
+   Γöé     <div class="flex h-16 shrink-0 items-center gap-3 border-b border-slate-800/80 px-5">\n
+   Γöé                 <img\n
+   Γöé     src="http://localhost/logo.png"\n
+   Γöé     alt="AutoSpa Management System"\n
+   Γöé     width="40"\n
+   Γöé     height="40"\n
+   Γöé     class="shrink-0 rounded-xl object-contain h-10 w-10 ring-2 ring-white"\n
+   Γöé >\n
+   Γöé         <div class="min-w-0 flex-1">\n
+   Γöé             <p class="truncate text-sm font-semibold text-white">AutoSpa Management System</p>\n
+   Γöé             <p class="truncate text-xs text-slate-400">AutoSpa Headquarters</p>\n
+   Γöé         </div>\n
+   Γöé     </div>\n
+   Γöé \n
+   Γöé     \n
+   Γöé     <div class="flex min-h-0 flex-1 flex-col px-4 pt-4" x-data="{ query: '' }">\n
+   Γöé         <div x-show="$store.offline.online" class="flex min-h-0 flex-1 flex-col">\n
+   Γöé             <div class="relative shrink-0">\n
+   Γöé             <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">\n
+   Γöé     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />\n
+   Γöé </svg>\n
+   Γöé             <input\n
+   Γöé                 type="search"\n
+   Γöé                 x-model="query"\n
+   Γöé                 placeholder="Search menuΓÇª"\n
+   Γöé                 class="w-full rounded-xl border border-slate-700/80 bg-slate-800/50 py-2 pl-9 pr-3 text-sm text-slate-200 placeholder-slate-500 transition focus:border-indigo-500/50 focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"\n
+   Γöé                 @keydown.escape="query = ''"\n
+   Γöé             />\n
+   Γöé         </div>\n
+   Γöé         <p x-show="$store.navMode.isMinimalist()" x-cloak class="mt-2 px-1 text-[10px] font-semibold uppercase tracking-widest text-indigo-400/80">\n
+   Γöé             Minimalist\n
+   Γöé         </p>\n
+   Γöé \n
+   Γöé         <nav class="sidebar-nav mt-3 min-h-0 flex-1 overflow-y-auto pb-2">\n
+   Γöé             <ul class="space-y-0.5">\n
+   Γöé                                                                                                             <li class="px-3 pb-1 pt-4 first:pt-1" x-show="$store.navMode.visible(false, false) && query === ''">\n
+   Γöé                             <span class="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Overview</span>\n
+   Γöé                         </li>\n
+   Γöé                                                                                                                                 <li\n
+   Γöé                             data-nav-item\n
+   Γöé                             x-show="$store.navMode.visible(false, false) && (query === '' || 'mission control'.includes(query.toLowerCase()))"\n
+   Γöé                                                     >\n
+   Γöé                             <a\n
+   Γöé                                 href="http://localhost/dashboard"\n
+   Γöé                                 class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 text-slate-300 hover:bg-slate-800/60 hover:text-white"\n
+   Γöé                             >\n
+   Γöé                                 <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors bg-slate-800 text-slate-400 group-hover:bg-slate-700 group-hover:text-slate-200">\n
+   Γöé                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">\n
+   Γöé     <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />\n
+   Γöé </svg>\n
+   Γöé                                 </span>\n
+   Γöé                                 <span class="truncate">Mission Control</span>\n
+   Γöé                             </a>\n
+   Γöé                         </li>\n
+   Γöé                                                                                                                                 <li class="px-3 pb-1 pt-4 first:pt-1" x-show="$store.navMode.visible(true, false) && query === ''">\n
+   Γöé                             <span class="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Operations</span>\n
+   Γöé                         </li>\n
+   Γöé                                                                                                                                 <li\n
+   Γöé                             data-nav-item\n
+   Γöé                             x-show="$store.navMode.visible(true, false) && (query === '' || 'live'.includes(query.toLowerCase()))"\n
+   Γöé                                                     >\n
+   Γöé                             <a\n
+   Γöé                                 href="http://localhost/job-cards/live"\n
+   Γöé                                 class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 text-slate-300 hover:bg-slate-800/60 hover:text-white"\n
+   Γöé                             >\n
+   Γöé                                 <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors bg-slate-800 text-slate-400 group-hover:bg-slate-700 group-hover:text-slate-200">\n
+   Γöé                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">\n
+   Γöé     <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />\n
+   Γöé </svg>\n
+   Γöé                                 </span>\n
+   Γöé                                 <span class="truncate">Live</span>\n
+   Γöé                             </a>\n
+   Γöé                         </li>\n
+   Γöé                                                                                                                                                                                 <li\n
+   Γöé                             data-nav-item\n
+   Γöé                             x-data="{ open: false }"\n
+   Γöé                             x-show="$store.navMode.visible(true, false) && (query === '' || 'bookings'.includes(query.toLowerCase()) || [&quot;calendar&quot;,&quot;all bookings&quot;].some(l => l.includes(query.toLowerCase())))"\n
+   Γöé                         >\n
+   Γöé                             <button\n
+   Γöé                                 type="button"\n
+   Γöé                                 @click="open = !open"\n
+   Γöé                                 class="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 text-slate-300 hover:bg-slate-800/60 hover:text-white"\n
+   Γöé                             >\n
+   Γöé                                 <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors bg-slate-800 text-slate-400 group-hover:bg-slate-700 group-hover:text-slate-200">\n
+   Γöé                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">\n
+   Γöé     <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />\n
+   Γöé </svg>\n
+   Γöé                                 </span>\n
+   Γöé                                 <span class="flex-1 truncate text-left">Bookings</span>\n
+   Γöé                                 <svg class="h-4 w-4 shrink-0 text-slate-500 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" viewBox="0 0 24 24" stroke="currentColor">\n
+   Γöé                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>\n
+   Γöé                                 </svg>\n
+   Γöé                             </button>\n
+   Γöé \n
+   Γöé                             <ul\n
+   Γöé                                 x-show="open"\n
+   Γöé                                 x-transition:enter="transition ease-out duration-200"\n
+   Γöé                                 x-transition:enter-start="opacity-0 -translate-y-1"\n
+   Γöé                                 x-transition:enter-end="opacity-100 translate-y-0"\n
+   Γöé                                 x-transition:leave="transition ease-in duration-150"\n
+   Γöé                                 x-transition:leave-start="opacity-100"\n
+   Γöé                                 x-transition:leave-end="opacity-0"\n
+   Γöé                                 class="mt-1 space-y-0.5 pl-[3.25rem] pr-1"\n
+   Γöé                                 x-cloak\n
+   Γöé                             >\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(true, false) && (query === '' || 'calendar'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/bookings/calendar"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Calendar\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(true, false) && (query === '' || 'all bookings'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/bookings"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             All Bookings\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                             </ul>\n
+   Γöé                         </li>\n
+   Γöé                                                                                                                                                                                 <li\n
+   Γöé                             data-nav-item\n
+   Γöé                             x-data="{ open: false }"\n
+   Γöé                             x-show="$store.navMode.visible(true, false) && (query === '' || 'vehicles'.includes(query.toLowerCase()) || [&quot;check in&quot;,&quot;active vehicles&quot;,&quot;ready for pickup&quot;,&quot;service history&quot;].some(l => l.includes(query.toLowerCase())))"\n
+   Γöé                         >\n
+   Γöé                             <button\n
+   Γöé                                 type="button"\n
+   Γöé                                 @click="open = !open"\n
+   Γöé                                 class="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 text-slate-300 hover:bg-slate-800/60 hover:text-white"\n
+   Γöé                             >\n
+   Γöé                                 <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors bg-slate-800 text-slate-400 group-hover:bg-slate-700 group-hover:text-slate-200">\n
+   Γöé                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">\n
+   Γöé     <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1" />\n
+   Γöé </svg>\n
+   Γöé                                 </span>\n
+   Γöé                                 <span class="flex-1 truncate text-left">Vehicles</span>\n
+   Γöé                                 <svg class="h-4 w-4 shrink-0 text-slate-500 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" viewBox="0 0 24 24" stroke="currentColor">\n
+   Γöé                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>\n
+   Γöé                                 </svg>\n
+   Γöé                             </button>\n
+   Γöé \n
+   Γöé                             <ul\n
+   Γöé                                 x-show="open"\n
+   Γöé                                 x-transition:enter="transition ease-out duration-200"\n
+   Γöé                                 x-transition:enter-start="opacity-0 -translate-y-1"\n
+   Γöé                                 x-transition:enter-end="opacity-100 translate-y-0"\n
+   Γöé                                 x-transition:leave="transition ease-in duration-150"\n
+   Γöé                                 x-transition:leave-start="opacity-100"\n
+   Γöé                                 x-transition:leave-end="opacity-0"\n
+   Γöé                                 class="mt-1 space-y-0.5 pl-[3.25rem] pr-1"\n
+   Γöé                                 x-cloak\n
+   Γöé                             >\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(true, false) && (query === '' || 'check in'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/vehicles/check-in"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Check In\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(true, false) && (query === '' || 'active vehicles'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/vehicles/active"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Active Vehicles\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(true, false) && (query === '' || 'ready for pickup'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/vehicles/ready"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Ready For Pickup\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(true, false) && (query === '' || 'service history'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/vehicles/history"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Service History\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                             </ul>\n
+   Γöé                         </li>\n
+   Γöé                                                                                                                                                                                 <li\n
+   Γöé                             data-nav-item\n
+   Γöé                             x-data="{ open: false }"\n
+   Γöé                             x-show="$store.navMode.visible(true, false) && (query === '' || 'customers'.includes(query.toLowerCase()) || [&quot;customer list&quot;,&quot;loyalty program&quot;,&quot;customer feedback&quot;].some(l => l.includes(query.toLowerCase())))"\n
+   Γöé                         >\n
+   Γöé                             <button\n
+   Γöé                                 type="button"\n
+   Γöé                                 @click="open = !open"\n
+   Γöé                                 class="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 text-slate-300 hover:bg-slate-800/60 hover:text-white"\n
+   Γöé                             >\n
+   Γöé                                 <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors bg-slate-800 text-slate-400 group-hover:bg-slate-700 group-hover:text-slate-200">\n
+   Γöé                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">\n
+   Γöé     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />\n
+   Γöé </svg>\n
+   Γöé                                 </span>\n
+   Γöé                                 <span class="flex-1 truncate text-left">Customers</span>\n
+   Γöé                                 <svg class="h-4 w-4 shrink-0 text-slate-500 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" viewBox="0 0 24 24" stroke="currentColor">\n
+   Γöé                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>\n
+   Γöé                                 </svg>\n
+   Γöé                             </button>\n
+   Γöé \n
+   Γöé                             <ul\n
+   Γöé                                 x-show="open"\n
+   Γöé                                 x-transition:enter="transition ease-out duration-200"\n
+   Γöé                                 x-transition:enter-start="opacity-0 -translate-y-1"\n
+   Γöé                                 x-transition:enter-end="opacity-100 translate-y-0"\n
+   Γöé                                 x-transition:leave="transition ease-in duration-150"\n
+   Γöé                                 x-transition:leave-start="opacity-100"\n
+   Γöé                                 x-transition:leave-end="opacity-0"\n
+   Γöé                                 class="mt-1 space-y-0.5 pl-[3.25rem] pr-1"\n
+   Γöé                                 x-cloak\n
+   Γöé                             >\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(true, false) && (query === '' || 'customer list'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/customers"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Customer List\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(true, false) && (query === '' || 'loyalty program'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/customers-loyalty"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Loyalty Program\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(true, false) && (query === '' || 'customer feedback'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/customers-feedback"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Customer Feedback\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                             </ul>\n
+   Γöé                         </li>\n
+   Γöé                                                                                                                                 <li\n
+   Γöé                             data-nav-item\n
+   Γöé                             x-show="$store.navMode.visible(true, false) && (query === '' || 'job cards'.includes(query.toLowerCase()))"\n
+   Γöé                                                     >\n
+   Γöé                             <a\n
+   Γöé                                 href="http://localhost/job-cards"\n
+   Γöé                                 class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 text-slate-300 hover:bg-slate-800/60 hover:text-white"\n
+   Γöé                             >\n
+   Γöé                                 <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors bg-slate-800 text-slate-400 group-hover:bg-slate-700 group-hover:text-slate-200">\n
+   Γöé                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">\n
+   Γöé     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />\n
+   Γöé </svg>\n
+   Γöé                                 </span>\n
+   Γöé                                 <span class="truncate">Job Cards</span>\n
+   Γöé                             </a>\n
+   Γöé                         </li>\n
+   Γöé                                                                                                                                 <li\n
+   Γöé                             data-nav-item\n
+   Γöé                             x-show="$store.navMode.visible(true, true) && (query === '' || 'pos'.includes(query.toLowerCase()))"\n
+   Γöé                                                     >\n
+   Γöé                             <a\n
+   Γöé                                 href="http://localhost/pos"\n
+   Γöé                                 class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 text-slate-300 hover:bg-slate-800/60 hover:text-white"\n
+   Γöé                             >\n
+   Γöé                                 <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors bg-slate-800 text-slate-400 group-hover:bg-slate-700 group-hover:text-slate-200">\n
+   Γöé                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">\n
+   Γöé     <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />\n
+   Γöé </svg>\n
+   Γöé                                 </span>\n
+   Γöé                                 <span class="truncate">POS</span>\n
+   Γöé                             </a>\n
+   Γöé                         </li>\n
+   Γöé                                                                                                                                                                                 <li\n
+   Γöé                             data-nav-item\n
+   Γöé                             x-data="{ open: false }"\n
+   Γöé                             x-show="$store.navMode.visible(false, false) && (query === '' || 'services'.includes(query.toLowerCase()) || [&quot;categories&quot;,&quot;services&quot;].some(l => l.includes(query.toLowerCase())))"\n
+   Γöé                         >\n
+   Γöé                             <button\n
+   Γöé                                 type="button"\n
+   Γöé                                 @click="open = !open"\n
+   Γöé                                 class="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 text-slate-300 hover:bg-slate-800/60 hover:text-white"\n
+   Γöé                             >\n
+   Γöé                                 <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors bg-slate-800 text-slate-400 group-hover:bg-slate-700 group-hover:text-slate-200">\n
+   Γöé                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">\n
+   Γöé     <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />\n
+   Γöé </svg>\n
+   Γöé                                 </span>\n
+   Γöé                                 <span class="flex-1 truncate text-left">Services</span>\n
+   Γöé                                 <svg class="h-4 w-4 shrink-0 text-slate-500 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" viewBox="0 0 24 24" stroke="currentColor">\n
+   Γöé                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>\n
+   Γöé                                 </svg>\n
+   Γöé                             </button>\n
+   Γöé \n
+   Γöé                             <ul\n
+   Γöé                                 x-show="open"\n
+   Γöé                                 x-transition:enter="transition ease-out duration-200"\n
+   Γöé                                 x-transition:enter-start="opacity-0 -translate-y-1"\n
+   Γöé                                 x-transition:enter-end="opacity-100 translate-y-0"\n
+   Γöé                                 x-transition:leave="transition ease-in duration-150"\n
+   Γöé                                 x-transition:leave-start="opacity-100"\n
+   Γöé                                 x-transition:leave-end="opacity-0"\n
+   Γöé                                 class="mt-1 space-y-0.5 pl-[3.25rem] pr-1"\n
+   Γöé                                 x-cloak\n
+   Γöé                             >\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'categories'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/services/categories"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Categories\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'services'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/services"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Services\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                             </ul>\n
+   Γöé                         </li>\n
+   Γöé                                                                                                                                                                                 <li\n
+   Γöé                             data-nav-item\n
+   Γöé                             x-data="{ open: false }"\n
+   Γöé                             x-show="$store.navMode.visible(false, false) && (query === '' || 'staff'.includes(query.toLowerCase()) || [&quot;employees&quot;,&quot;performance&quot;,&quot;commissions&quot;].some(l => l.includes(query.toLowerCase())))"\n
+   Γöé                         >\n
+   Γöé                             <button\n
+   Γöé                                 type="button"\n
+   Γöé                                 @click="open = !open"\n
+   Γöé                                 class="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 text-slate-300 hover:bg-slate-800/60 hover:text-white"\n
+   Γöé                             >\n
+   Γöé                                 <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors bg-slate-800 text-slate-400 group-hover:bg-slate-700 group-hover:text-slate-200">\n
+   Γöé                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">\n
+   Γöé     <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />\n
+   Γöé </svg>\n
+   Γöé                                 </span>\n
+   Γöé                                 <span class="flex-1 truncate text-left">Staff</span>\n
+   Γöé                                 <svg class="h-4 w-4 shrink-0 text-slate-500 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" viewBox="0 0 24 24" stroke="currentColor">\n
+   Γöé                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>\n
+   Γöé                                 </svg>\n
+   Γöé                             </button>\n
+   Γöé \n
+   Γöé                             <ul\n
+   Γöé                                 x-show="open"\n
+   Γöé                                 x-transition:enter="transition ease-out duration-200"\n
+   Γöé                                 x-transition:enter-start="opacity-0 -translate-y-1"\n
+   Γöé                                 x-transition:enter-end="opacity-100 translate-y-0"\n
+   Γöé                                 x-transition:leave="transition ease-in duration-150"\n
+   Γöé                                 x-transition:leave-start="opacity-100"\n
+   Γöé                                 x-transition:leave-end="opacity-0"\n
+   Γöé                                 class="mt-1 space-y-0.5 pl-[3.25rem] pr-1"\n
+   Γöé                                 x-cloak\n
+   Γöé                             >\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'employees'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/employees"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Employees\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'performance'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/performance"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Performance\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'commissions'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/commissions"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Commissions\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                             </ul>\n
+   Γöé                         </li>\n
+   Γöé                                                                                                                                                                                 <li\n
+   Γöé                             data-nav-item\n
+   Γöé                             x-data="{ open: false }"\n
+   Γöé                             x-show="$store.navMode.visible(false, false) && (query === '' || 'inventory'.includes(query.toLowerCase()) || [&quot;products&quot;,&quot;suppliers&quot;,&quot;purchases&quot;,&quot;stock movement&quot;,&quot;fixed assets&quot;,&quot;low stock&quot;].some(l => l.includes(query.toLowerCase())))"\n
+   Γöé                         >\n
+   Γöé                             <button\n
+   Γöé                                 type="button"\n
+   Γöé                                 @click="open = !open"\n
+   Γöé                                 class="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 text-slate-300 hover:bg-slate-800/60 hover:text-white"\n
+   Γöé                             >\n
+   Γöé                                 <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors bg-slate-800 text-slate-400 group-hover:bg-slate-700 group-hover:text-slate-200">\n
+   Γöé                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">\n
+   Γöé     <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />\n
+   Γöé </svg>\n
+   Γöé                                 </span>\n
+   Γöé                                 <span class="flex-1 truncate text-left">Inventory</span>\n
+   Γöé                                 <svg class="h-4 w-4 shrink-0 text-slate-500 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" viewBox="0 0 24 24" stroke="currentColor">\n
+   Γöé                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>\n
+   Γöé                                 </svg>\n
+   Γöé                             </button>\n
+   Γöé \n
+   Γöé                             <ul\n
+   Γöé                                 x-show="open"\n
+   Γöé                                 x-transition:enter="transition ease-out duration-200"\n
+   Γöé                                 x-transition:enter-start="opacity-0 -translate-y-1"\n
+   Γöé                                 x-transition:enter-end="opacity-100 translate-y-0"\n
+   Γöé                                 x-transition:leave="transition ease-in duration-150"\n
+   Γöé                                 x-transition:leave-start="opacity-100"\n
+   Γöé                                 x-transition:leave-end="opacity-0"\n
+   Γöé                                 class="mt-1 space-y-0.5 pl-[3.25rem] pr-1"\n
+   Γöé                                 x-cloak\n
+   Γöé                             >\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'products'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/products"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Products\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'suppliers'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/suppliers"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Suppliers\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'purchases'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/purchase-orders"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Purchases\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'stock movement'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/stock-movements"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Stock Movement\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'fixed assets'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/fixed-assets"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Fixed Assets\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'low stock'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/products/low-stock"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Low Stock\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                             </ul>\n
+   Γöé                         </li>\n
+   Γöé                                                                                                                                 <li class="px-3 pb-1 pt-4 first:pt-1" x-show="$store.navMode.visible(true, false) && query === ''">\n
+   Γöé                             <span class="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Business</span>\n
+   Γöé                         </li>\n
+   Γöé                                                                                                                                                                                 <li\n
+   Γöé                             data-nav-item\n
+   Γöé                             x-data="{ open: false }"\n
+   Γöé                             x-show="$store.navMode.visible(true, false) && (query === '' || 'sales'.includes(query.toLowerCase()) || [&quot;pos&quot;,&quot;invoices&quot;,&quot;receipts&quot;].some(l => l.includes(query.toLowerCase())))"\n
+   Γöé                         >\n
+   Γöé                             <button\n
+   Γöé                                 type="button"\n
+   Γöé                                 @click="open = !open"\n
+   Γöé                                 class="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 text-slate-300 hover:bg-slate-800/60 hover:text-white"\n
+   Γöé                             >\n
+   Γöé                                 <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors bg-slate-800 text-slate-400 group-hover:bg-slate-700 group-hover:text-slate-200">\n
+   Γöé                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">\n
+   Γöé     <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />\n
+   Γöé </svg>\n
+   Γöé                                 </span>\n
+   Γöé                                 <span class="flex-1 truncate text-left">Sales</span>\n
+   Γöé                                 <svg class="h-4 w-4 shrink-0 text-slate-500 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" viewBox="0 0 24 24" stroke="currentColor">\n
+   Γöé                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>\n
+   Γöé                                 </svg>\n
+   Γöé                             </button>\n
+   Γöé \n
+   Γöé                             <ul\n
+   Γöé                                 x-show="open"\n
+   Γöé                                 x-transition:enter="transition ease-out duration-200"\n
+   Γöé                                 x-transition:enter-start="opacity-0 -translate-y-1"\n
+   Γöé                                 x-transition:enter-end="opacity-100 translate-y-0"\n
+   Γöé                                 x-transition:leave="transition ease-in duration-150"\n
+   Γöé                                 x-transition:leave-start="opacity-100"\n
+   Γöé                                 x-transition:leave-end="opacity-0"\n
+   Γöé                                 class="mt-1 space-y-0.5 pl-[3.25rem] pr-1"\n
+   Γöé                                 x-cloak\n
+   Γöé                             >\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'pos'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/pos"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             POS\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'invoices'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/invoices"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Invoices\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(true, false) && (query === '' || 'receipts'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/receipts"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Receipts\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                             </ul>\n
+   Γöé                         </li>\n
+   Γöé                                                                                                                                                                                 <li\n
+   Γöé                             data-nav-item\n
+   Γöé                             x-data="{ open: false }"\n
+   Γöé                             x-show="$store.navMode.visible(false, false) && (query === '' || 'finance'.includes(query.toLowerCase()) || [&quot;overview&quot;,&quot;income&quot;,&quot;expenses&quot;,&quot;profit &amp; loss&quot;,&quot;cash payments&quot;,&quot;m-pesa payments&quot;,&quot;card payments&quot;,&quot;bank payments&quot;].some(l => l.includes(query.toLowerCase())))"\n
+   Γöé                         >\n
+   Γöé                             <button\n
+   Γöé                                 type="button"\n
+   Γöé                                 @click="open = !open"\n
+   Γöé                                 class="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 text-slate-300 hover:bg-slate-800/60 hover:text-white"\n
+   Γöé                             >\n
+   Γöé                                 <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors bg-slate-800 text-slate-400 group-hover:bg-slate-700 group-hover:text-slate-200">\n
+   Γöé                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">\n
+   Γöé     <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />\n
+   Γöé </svg>\n
+   Γöé                                 </span>\n
+   Γöé                                 <span class="flex-1 truncate text-left">Finance</span>\n
+   Γöé                                 <svg class="h-4 w-4 shrink-0 text-slate-500 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" viewBox="0 0 24 24" stroke="currentColor">\n
+   Γöé                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>\n
+   Γöé                                 </svg>\n
+   Γöé                             </button>\n
+   Γöé \n
+   Γöé                             <ul\n
+   Γöé                                 x-show="open"\n
+   Γöé                                 x-transition:enter="transition ease-out duration-200"\n
+   Γöé                                 x-transition:enter-start="opacity-0 -translate-y-1"\n
+   Γöé                                 x-transition:enter-end="opacity-100 translate-y-0"\n
+   Γöé                                 x-transition:leave="transition ease-in duration-150"\n
+   Γöé                                 x-transition:leave-start="opacity-100"\n
+   Γöé                                 x-transition:leave-end="opacity-0"\n
+   Γöé                                 class="mt-1 space-y-0.5 pl-[3.25rem] pr-1"\n
+   Γöé                                 x-cloak\n
+   Γöé                             >\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'overview'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/finance"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Overview\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'income'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/finance/income"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Income\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'expenses'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/finance/expenses"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Expenses\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'profit &amp; loss'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/finance/profit-loss"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Profit &amp; Loss\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'cash payments'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/payments/cash"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Cash Payments\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'm-pesa payments'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/payments/mpesa"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             M-Pesa Payments\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'card payments'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/payments/card"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Card Payments\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'bank payments'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/payments/bank"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Bank Payments\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                             </ul>\n
+   Γöé                         </li>\n
+   Γöé                                                                                                                                 <li class="px-3 pb-1 pt-4 first:pt-1" x-show="$store.navMode.visible(false, false) && query === ''">\n
+   Γöé                             <span class="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Insights</span>\n
+   Γöé                         </li>\n
+   Γöé                                                                                                                                                                                 <li\n
+   Γöé                             data-nav-item\n
+   Γöé                             x-data="{ open: true }"\n
+   Γöé                             x-show="$store.navMode.visible(false, false) && (query === '' || 'reports'.includes(query.toLowerCase()) || [&quot;daily&quot;,&quot;weekly&quot;,&quot;monthly&quot;,&quot;customers&quot;,&quot;staff&quot;,&quot;job cards&quot;,&quot;inventory&quot;].some(l => l.includes(query.toLowerCase())))"\n
+   Γöé                         >\n
+   Γöé                             <button\n
+   Γöé                                 type="button"\n
+   Γöé                                 @click="open = !open"\n
+   Γöé                                 class="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 bg-slate-800/80 text-white shadow-sm ring-1 ring-slate-700/50"\n
+   Γöé                             >\n
+   Γöé                                 <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors bg-indigo-500/20 text-indigo-300">\n
+   Γöé                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">\n
+   Γöé     <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />\n
+   Γöé </svg>\n
+   Γöé                                 </span>\n
+   Γöé                                 <span class="flex-1 truncate text-left">Reports</span>\n
+   Γöé                                 <svg class="h-4 w-4 shrink-0 text-slate-500 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" viewBox="0 0 24 24" stroke="currentColor">\n
+   Γöé                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>\n
+   Γöé                                 </svg>\n
+   Γöé                             </button>\n
+   Γöé \n
+   Γöé                             <ul\n
+   Γöé                                 x-show="open"\n
+   Γöé                                 x-transition:enter="transition ease-out duration-200"\n
+   Γöé                                 x-transition:enter-start="opacity-0 -translate-y-1"\n
+   Γöé                                 x-transition:enter-end="opacity-100 translate-y-0"\n
+   Γöé                                 x-transition:leave="transition ease-in duration-150"\n
+   Γöé                                 x-transition:leave-start="opacity-100"\n
+   Γöé                                 x-transition:leave-end="opacity-0"\n
+   Γöé                                 class="mt-1 space-y-0.5 pl-[3.25rem] pr-1"\n
+   Γöé                                 x-cloak\n
+   Γöé                             >\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'daily'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/reports/daily"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Daily\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'weekly'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/reports/weekly"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Weekly\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'monthly'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/reports/monthly"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Monthly\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'customers'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/reports/customers"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Customers\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'staff'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/reports/staff"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Staff\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'job cards'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/reports/job-cards"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 font-medium text-indigo-300 before:absolute before:-left-3 before:top-1/2 before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:bg-indigo-400"\n
+   Γöé                                         >\n
+   Γöé                                             Job Cards\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'inventory'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/reports/inventory"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Inventory\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                             </ul>\n
+   Γöé                         </li>\n
+   Γöé                                                                                                                                 <li class="px-3 pb-1 pt-4 first:pt-1" x-show="$store.navMode.visible(false, false) && query === ''">\n
+   Γöé                             <span class="text-[10px] font-semibold uppercase tracking-widest text-slate-500">System</span>\n
+   Γöé                         </li>\n
+   Γöé                                                                                                                                 <li\n
+   Γöé                             data-nav-item\n
+   Γöé                             x-show="$store.navMode.visible(false, false) && (query === '' || 'user manual'.includes(query.toLowerCase()))"\n
+   Γöé                              data-tour="user-manual"                         >\n
+   Γöé                             <a\n
+   Γöé                                 href="http://localhost/manual"\n
+   Γöé                                 class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 text-slate-300 hover:bg-slate-800/60 hover:text-white"\n
+   Γöé                             >\n
+   Γöé                                 <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors bg-slate-800 text-slate-400 group-hover:bg-slate-700 group-hover:text-slate-200">\n
+   Γöé                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">\n
+   Γöé     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />\n
+   Γöé </svg>\n
+   Γöé                                 </span>\n
+   Γöé                                 <span class="truncate">User Manual</span>\n
+   Γöé                             </a>\n
+   Γöé                         </li>\n
+   Γöé                                                                                                                                 <li\n
+   Γöé                             data-nav-item\n
+   Γöé                             x-show="$store.navMode.visible(false, false) && (query === '' || 'notifications'.includes(query.toLowerCase()))"\n
+   Γöé                                                     >\n
+   Γöé                             <a\n
+   Γöé                                 href="http://localhost/notifications"\n
+   Γöé                                 class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 text-slate-300 hover:bg-slate-800/60 hover:text-white"\n
+   Γöé                             >\n
+   Γöé                                 <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors bg-slate-800 text-slate-400 group-hover:bg-slate-700 group-hover:text-slate-200">\n
+   Γöé                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">\n
+   Γöé     <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />\n
+   Γöé </svg>\n
+   Γöé                                 </span>\n
+   Γöé                                 <span class="truncate">Notifications</span>\n
+   Γöé                             </a>\n
+   Γöé                         </li>\n
+   Γöé                                                                                                                                                                                 <li\n
+   Γöé                             data-nav-item\n
+   Γöé                             x-data="{ open: false }"\n
+   Γöé                             x-show="$store.navMode.visible(false, false) && (query === '' || 'settings'.includes(query.toLowerCase()) || [&quot;company&quot;,&quot;branches&quot;,&quot;users&quot;,&quot;roles&quot;,&quot;integrations&quot;,&quot;test ground&quot;].some(l => l.includes(query.toLowerCase())))"\n
+   Γöé                         >\n
+   Γöé                             <button\n
+   Γöé                                 type="button"\n
+   Γöé                                 @click="open = !open"\n
+   Γöé                                 class="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 text-slate-300 hover:bg-slate-800/60 hover:text-white"\n
+   Γöé                             >\n
+   Γöé                                 <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors bg-slate-800 text-slate-400 group-hover:bg-slate-700 group-hover:text-slate-200">\n
+   Γöé                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">\n
+   Γöé     <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z" />\n
+   Γöé </svg>\n
+   Γöé                                 </span>\n
+   Γöé                                 <span class="flex-1 truncate text-left">Settings</span>\n
+   Γöé                                 <svg class="h-4 w-4 shrink-0 text-slate-500 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" viewBox="0 0 24 24" stroke="currentColor">\n
+   Γöé                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>\n
+   Γöé                                 </svg>\n
+   Γöé                             </button>\n
+   Γöé \n
+   Γöé                             <ul\n
+   Γöé                                 x-show="open"\n
+   Γöé                                 x-transition:enter="transition ease-out duration-200"\n
+   Γöé                                 x-transition:enter-start="opacity-0 -translate-y-1"\n
+   Γöé                                 x-transition:enter-end="opacity-100 translate-y-0"\n
+   Γöé                                 x-transition:leave="transition ease-in duration-150"\n
+   Γöé                                 x-transition:leave-start="opacity-100"\n
+   Γöé                                 x-transition:leave-end="opacity-0"\n
+   Γöé                                 class="mt-1 space-y-0.5 pl-[3.25rem] pr-1"\n
+   Γöé                                 x-cloak\n
+   Γöé                             >\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'company'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/settings/company"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Company\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'branches'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/settings/branches"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Branches\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'users'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/settings/users"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Users\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'roles'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/settings/roles"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Roles\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'integrations'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/settings/integrations"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Integrations\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                                                                                                             <li x-show="$store.navMode.visible(false, false) && (query === '' || 'test ground'.includes(query.toLowerCase()))">\n
+   Γöé                                         <a\n
+   Γöé                                             href="http://localhost/settings/test-ground"\n
+   Γöé                                             class="relative block rounded-lg px-3 py-2 text-sm transition-all duration-150 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"\n
+   Γöé                                         >\n
+   Γöé                                             Test Ground\n
+   Γöé                                         </a>\n
+   Γöé                                     </li>\n
+   Γöé                                                             </ul>\n
+   Γöé                         </li>\n
+   Γöé                                                 </ul>\n
+   Γöé         </nav>\n
+   Γöé         </div>\n
+   Γöé \n
+   Γöé         <nav\n
+   Γöé             x-show="! $store.offline.online"\n
+   Γöé             x-cloak\n
+   Γöé             class="sidebar-nav mt-3 min-h-0 flex-1 overflow-y-auto pb-2"\n
+   Γöé         >\n
+   Γöé             <ul class="space-y-0.5">\n
+   Γöé         <li class="px-3 pb-1 pt-2">\n
+   Γöé             <span class="text-[10px] font-semibold uppercase tracking-widest text-indigo-300/80">Offline mode</span>\n
+   Γöé         </li>\n
+   Γöé                     <li>\n
+   Γöé                 <a\n
+   Γöé                     href="http://localhost/pos"\n
+   Γöé                     class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 text-slate-300 hover:bg-slate-800/60 hover:text-white"\n
+   Γöé                 >\n
+   Γöé                     <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors bg-slate-800 text-slate-400 group-hover:bg-slate-700 group-hover:text-slate-200">\n
+   Γöé                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">\n
+   Γöé     <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />\n
+   Γöé </svg>\n
+   Γöé                     </span>\n
+   Γöé                     <span class="truncate">Point of Sale</span>\n
+   Γöé                 </a>\n
+   Γöé             </li>\n
+   Γöé                     <li>\n
+   Γöé                 <a\n
+   Γöé                     href="http://localhost/job-cards/live"\n
+   Γöé                     class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 text-slate-300 hover:bg-slate-800/60 hover:text-white"\n
+   Γöé                 >\n
+   Γöé                     <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors bg-slate-800 text-slate-400 group-hover:bg-slate-700 group-hover:text-slate-200">\n
+   Γöé                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">\n
+   Γöé     <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />\n
+   Γöé </svg>\n
+   Γöé                     </span>\n
+   Γöé                     <span class="truncate">Live Wash Board</span>\n
+   Γöé                 </a>\n
+   Γöé             </li>\n
+   Γöé                     <li>\n
+   Γöé                 <a\n
+   Γöé                     href="http://localhost/job-cards/create"\n
+   Γöé                     class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 text-slate-300 hover:bg-slate-800/60 hover:text-white"\n
+   Γöé                 >\n
+   Γöé                     <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors bg-slate-800 text-slate-400 group-hover:bg-slate-700 group-hover:text-slate-200">\n
+   Γöé                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">\n
+   Γöé     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />\n
+   Γöé </svg>\n
+   Γöé                     </span>\n
+   Γöé                     <span class="truncate">New Job Card</span>\n
+   Γöé                 </a>\n
+   Γöé             </li>\n
+   Γöé                     <li>\n
+   Γöé                 <a\n
+   Γöé                     href="http://localhost/vehicles/check-in"\n
+   Γöé                     class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 text-slate-300 hover:bg-slate-800/60 hover:text-white"\n
+   Γöé                 >\n
+   Γöé                     <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors bg-slate-800 text-slate-400 group-hover:bg-slate-700 group-hover:text-slate-200">\n
+   Γöé                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">\n
+   Γöé     <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1" />\n
+   Γöé </svg>\n
+   Γöé                     </span>\n
+   Γöé                     <span class="truncate">Check In Vehicle</span>\n
+   Γöé                 </a>\n
+   Γöé             </li>\n
+   Γöé             </ul>\n
+   Γöé         </nav>\n
+   Γöé     </div>\n
+   Γöé \n
+   Γöé     \n
+   Γöé             <div class="shrink-0 border-t border-slate-800/80 bg-slate-900/50 p-3">\n
+   Γöé             <form method="POST" action="http://localhost/logout" data-turbo="false">\n
+   Γöé                 <input type="hidden" name="_token" value="w5CmAAL2wWAU3fRvCMBONcXmFtSrTus1PPOQmBUJ" autocomplete="off">                <button\n
+   Γöé                     type="submit"\n
+   Γöé                     class="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-400 transition-all duration-150 hover:bg-red-500/10 hover:text-red-400"\n
+   Γöé                 >\n
+   Γöé                     <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-800 text-slate-500 transition group-hover:bg-red-500/15 group-hover:text-red-400">\n
+   Γöé                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">\n
+   Γöé     <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />\n
+   Γöé </svg>\n
+   Γöé                     </span>\n
+   Γöé                     Log Out\n
+   Γöé                 </button>\n
+   Γöé             </form>\n
+   Γöé         </div>\n
+   Γöé     </aside>\n
+   Γöé \n
+   Γöé <div\n
+   Γöé     x-show="sidebarOpen"\n
+   Γöé     x-transition:enter="transition-opacity ease-out duration-300"\n
+   Γöé     x-transition:enter-start="opacity-0"\n
+   Γöé     x-transition:enter-end="opacity-100"\n
+   Γöé     x-transition:leave="transition-opacity ease-in duration-200"\n
+   Γöé     x-transition:leave-start="opacity-100"\n
+   Γöé     x-transition:leave-end="opacity-0"\n
+   Γöé     @click="sidebarOpen = false"\n
+   Γöé     class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"\n
+   Γöé     x-cloak\n
+   Γöé ></div>\n
+   Γöé \n
+   Γöé         <div class="flex flex-1 flex-col lg:pl-64">\n
+   Γöé             <header class="sticky top-0 z-30 border-b border-slate-300 bg-white/80 backdrop-blur-md dark:border-brand-border-subtle/80 dark:bg-brand-bg/80">\n
+   Γöé     <div\n
+   Γöé     x-show="! $store.offline.online || $store.offline.pending > 0"\n
+   Γöé     x-cloak\n
+   Γöé     class="border-b border-amber-200/80 bg-amber-50 px-4 py-2 text-sm text-amber-950 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-100"\n
+   Γöé >\n
+   Γöé     <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2">\n
+   Γöé         <div class="flex flex-wrap items-center gap-x-4 gap-y-1">\n
+   Γöé             <p x-show="! $store.offline.online" class="font-medium">\n
+   Γöé                 Offline ΓÇö only tools that queue changes for sync are shown\n
+   Γöé             </p>\n
+   Γöé             <p x-show="$store.offline.pending > 0" class="text-amber-800 dark:text-amber-200">\n
+   Γöé                 <span x-text="$store.offline.pending"></span>\n
+   Γöé                 <span x-text="$store.offline.pending === 1 ? ' change pending sync' : ' changes pending sync'"></span>\n
+   Γöé             </p>\n
+   Γöé         </div>\n
+   Γöé \n
+   Γöé         <button\n
+   Γöé             type="button"\n
+   Γöé             x-show="$store.offline.online && $store.offline.pending > 0"\n
+   Γöé             x-cloak\n
+   Γöé             class="rounded-lg border border-amber-300/80 bg-white px-3 py-1 text-xs font-semibold text-amber-900 hover:bg-amber-100 disabled:opacity-60 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100 dark:hover:bg-amber-500/20"\n
+   Γöé             x-bind:disabled="$store.offline.syncing"\n
+   Γöé             @click="$store.offline.syncNow()"\n
+   Γöé         >\n
+   Γöé             <span x-show="! $store.offline.syncing">Sync now</span>\n
+   Γöé             <span x-show="$store.offline.syncing" x-cloak>SyncingΓÇª</span>\n
+   Γöé         </button>\n
+   Γöé     </div>\n
+   Γöé </div>\n
+   Γöé \n
+   Γöé     <div class="flex h-16 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">\n
+   Γöé         <div class="flex items-center gap-3">\n
+   Γöé             <button type="button" @click="sidebarOpen = !sidebarOpen" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 lg:hidden dark:hover:bg-slate-800">\n
+   Γöé                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>\n
+   Γöé             </button>\n
+   Γöé                             <div class="hidden sm:block"><span class="hidden sm:inline">Insights</span></div>\n
+   Γöé                     </div>\n
+   Γöé \n
+   Γöé         <div class="flex items-center gap-2 sm:gap-4" data-tour="header-tools">\n
+   Γöé                             <form method="POST" action="http://localhost/branch/switch" class="hidden sm:block" data-turbo="false">\n
+   Γöé                     <input type="hidden" name="_token" value="w5CmAAL2wWAU3fRvCMBONcXmFtSrTus1PPOQmBUJ" autocomplete="off">                    <select name="branch_id" onchange="this.form.submit()"\n
+   Γöé                         class="rounded-xl border-slate-200 bg-slate-50 text-sm dark:border-slate-700 dark:bg-slate-800">\n
+   Γöé                                                     <option value="1" selected>AutoSpa Headquarters</option>\n
+   Γöé                                             </select>\n
+   Γöé                 </form>\n
+   Γöé             \n
+   Γöé             <button type="button" @click="$store.theme.toggle()" class="rounded-xl p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800" aria-label="Toggle dark mode">\n
+   Γöé                 <svg x-show="!$store.theme.dark" x-cloak class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>\n
+   Γöé                 <svg x-show="$store.theme.dark" x-cloak class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>\n
+   Γöé             </button>\n
+   Γöé \n
+   Γöé             <button\n
+   Γöé                 type="button"\n
+   Γöé                 @click="$store.navMode.toggle()"\n
+   Γöé                 x-bind:aria-label="$store.navMode.isMinimalist() ? 'Switch to Beast mode' : 'Switch to Minimalist mode'"\n
+   Γöé                 x-bind:title="$store.navMode.isMinimalist() ? 'Switch to Beast mode' : 'Switch to Minimalist mode'"\n
+   Γöé                 class="rounded-xl p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"\n
+   Γöé             >\n
+   Γöé                 <svg x-show="!$store.navMode.isMinimalist()" x-cloak class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">\n
+   Γöé                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h10M4 14h16M4 18h8" />\n
+   Γöé                 </svg>\n
+   Γöé                 <svg x-show="$store.navMode.isMinimalist()" x-cloak class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">\n
+   Γöé                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />\n
+   Γöé                 </svg>\n
+   Γöé             </button>\n
+   Γöé \n
+   Γöé             <button\n
+   Γöé                 type="button"\n
+   Γöé                 x-show="$store.pwa.canInstall && ! $store.pwa.installed"\n
+   Γöé                 x-cloak\n
+   Γöé                 @click="$store.pwa.install()"\n
+   Γöé                 aria-label="Install app"\n
+   Γöé                 title="Install app"\n
+   Γöé                 class="rounded-xl p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"\n
+   Γöé             >\n
+   Γöé                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">\n
+   Γöé                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" />\n
+   Γöé                 </svg>\n
+   Γöé             </button>\n
+   Γöé \n
+   Γöé             <button\n
+   Γöé                 type="button"\n
+   Γöé                 x-show="$store.fullscreen.supported"\n
+   Γöé                 x-cloak\n
+   Γöé                 @click="$store.fullscreen.toggle()"\n
+   Γöé                 x-bind:aria-label="$store.fullscreen.active ? 'Exit full screen' : 'Enter full screen'"\n
+   Γöé                 x-bind:title="$store.fullscreen.active ? 'Exit full screen' : 'Enter full screen'"\n
+   Γöé                 class="rounded-xl p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"\n
+   Γöé             >\n
+   Γöé                 <svg x-show="!$store.fullscreen.active" x-cloak class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">\n
+   Γöé                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 3H5a2 2 0 00-2 2v3m16-5h-3m3 0v3M3 16v3a2 2 0 002 2h3m11-5v3a2 2 0 01-2 2h-3" />\n
+   Γöé                 </svg>\n
+   Γöé                 <svg x-show="$store.fullscreen.active" x-cloak class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">\n
+   Γöé                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9H5m0 0V5m0 4l5-5m5 5h4m0 0V5m0 4l-5-5M9 15H5m0 0v4m0-4l5 5m5-5h4m0 0v4m0-4l-5 5" />\n
+   Γöé                 </svg>\n
+   Γöé             </button>\n
+   Γöé \n
+   Γöé             <a href="http://localhost/notifications" class="relative rounded-xl p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">\n
+   Γöé                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>\n
+   Γöé             </a>\n
+   Γöé \n
+   Γöé             <div class="relative" x-data="{ open: false }" @click.outside="open = false" @close.stop="open = false">\n
+   Γöé     <div @click="open = ! open">\n
+   Γöé         <button class="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">\n
+   Γöé                         <span class="hidden sm:inline">Rahul Doyle</span>\n
+   Γöé                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>\n
+   Γöé                     </button>\n
+   Γöé     </div>\n
+   Γöé \n
+   Γöé     <div x-show="open"\n
+   Γöé             x-transition:enter="transition ease-out duration-200"\n
+   Γöé             x-transition:enter-start="opacity-0 scale-95"\n
+   Γöé             x-transition:enter-end="opacity-100 scale-100"\n
+   Γöé             x-transition:leave="transition ease-in duration-75"\n
+   Γöé             x-transition:leave-start="opacity-100 scale-100"\n
+   Γöé             x-transition:leave-end="opacity-0 scale-95"\n
+   Γöé             class="absolute z-50 mt-2 w-48 rounded-md shadow-lg ltr:origin-top-right rtl:origin-top-left end-0"\n
+   Γöé             style="display: none;"\n
+   Γöé             @click="open = false">\n
+   Γöé         <div class="rounded-md ring-1 ring-black ring-opacity-5 py-1 bg-white dark:bg-gray-700">\n
+   Γöé             <a class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out" href="http://localhost/mobile">Mobile View</a>\n
+   Γöé                                         <a class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out" href="http://localhost/manual">User Manual</a>\n
+   Γöé                     <a class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out" href="http://localhost/profile">Profile</a>\n
+   Γöé                     <form method="POST" action="http://localhost/logout" data-turbo="false">\n
+   Γöé                         <input type="hidden" name="_token" value="w5CmAAL2wWAU3fRvCMBONcXmFtSrTus1PPOQmBUJ" autocomplete="off">                        <a class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out" href="http://localhost/logout" onclick="event.preventDefault(); this.closest('form').submit();">Log Out</a>\n
+   Γöé                     </form>\n
+   Γöé         </div>\n
+   Γöé     </div>\n
+   Γöé </div>\n
+   Γöé         </div>\n
+   Γöé     </div>\n
+   Γöé </header>\n
+   Γöé \n
+   Γöé             <main class="flex-1 p-4 sm:p-6 lg:p-8">\n
+   Γöé                                 \n
+   Γöé                 <header class="asp-page-header">\n
+   Γöé     <div>\n
+   Γöé         <p class="asp-page-eyebrow">Insights</p>\n
+   Γöé     </div>\n
+   Γöé \n
+   Γöé     </header>\n
+   Γöé \n
+   Γöé     <form method="GET" class="mb-6 flex flex-wrap items-end gap-3">\n
+   Γöé         <div class="asp-form-field">\n
+   Γöé             <label\n
+   Γöé              for="report_date"             class="asp-label"\n
+   Γöé         >Report Date</label>\n
+   Γöé     \n
+   Γöé     <input\n
+   Γöé      name="date"     class="asp-input" id="report_date" type="date" value="2026-07-11"\n
+   Γöé     />\n
+   Γöé \n
+   Γöé     \n
+   Γöé     \n
+   Γöé     </div>\n
+   Γöé         <button type="submit" class="asp-btn asp-btn-primary !py-2.5">Update</button>\n
+   Γöé     </form>\n
+   Γöé \n
+   Γöé     <div class="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">\n
+   Γöé         <div\n
+   Γöé         class="asp-stat asp-stat--bookings"\n
+   Γöé >\n
+   Γöé     <div class="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-current opacity-[0.04] blur-2xl"></div>\n
+   Γöé     <div class="relative flex items-start justify-between gap-3">\n
+   Γöé         <div class="min-w-0">\n
+   Γöé             <p class="asp-stat-label">Open Today</p>\n
+   Γöé             <p class="asp-stat-value">0</p>\n
+   Γöé                     </div>\n
+   Γöé         <div class="asp-stat-icon">\n
+   Γöé             <span class="material-symbols-outlined text-[22px]">hourglass_top</span>\n
+   Γöé         </div>\n
+   Γöé     </div>\n
+   Γöé </div>\n
+   Γöé         <div\n
+   Γöé         class="asp-stat asp-stat--service"\n
+   Γöé >\n
+   Γöé     <div class="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-current opacity-[0.04] blur-2xl"></div>\n
+   Γöé     <div class="relative flex items-start justify-between gap-3">\n
+   Γöé         <div class="min-w-0">\n
+   Γöé             <p class="asp-stat-label">In Progress Today</p>\n
+   Γöé             <p class="asp-stat-value">0</p>\n
+   Γöé                     </div>\n
+   Γöé         <div class="asp-stat-icon">\n
+   Γöé             <span class="material-symbols-outlined text-[22px]">autorenew</span>\n
+   Γöé         </div>\n
+   Γöé     </div>\n
+   Γöé </div>\n
+   Γöé         <div\n
+   Γöé         class="asp-stat asp-stat--ready"\n
+   Γöé >\n
+   Γöé     <div class="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-current opacity-[0.04] blur-2xl"></div>\n
+   Γöé     <div class="relative flex items-start justify-between gap-3">\n
+   Γöé         <div class="min-w-0">\n
+   Γöé             <p class="asp-stat-label">Completed Today</p>\n
+   Γöé             <p class="asp-stat-value">1</p>\n
+   Γöé                     </div>\n
+   Γöé         <div class="asp-stat-icon">\n
+   Γöé             <span class="material-symbols-outlined text-[22px]">task_alt</span>\n
+   Γöé         </div>\n
+   Γöé     </div>\n
+   Γöé </div>\n
+   Γöé         <div\n
+   Γöé         class="asp-stat asp-stat--default"\n
+   Γöé >\n
+   Γöé     <div class="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-current opacity-[0.04] blur-2xl"></div>\n
+   Γöé     <div class="relative flex items-start justify-between gap-3">\n
+   Γöé         <div class="min-w-0">\n
+   Γöé             <p class="asp-stat-label">Total Today</p>\n
+   Γöé             <p class="asp-stat-value">1</p>\n
+   Γöé                     </div>\n
+   Γöé         <div class="asp-stat-icon">\n
+   Γöé             <span class="material-symbols-outlined text-[22px]">assignment</span>\n
+   Γöé         </div>\n
+   Γöé     </div>\n
+   Γöé </div>\n
+   Γöé     </div>\n
+   Γöé \n
+   Γöé     <div class="mb-6 grid gap-6 lg:grid-cols-2">\n
+   Γöé         <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 p-6">\n
+   Γöé     <h2 class="mb-4 text-lg font-semibold">This Week</h2>\n
+   Γöé             <p class="mb-4 text-sm text-slate-500 dark:text-slate-400">\n
+   Γöé                 2026-07-06 ΓÇô 2026-07-12\n
+   Γöé             </p>\n
+   Γöé             <dl class="grid gap-3 text-sm">\n
+   Γöé                                     <div class="flex justify-between gap-4 rounded-lg bg-slate-50 px-4 py-3 dark:bg-slate-800">\n
+   Γöé                         <dt class="text-slate-500">Open</dt>\n
+   Γöé                         <dd class="font-mono font-medium">0</dd>\n
+   Γöé                     </div>\n
+   Γöé                                     <div class="flex justify-between gap-4 rounded-lg bg-slate-50 px-4 py-3 dark:bg-slate-800">\n
+   Γöé                         <dt class="text-slate-500">In Progress</dt>\n
+   Γöé                         <dd class="font-mono font-medium">0</dd>\n
+   Γöé                     </div>\n
+   Γöé                                     <div class="flex justify-between gap-4 rounded-lg bg-slate-50 px-4 py-3 dark:bg-slate-800">\n
+   Γöé                         <dt class="text-slate-500">Completed</dt>\n
+   Γöé                         <dd class="font-mono font-medium">1</dd>\n
+   Γöé                     </div>\n
+   Γöé                                     <div class="flex justify-between gap-4 rounded-lg bg-slate-50 px-4 py-3 dark:bg-slate-800">\n
+   Γöé                         <dt class="text-slate-500">Total</dt>\n
+   Γöé                         <dd class="font-mono font-medium">1</dd>\n
+   Γöé                     </div>\n
+   Γöé                             </dl>\n
+   Γöé </div>\n
+   Γöé \n
+   Γöé         <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 p-6">\n
+   Γöé     <h2 class="mb-4 text-lg font-semibold">This Month</h2>\n
+   Γöé             <p class="mb-4 text-sm text-slate-500 dark:text-slate-400">July 2026</p>\n
+   Γöé             <dl class="grid gap-3 text-sm">\n
+   Γöé                                     <div class="flex justify-between gap-4 rounded-lg bg-slate-50 px-4 py-3 dark:bg-slate-800">\n
+   Γöé                         <dt class="text-slate-500">Open</dt>\n
+   Γöé                         <dd class="font-mono font-medium">0</dd>\n
+   Γöé                     </div>\n
+   Γöé                                     <div class="flex justify-between gap-4 rounded-lg bg-slate-50 px-4 py-3 dark:bg-slate-800">\n
+   Γöé                         <dt class="text-slate-500">In Progress</dt>\n
+   Γöé                         <dd class="font-mono font-medium">0</dd>\n
+   Γöé                     </div>\n
+   Γöé                                     <div class="flex justify-between gap-4 rounded-lg bg-slate-50 px-4 py-3 dark:bg-slate-800">\n
+   Γöé                         <dt class="text-slate-500">Completed</dt>\n
+   Γöé                         <dd class="font-mono font-medium">1</dd>\n
+   Γöé                     </div>\n
+   Γöé                                     <div class="flex justify-between gap-4 rounded-lg bg-slate-50 px-4 py-3 dark:bg-slate-800">\n
+   Γöé                         <dt class="text-slate-500">Total</dt>\n
+   Γöé                         <dd class="font-mono font-medium">1</dd>\n
+   Γöé                     </div>\n
+   Γöé                             </dl>\n
+   Γöé </div>\n
+   Γöé     </div>\n
+   Γöé \n
+   Γöé     <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">\n
+   Γöé     <div class="border-b border-slate-200 px-6 py-4 dark:border-slate-800">\n
+   Γöé             <h2 class="text-lg font-semibold">Job Cards for 2026-07-11</h2>\n
+   Γöé             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">All job cards with activity on the selected date.</p>\n
+   Γöé         </div>\n
+   Γöé \n
+   Γöé         <div class="asp-panel asp-table-panel">\n
+   Γöé     <div class="asp-table-wrap">\n
+   Γöé         <table class="asp-table">\n
+   Γöé             <thead class="asp-table-head">\n
+   Γöé                 <tr>\n
+   Γöé                                             <th class="asp-th asp-th--center w-14 shrink-0">#</th>\n
+   Γöé                                         <th class="asp-th">Customer</th>\n
+   Γöé                 <th class="asp-th">Vehicle</th>\n
+   Γöé                 <th class="asp-th">Assignee</th>\n
+   Γöé                 <th class="asp-th">Status</th>\n
+   Γöé                 <th class="asp-th">Started</th>\n
+   Γöé                 <th class="asp-th">Completed</th>\n
+   Γöé                 <th class="asp-th asp-th--right">Actions</th>\n
+   Γöé                 </tr>\n
+   Γöé             </thead>\n
+   Γöé             <tbody class="asp-table-body">\n
+   Γöé                 <tr class="asp-table-row">\n
+   Γöé                 <td class="asp-td asp-td--muted asp-td--mono w-14 shrink-0 text-center">1</td>\n
+   Γöé                     <td class="asp-td">Rylee White</td>\n
+   Γöé                     <td class="asp-td asp-td--mono">KDJ 902K</td>\n
+   Γöé                     <td class="asp-td">Unassigned</td>\n
+   Γöé                     <td class="asp-td"><span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">\n
+   Γöé     Completed\n
+   Γöé </span></td>\n
+   Γöé                     <td class="asp-td asp-td--muted">Jul 11, 9:11 AM</td>\n
+   Γöé                     <td class="asp-td asp-td--muted">Jul 11, 10:11 AM</td>\n
+   Γöé                     <td class="asp-td asp-td--right"><div class="asp-table-actions">\n
+   Γöé             <a href="http://localhost/job-cards/1" class="asp-table-action asp-table-action--primary">\n
+   Γöé             <span class="material-symbols-outlined text-base">visibility</span>\n
+   Γöé             View\n
+   Γöé         </a>\n
+   Γöé     \n
+   Γöé     \n
+   Γöé     \n
+   Γöé     \n
+   Γöé </div></td>\n
+   Γöé                 </tr>\n
+   Γöé             </tbody>\n
+   Γöé         </table>\n
+   Γöé     </div>\n
+   Γöé \n
+   Γöé     \n
+   Γöé     </div>\n
+   Γöé </div>\n
+   Γöé             </main>\n
+   Γöé         </div>\n
+   Γöé     </div>\n
+   Γöé \n
+   Γöé     <div class="fixed bottom-4 right-4 z-[60] flex flex-col gap-2" x-data>\n
+   Γöé     <template x-for="item in $store.toast.items" :key="item.id">\n
+   Γöé         <div x-show="true" x-transition\n
+   Γöé             :class="{\n
+   Γöé                 'bg-emerald-600': item.type === 'success',\n
+   Γöé                 'bg-red-600': item.type === 'error',\n
+   Γöé                 'bg-slate-800': item.type === 'info'\n
+   Γöé             }"\n
+   Γöé             class="rounded-xl px-4 py-3 text-sm font-medium text-white shadow-lg">\n
+   Γöé             <span x-text="item.message"></span>\n
+   Γöé         </div>\n
+   Γöé     </template>\n
+   Γöé </div>\n
+   Γöé     <div\n
+   Γöé             x-data="onboardingTour()"\n
+   Γöé             x-show="$store.onboarding.active"\n
+   Γöé             x-cloak\n
+   Γöé             class="fixed inset-0 z-[100]"\n
+   Γöé             @keydown.escape.window="$store.onboarding.skip()"\n
+   Γöé         >\n
+   Γöé             <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" @click="$store.onboarding.skip()"></div>\n
+   Γöé \n
+   Γöé             <template x-if="$store.onboarding.currentStep">\n
+   Γöé                 <div\n
+   Γöé                     class="asp-tour-highlight"\n
+   Γöé                     x-show="$store.onboarding.highlightStyle"\n
+   Γöé                     x-bind:style="$store.onboarding.highlightStyle"\n
+   Γöé                     x-transition.opacity\n
+   Γöé                 ></div>\n
+   Γöé             </template>\n
+   Γöé \n
+   Γöé             <div\n
+   Γöé                 class="asp-tour-card"\n
+   Γöé                 x-bind:style="$store.onboarding.cardStyle"\n
+   Γöé                 x-transition\n
+   Γöé                 @click.stop\n
+   Γöé             >\n
+   Γöé                 <div class="flex items-start justify-between gap-4">\n
+   Γöé                     <div>\n
+   Γöé                         <p class="font-mono text-[10px] font-semibold uppercase tracking-widest text-brand-primary">\n
+   Γöé                             Getting started ┬╖ Step <span x-text="$store.onboarding.step + 1"></span> of <span x-text="$store.onboarding.steps.length"></span>\n
+   Γöé                         </p>\n
+   Γöé                         <h2 class="mt-1 font-display text-xl font-bold text-slate-900 dark:text-white" x-text="$store.onboarding.currentStep?.title"></h2>\n
+   Γöé                     </div>\n
+   Γöé                     <button\n
+   Γöé                         type="button"\n
+   Γöé                         class="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-brand-surface-high dark:hover:text-slate-200"\n
+   Γöé                         @click="$store.onboarding.skip()"\n
+   Γöé                         aria-label="Skip tour"\n
+   Γöé                     >\n
+   Γöé                         <span class="material-symbols-outlined">close</span>\n
+   Γöé                     </button>\n
+   Γöé                 </div>\n
+   Γöé \n
+   Γöé                 <p class="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300" x-text="$store.onboarding.currentStep?.body"></p>\n
+   Γöé \n
+   Γöé                 <div class="mt-6 flex flex-wrap items-center justify-between gap-3">\n
+   Γöé                     <button\n
+   Γöé                         type="button"\n
+   Γöé                         class="asp-btn asp-btn-ghost !px-3 text-sm"\n
+   Γöé                         @click="$store.onboarding.skip()"\n
+   Γöé                     >\n
+   Γöé                         Skip tour\n
+   Γöé                     </button>\n
+   Γöé                     <div class="flex items-center gap-2">\n
+   Γöé                         <button\n
+   Γöé                             type="button"\n
+   Γöé                             class="asp-btn asp-btn-secondary !px-4 text-sm"\n
+   Γöé                             x-show="$store.onboarding.step > 0"\n
+   Γöé                             @click="$store.onboarding.previous()"\n
+   Γöé                         >\n
+   Γöé                             Back\n
+   Γöé                         </button>\n
+   Γöé                         <button\n
+   Γöé                             type="button"\n
+   Γöé                             class="asp-btn asp-btn-primary !px-4 text-sm"\n
+   Γöé                             @click="$store.onboarding.next()"\n
+   Γöé                             x-text="$store.onboarding.isLastStep ? 'Finish' : 'Next'"\n
+   Γöé                         ></button>\n
+   Γöé                     </div>\n
+   Γöé                 </div>\n
+   Γöé             </div>\n
+   Γöé         </div>\n
+   Γöé \n
+   Γöé         <script>\n
+   Γöé             document.addEventListener('alpine:init', () => {\n
+   Γöé                 Alpine.store('onboarding').start(JSON.parse('[{\u0022title\u0022:\u0022Welcome to AutoSpa\u0022,\u0022body\u0022:\u0022This quick tour shows you how to navigate the system. You can skip at any time and reopen the User Manual later from the sidebar.\u0022,\u0022target\u0022:null},{\u0022title\u0022:\u0022Sidebar navigation\u0022,\u0022body\u0022:\u0022The sidebar is your home base. Modules are grouped into Overview, Operations, Business, Insights, and System. Use the search box to find any menu item quickly.\u0022,\u0022target\u0022:\u0022sidebar\u0022},{\u0022title\u0022:\u0022Mission Control\u0022,\u0022body\u0022:\u0022Mission Control is your dashboard. Review today\\u0027s revenue, bookings, vehicles in service, ready-for-pickup counts, pending payments, commissions, and recent activity at a glance.\u0022,\u0022target\u0022:null},{\u0022title\u0022:\u0022Daily operations\u0022,\u0022body\u0022:\u0022Operations covers Live job boards, Bookings, Vehicles, Customers, Job Cards, and POS. Move washes from Queued \\u2192 Washing \\u2192 Ready, then checkout.\u0022,\u0022target\u0022:\u0022sidebar\u0022},{\u0022title\u0022:\u0022Point of Sale\u0022,\u0022body\u0022:\u0022Use POS to sell products, select a customer, take cash or M-Pesa payment, and issue a receipt. Completed job cards open POS with wash services and products pre-filled.\u0022,\u0022target\u0022:null},{\u0022title\u0022:\u0022Services, staff \\u0026 inventory\u0022,\u0022body\u0022:\u0022Configure service categories and pricing. Manage attendees and supervisors, daily washer commissions (with M-Pesa OTP payout), attendance, and inventory.\u0022,\u0022target\u0022:null},{\u0022title\u0022:\u0022Sales \\u0026 payments\u0022,\u0022body\u0022:\u0022Review invoices and receipts. Track payments by channel (cash, M-Pesa, card, and bank) for reconciliation.\u0022,\u0022target\u0022:null},{\u0022title\u0022:\u0022Reports\u0022,\u0022body\u0022:\u0022Run daily, weekly, and monthly reports. The Revenue report includes payment-method breakdown and services vs products. Customer and Staff reports support date filters.\u0022,\u0022target\u0022:null},{\u0022title\u0022:\u0022Header tools\u0022,\u0022body\u0022:\u0022Switch branches, toggle dark mode, switch between Minimalist (daily ops) and Beast (full admin) navigation, watch the sync badge for offline changes, and enter fullscreen from the top bar.\u0022,\u0022target\u0022:\u0022header-tools\u0022},{\u0022title\u0022:\u0022Settings \\u0026 user manual\u0022,\u0022body\u0022:\u0022Configure company details, commissions, loyalty, branches, users, roles, and integrations under Settings. The User Manual explains every module in detail.\u0022,\u0022target\u0022:\u0022user-manual\u0022},{\u0022title\u0022:\u0022You\\u0027re ready\u0022,\u0022body\u0022:\u0022That\\u0027s the overview. Explore the modules you have access to, or open the User Manual anytime for step-by-step guidance.\u0022,\u0022target\u0022:null}]'));\n
+   Γöé             });\n
+   Γöé         </script>\n
+   Γöé         </body>\n
+   Γöé </html>\n
+   Γöé ' [UTF-8](length: 108713) contains "Job Cards Report" [ASCII](length: 16).
+   Γöé
+   Γöé C:\projects\autospa\vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:45
+   Γöé C:\projects\autospa\vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:710
+   Γöé C:\projects\autospa\tests\Feature\JobCardReportTest.php:55
+   Γöé
+
+FAILURES!
+Tests: 1, Assertions: 2, Failures: 1.
