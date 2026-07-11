@@ -40,6 +40,8 @@ class LandingController extends Controller
             6 => 'Saturday',
         ];
 
+        $phone = $this->sanitizeContactString($company?->phone ?: $branch?->phone);
+
         return view('landing.index', [
             'company' => $company,
             'companyName' => $this->companyService->displayName(),
@@ -48,9 +50,11 @@ class LandingController extends Controller
             'hours' => $hours,
             'dayNames' => $dayNames,
             'locality' => 'Kimana',
-            'phone' => $company?->phone ?: $branch?->phone,
-            'email' => $company?->email ?: $branch?->email,
-            'address' => $company?->address ?: $branch?->address,
+            'phone' => $phone !== '' ? $phone : null,
+            'whatsappUrl' => $this->whatsappUrlFromPhone($phone),
+            'telUrl' => $this->telUrlFromPhone($phone),
+            'email' => $this->sanitizeContactString($company?->email ?: $branch?->email) ?: null,
+            'address' => $this->sanitizeContactString($company?->address ?: $branch?->address) ?: null,
         ]);
     }
 
@@ -65,5 +69,40 @@ class LandingController extends Controller
         return redirect()
             ->to(route('landing').'#book')
             ->with('success', 'Request received. We’ll confirm your appointment shortly.');
+    }
+
+    private function sanitizeContactString(?string $value): string
+    {
+        if ($value === null) {
+            return '';
+        }
+
+        return trim(str_replace("\0", '', $value));
+    }
+
+    private function whatsappUrlFromPhone(string $phone): ?string
+    {
+        $digits = preg_replace('/\D+/', '', $phone) ?: '';
+
+        if ($digits === '') {
+            return null;
+        }
+
+        if (str_starts_with($digits, '0')) {
+            $digits = '254'.substr($digits, 1);
+        }
+
+        return 'https://wa.me/'.$digits;
+    }
+
+    private function telUrlFromPhone(string $phone): ?string
+    {
+        if ($phone === '') {
+            return null;
+        }
+
+        $compact = preg_replace('/\s+/', '', $phone) ?: $phone;
+
+        return 'tel:'.$compact;
     }
 }

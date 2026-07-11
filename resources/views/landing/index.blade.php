@@ -1,10 +1,4 @@
 @php
-    $waPhone = preg_replace('/\D+/', '', (string) ($phone ?? ''));
-    if (str_starts_with($waPhone, '0')) {
-        $waPhone = '254'.substr($waPhone, 1);
-    }
-    $whatsappUrl = filled($waPhone) ? 'https://wa.me/'.$waPhone : null;
-    $telUrl = filled($phone) ? 'tel:'.preg_replace('/\s+/', '', $phone) : null;
     $brandLogo = filled($company?->logo_path)
         ? asset('storage/'.$company->logo_path)
         : asset('brand/logo.jpeg');

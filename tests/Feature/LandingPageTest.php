@@ -27,7 +27,7 @@ class LandingPageTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Kimana', false);
-        $response->assertSee('Book appointment', false);
+        $response->assertSee('Book Auto Spa', false);
         $response->assertSee('Body Wash', false);
         $response->assertSee('KES 800', false);
         $response->assertSee('application/ld+json', false);

@@ -21,7 +21,7 @@ class PublicBookingRequest extends FormRequest
             $this->merge(['email' => null]);
         }
 
-            if ($this->input('notes') === '') {
+        if ($this->input('notes') === '') {
             $this->merge(['notes' => null]);
         }
     }
