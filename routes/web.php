@@ -8,6 +8,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\FinanceController;
+use App\Http\Controllers\LandingController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\JobCardController;
 use App\Http\Controllers\ManifestController;
@@ -38,16 +39,12 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Setup\SetupWizardController;
-use App\Services\InstallService;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    if (app(InstallService::class)->isInstalled()) {
-        return redirect()->route('dashboard');
-    }
-
-    return redirect()->route('setup.welcome');
-});
+Route::get('/', [LandingController::class, 'index'])->name('landing');
+Route::post('/book', [LandingController::class, 'book'])
+    ->middleware('throttle:5,1')
+    ->name('landing.book');
 
 Route::get('manifest.webmanifest', ManifestController::class)->name('manifest');
 Route::get('sw.js', ServiceWorkerController::class)->name('service-worker');

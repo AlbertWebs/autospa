@@ -1,7 +1,7 @@
 import { isOnline } from './connectivity';
 
-export const PAGES_CACHE = 'autospa-pages-v5';
-export const STATIC_CACHE = 'autospa-static-v5';
+export const PAGES_CACHE = 'autospa-pages-v6';
+export const STATIC_CACHE = 'autospa-static-v6';
 
 let serviceWorkerRegistration = null;
 let precacheStarted = false;

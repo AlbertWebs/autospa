@@ -170,7 +170,8 @@ class SetupWizardTest extends TestCase
     {
         $this->seed(DatabaseSeeder::class);
 
-        $this->get('/')->assertRedirect(route('dashboard'));
+        $this->get('/')->assertOk();
+        $this->get('/')->assertSee('Kimana', false);
         $this->get(route('setup.welcome'))->assertRedirect(route('login'));
 
         $this->assertTrue(Company::query()->exists());

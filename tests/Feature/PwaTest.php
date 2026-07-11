@@ -38,7 +38,7 @@ class PwaTest extends TestCase
 
         $response->assertOk();
         $response->assertHeader('Content-Type', 'application/javascript; charset=utf-8');
-        $response->assertSee('autospa-pages-v5', false);
+        $response->assertSee('autospa-pages-v6', false);
     }
 
     public function test_service_worker_file_is_publicly_accessible(): void
@@ -47,7 +47,7 @@ class PwaTest extends TestCase
 
         $contents = file_get_contents(public_path('sw.js'));
 
-        $this->assertStringContainsString('autospa-pages-v5', $contents);
+        $this->assertStringContainsString('autospa-pages-v6', $contents);
         $this->assertStringContainsString('serveHtml', $contents);
         $this->assertStringContainsString('matchExactCachedPage', $contents);
     }

@@ -1,8 +1,8 @@
-const STATIC_CACHE = 'autospa-static-v5';
-const PAGES_CACHE = 'autospa-pages-v5';
+const STATIC_CACHE = 'autospa-static-v6';
+const PAGES_CACHE = 'autospa-pages-v6';
 
 const OFFLINE_FALLBACK_PATHS = [
-    '/finance',
+    '/',
     '/dashboard',
     '/pos',
     '/mobile/pos',
@@ -92,10 +92,16 @@ async function matchExactCachedPage(request) {
 }
 
 async function findOfflineFallbackPage(request) {
-    const origin = new URL(request.url).origin;
+    const url = new URL(request.url);
+    const origin = url.origin;
     const cache = await caches.open(PAGES_CACHE);
 
-    for (const path of OFFLINE_FALLBACK_PATHS) {
+    // Never substitute a staff page for the public landing (or other exact paths).
+    const paths = url.pathname === '/'
+        ? ['/']
+        : OFFLINE_FALLBACK_PATHS;
+
+    for (const path of paths) {
         for (const req of requestsForUrl(`${origin}${path}`)) {
             const fallback = await cache.match(req);
 
@@ -109,7 +115,15 @@ async function findOfflineFallbackPage(request) {
 }
 
 async function cachePageResponse(request, response) {
-    if (!response || !response.ok || response.type === 'opaqueredirect') {
+    if (!response || !response.ok || response.type === 'opaqueredirect' || response.redirected) {
+        return;
+    }
+
+    const requestUrl = new URL(request.url);
+    const responseUrl = new URL(response.url);
+
+    // Do not store a different page under this request path (e.g. old / → dashboard).
+    if (requestUrl.origin !== responseUrl.origin || requestUrl.pathname !== responseUrl.pathname) {
         return;
     }
 
