@@ -98,6 +98,11 @@
                     @endcan
                     <x-dropdown-link :href="route('manual.index')">{{ __('User Manual') }}</x-dropdown-link>
                     <x-dropdown-link :href="route('profile.edit')">{{ __('Profile') }}</x-dropdown-link>
+                    @if (auth()->user()->isSuperAdmin())
+                        <x-dropdown-link :href="route('danger-zone.show')" class="!text-rose-600 dark:!text-rose-400">
+                            {{ __('Danger Zone') }}
+                        </x-dropdown-link>
+                    @endif
                     <form method="POST" action="{{ route('logout') }}" data-turbo="false">
                         @csrf
                         <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">{{ __('Log Out') }}</x-dropdown-link>

@@ -38,6 +38,7 @@ use App\Http\Controllers\FixedAssetController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DangerZoneController;
 use App\Http\Controllers\Setup\SetupWizardController;
 use Illuminate\Support\Facades\Route;
 
@@ -241,6 +242,9 @@ Route::middleware(['installed', 'auth', 'verified', 'branch'])->group(function (
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get('/danger-zone', [DangerZoneController::class, 'show'])->name('danger-zone.show');
+    Route::delete('/danger-zone', [DangerZoneController::class, 'destroy'])->name('danger-zone.destroy');
 });
 
 require __DIR__.'/auth.php';

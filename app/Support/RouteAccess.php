@@ -74,6 +74,7 @@ class RouteAccess
 
         return match (true) {
             $routeName === 'dashboard' => $this->needs('dashboard.view'),
+            in_array($routeName, ['danger-zone.show', 'danger-zone.destroy'], true) => $this->needs('settings.update'),
             $routeName === 'settings.company' => $this->needs('settings.view'),
             $routeName === 'settings.company.update' => $this->needs('settings.update'),
             Str::startsWith($routeName, 'settings.branches.') => $this->resourceRequirement($this->resourceAction($routeName), 'branches.view', 'branches.create', 'branches.update', 'branches.delete'),
