@@ -23,7 +23,9 @@ class BranchService
 
     public function currentBranchId(): ?int
     {
-        return session('current_branch_id');
+        $id = session('current_branch_id') ?? auth()->user()?->branch_id;
+
+        return $id !== null ? (int) $id : null;
     }
 
     public function currentBranch(): ?Branch
@@ -44,7 +46,7 @@ class BranchService
 
     public function ensureBranchSelected(User $user): void
     {
-        if (session()->has('current_branch_id')) {
+        if (session('current_branch_id')) {
             return;
         }
 
@@ -52,6 +54,12 @@ class BranchService
 
         if ($branches->isNotEmpty()) {
             session(['current_branch_id' => $branches->first()->id]);
+
+            return;
+        }
+
+        if ($user->branch_id) {
+            session(['current_branch_id' => $user->branch_id]);
         }
     }
 }

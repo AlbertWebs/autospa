@@ -62,27 +62,32 @@ class FinanceService
         $branchId = $branchId ?? $this->branchService->currentBranchId();
         [$from, $to] = $this->resolvePeriod($from, $to);
 
-        $manualExpenses = Expense::query()
-            ->with('creator')
-            ->where('branch_id', $branchId)
+        // Date-filtered totals for the selected reporting window.
+        $manualExpensesInPeriod = $this->manualExpensesQuery($branchId)
             ->whereBetween('spent_on', [$from->toDateString(), $to->toDateString()])
             ->latest('spent_on')
             ->latest('id')
             ->get();
 
-        $commissionsPaid = (float) Commission::query()
-            ->where('branch_id', $branchId)
+        // Ledger always lists recent branch expenses so a successful save is never "invisible"
+        // just because the date filter window does not include spent_on.
+        $manualExpenseEntries = $this->manualExpensesQuery($branchId)
+            ->latest('spent_on')
+            ->latest('id')
+            ->limit(100)
+            ->get();
+
+        $commissionsPaid = (float) $this->branchScopedQuery(Commission::query(), $branchId)
             ->where('status', 'paid')
             ->whereBetween('paid_at', [$from, $to])
             ->sum('amount');
 
-        $supplierPurchases = (float) PurchaseOrder::query()
-            ->where('branch_id', $branchId)
+        $supplierPurchases = (float) $this->branchScopedQuery(PurchaseOrder::query(), $branchId)
             ->whereNotNull('received_at')
             ->whereBetween('received_at', [$from->toDateString(), $to->toDateString()])
             ->sum('total_amount');
 
-        $manualTotal = (float) $manualExpenses->sum('amount');
+        $manualTotal = (float) $manualExpensesInPeriod->sum('amount');
 
         $breakdown = collect([
             ['key' => 'manual_expenses', 'label' => 'Manual expenses', 'total' => $manualTotal],
@@ -96,7 +101,8 @@ class FinanceService
             'total_expenses' => (float) $breakdown->sum('total'),
             'breakdown' => $breakdown,
             'max_expense_row' => max(1.0, (float) $breakdown->max('total') ?: 1.0),
-            'manual_expenses' => $manualExpenses,
+            'manual_expenses' => $manualExpensesInPeriod,
+            'manual_expense_entries' => $manualExpenseEntries,
             'manual_expenses_total' => $manualTotal,
         ];
     }
@@ -147,5 +153,30 @@ class FinanceService
         }
 
         return [$from, $to];
+    }
+
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<\Illuminate\Database\Eloquent\Model>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<\Illuminate\Database\Eloquent\Model>
+     */
+    protected function branchScopedQuery($query, ?int $branchId)
+    {
+        // Never use where('branch_id', null) — Laravel turns that into IS NULL and hides real rows.
+        if ($branchId) {
+            $query->where($query->getModel()->getTable().'.branch_id', $branchId);
+        }
+
+        return $query;
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Builder<\App\Models\Expense>
+     */
+    protected function manualExpensesQuery(?int $branchId)
+    {
+        return $this->branchScopedQuery(
+            Expense::query()->with('creator'),
+            $branchId,
+        );
     }
 }

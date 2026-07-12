@@ -74,15 +74,16 @@
     <x-ui.card :padding="false">
         <div class="border-b border-slate-200 px-6 py-4 dark:border-slate-800">
             <h2 class="text-lg font-semibold">Manual Expense Entries</h2>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Recent recorded expenses for this branch. Totals above still follow the date filter.</p>
         </div>
-        <x-ui.data-table :empty="$report['manual_expenses']->isEmpty()" empty-title="No expenses yet" empty-description="Use the form above to record rent, utilities, and other costs." :count="$report['manual_expenses']->count()">
+        <x-ui.data-table :empty="$report['manual_expense_entries']->isEmpty()" empty-title="No expenses yet" empty-description="Use the form above to record rent, utilities, and other costs." :count="$report['manual_expense_entries']->count()">
             <x-slot name="header">
                 <x-ui.th>Date</x-ui.th>
                 <x-ui.th>Category</x-ui.th>
                 <x-ui.th>Description</x-ui.th>
                 <x-ui.th align="right">Amount</x-ui.th>
             </x-slot>
-            @foreach ($report['manual_expenses'] as $expense)
+            @foreach ($report['manual_expense_entries'] as $expense)
                 <tr class="asp-table-row">
                     <x-ui.table-number-td :loop="$loop" />
                     <x-ui.td muted>{{ $expense->spent_on?->format('M j, Y') }}</x-ui.td>

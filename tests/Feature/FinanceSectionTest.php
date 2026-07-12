@@ -103,6 +103,49 @@ class FinanceSectionTest extends TestCase
             ->assertSee('June warehouse rent');
     }
 
+    public function test_saved_expense_appears_in_entries_even_when_date_filter_excludes_it(): void
+    {
+        $manager = $this->makeUserWithRole(RoleSlug::Manager);
+        $branch = Branch::query()->firstOrFail();
+
+        \App\Models\Expense::query()->create([
+            'branch_id' => $branch->id,
+            'category' => 'Fuel',
+            'description' => 'Generator diesel',
+            'amount' => 2500,
+            'spent_on' => '2026-05-01',
+            'created_by' => $manager->id,
+        ]);
+
+        $this->actingAs($manager)
+            ->withSession(['current_branch_id' => $branch->id])
+            ->get(route('finance.expenses', [
+                'from' => '2026-07-01',
+                'to' => '2026-07-12',
+            ]))
+            ->assertOk()
+            ->assertSee('Generator diesel')
+            ->assertSee('Fuel');
+    }
+
+    public function test_following_expense_save_redirect_shows_the_new_entry(): void
+    {
+        $manager = $this->makeUserWithRole(RoleSlug::Manager);
+
+        $this->actingAs($manager)
+            ->followingRedirects()
+            ->post(route('finance.expenses.store'), [
+                'category' => 'Internet',
+                'description' => 'Office fibre',
+                'amount' => 7500,
+                'spent_on' => now()->toDateString(),
+            ])
+            ->assertOk()
+            ->assertSee('Expense recorded successfully.', false)
+            ->assertSee('Office fibre')
+            ->assertSee('Internet');
+    }
+
     public function test_expenses_form_disables_turbo_drive_for_reliable_full_page_save(): void
     {
         $manager = $this->makeUserWithRole(RoleSlug::Manager);
