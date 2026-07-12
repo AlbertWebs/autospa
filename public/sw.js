@@ -1,5 +1,5 @@
-const STATIC_CACHE = 'autospa-static-v6';
-const PAGES_CACHE = 'autospa-pages-v6';
+const STATIC_CACHE = 'autospa-static-v7';
+const PAGES_CACHE = 'autospa-pages-v7';
 
 const OFFLINE_FALLBACK_PATHS = [
     '/',
@@ -41,7 +41,9 @@ function isStaticAsset(url) {
 function shouldBypassCache(url) {
     return url.pathname.startsWith('/sync/')
         || url.pathname.startsWith('/api/')
-        || url.pathname.startsWith('/livewire/');
+        || url.pathname.startsWith('/livewire/')
+        // Finance pages change after POSTs; never serve a stale cached copy.
+        || url.pathname.startsWith('/finance');
 }
 
 function offlineHtmlResponse(message) {

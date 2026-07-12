@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\AssignsBranchId;
 use App\Models\Expense;
 use App\Models\FinanceAccountClosure;
 use App\Services\BranchService;
 use App\Services\FinanceService;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class FinanceController extends Controller
 {
+    use AssignsBranchId;
+
     public function __construct(
         protected FinanceService $financeService,
         protected BranchService $branchService,
@@ -79,16 +83,36 @@ class FinanceController extends Controller
             'description' => ['required', 'string', 'max:255'],
             'amount' => ['required', 'numeric', 'min:0.01'],
             'spent_on' => ['required', 'date'],
+            'from' => ['nullable', 'date'],
+            'to' => ['nullable', 'date'],
         ]);
 
-        Expense::query()->create([
-            ...$validated,
-            'branch_id' => $this->branchService->currentBranchId(),
+        $payload = $this->withBranchId([
+            'category' => $validated['category'],
+            'description' => $validated['description'],
+            'amount' => $validated['amount'],
+            'spent_on' => $validated['spent_on'],
             'created_by' => $request->user()?->id,
         ]);
 
-        return redirect()->route('finance.expenses')
-            ->with('success', 'Expense recorded successfully.');
+        if (empty($payload['branch_id'])) {
+            return back()
+                ->withInput()
+                ->with('error', 'Select a branch before recording an expense.');
+        }
+
+        Expense::query()->create($payload);
+
+        [$from, $to] = $this->periodIncluding(
+            $validated['spent_on'],
+            $request->date('from'),
+            $request->date('to'),
+        );
+
+        return redirect()->route('finance.expenses', [
+            'from' => $from->toDateString(),
+            'to' => $to->toDateString(),
+        ])->with('success', 'Expense recorded successfully.');
     }
 
     public function closeAccounts(Request $request): RedirectResponse
@@ -113,6 +137,32 @@ class FinanceController extends Controller
     {
         $from = $request->date('from')?->startOfDay() ?? now()->copy()->startOfMonth()->startOfDay();
         $to = $request->date('to')?->endOfDay() ?? now()->copy()->endOfDay();
+
+        if ($from->gt($to)) {
+            [$from, $to] = [$to->copy()->startOfDay(), $from->copy()->endOfDay()];
+        }
+
+        return [$from, $to];
+    }
+
+    /**
+     * Keep the active report window, but always expand it so the saved expense is visible.
+     *
+     * @return array{0: Carbon, 1: Carbon}
+     */
+    protected function periodIncluding(string $spentOn, ?Carbon $from = null, ?Carbon $to = null): array
+    {
+        $spentOn = Carbon::parse($spentOn)->startOfDay();
+        $from = $from?->copy()->startOfDay() ?? $spentOn->copy()->startOfMonth();
+        $to = $to?->copy()->endOfDay() ?? now()->copy()->endOfDay();
+
+        if ($spentOn->lt($from)) {
+            $from = $spentOn->copy()->startOfDay();
+        }
+
+        if ($spentOn->gt($to)) {
+            $to = $spentOn->copy()->endOfDay();
+        }
 
         if ($from->gt($to)) {
             [$from, $to] = [$to->copy()->startOfDay(), $from->copy()->endOfDay()];

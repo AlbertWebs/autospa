@@ -51,20 +51,67 @@ class FinanceSectionTest extends TestCase
     {
         $manager = $this->makeUserWithRole(RoleSlug::Manager);
         $branch = Branch::query()->firstOrFail();
+        $spentOn = '2026-07-08';
 
         $response = $this->actingAs($manager)->post(route('finance.expenses.store'), [
             'category' => 'Utilities',
             'description' => 'Power bill',
             'amount' => 4500,
-            'spent_on' => '2026-07-08',
+            'spent_on' => $spentOn,
+            'from' => '2026-07-01',
+            'to' => '2026-07-12',
         ]);
 
-        $response->assertRedirect(route('finance.expenses'));
+        $response->assertRedirect(route('finance.expenses', [
+            'from' => '2026-07-01',
+            'to' => '2026-07-12',
+        ]));
         $this->assertDatabaseHas('expenses', [
             'branch_id' => $branch->id,
             'category' => 'Utilities',
             'description' => 'Power bill',
         ]);
+
+        $this->actingAs($manager)
+            ->get(route('finance.expenses', ['from' => '2026-07-01', 'to' => '2026-07-12']))
+            ->assertOk()
+            ->assertSee('Power bill')
+            ->assertSee('Utilities');
+    }
+
+    public function test_recorded_expense_outside_current_filter_expands_period_so_it_remains_visible(): void
+    {
+        $manager = $this->makeUserWithRole(RoleSlug::Manager);
+
+        $response = $this->actingAs($manager)->post(route('finance.expenses.store'), [
+            'category' => 'Rent',
+            'description' => 'June warehouse rent',
+            'amount' => 12000,
+            'spent_on' => '2026-06-15',
+            'from' => '2026-07-01',
+            'to' => '2026-07-12',
+        ]);
+
+        $response->assertRedirect(route('finance.expenses', [
+            'from' => '2026-06-15',
+            'to' => '2026-07-12',
+        ]));
+
+        $this->actingAs($manager)
+            ->get(route('finance.expenses', ['from' => '2026-06-15', 'to' => '2026-07-12']))
+            ->assertOk()
+            ->assertSee('June warehouse rent');
+    }
+
+    public function test_expenses_form_disables_turbo_drive_for_reliable_full_page_save(): void
+    {
+        $manager = $this->makeUserWithRole(RoleSlug::Manager);
+
+        $this->actingAs($manager)
+            ->get(route('finance.expenses'))
+            ->assertOk()
+            ->assertSee('data-turbo="false"', false)
+            ->assertSee(route('finance.expenses.store'), false);
     }
 
     public function test_finance_profit_and_loss_calculates_income_minus_all_expenses_correctly(): void

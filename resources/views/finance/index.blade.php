@@ -35,7 +35,7 @@
     <x-ui.card class="mb-6">
         <h2 class="mb-3 text-lg font-semibold">Close Accounts</h2>
         <p class="mb-4 text-sm text-slate-500 dark:text-slate-400">Lock this period totals for reconciliation and historical audit trail.</p>
-        <form method="POST" action="{{ route('finance.close-accounts') }}" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <form method="POST" action="{{ route('finance.close-accounts') }}" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" data-turbo="false">
             @csrf
             <x-ui.form-field label="From" for="close_from">
                 <x-ui.input id="close_from" name="from" type="date" :value="$report['from']" />

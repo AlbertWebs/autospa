@@ -27,8 +27,10 @@
 
     <x-ui.card class="mb-6">
         <h2 class="mb-3 text-lg font-semibold">Record Expense</h2>
-        <form method="POST" action="{{ route('finance.expenses.store') }}" class="grid gap-4 md:grid-cols-2">
+        <form method="POST" action="{{ route('finance.expenses.store') }}" class="grid gap-4 md:grid-cols-2" data-turbo="false">
             @csrf
+            <input type="hidden" name="from" value="{{ old('from', $report['from']) }}">
+            <input type="hidden" name="to" value="{{ old('to', $report['to']) }}">
             <x-ui.form-field label="Category" for="category" name="category" :required="true">
                 <x-ui.input id="category" name="category" :value="old('category')" placeholder="Rent, Utilities, Fuel..." required />
             </x-ui.form-field>
