@@ -2,7 +2,7 @@ const STATIC_CACHE = 'autospa-static-v7';
 const PAGES_CACHE = 'autospa-pages-v7';
 
 const OFFLINE_FALLBACK_PATHS = [
-    '/',
+    '/finance',
     '/dashboard',
     '/pos',
     '/mobile/pos',
@@ -42,8 +42,17 @@ function shouldBypassCache(url) {
     return url.pathname.startsWith('/sync/')
         || url.pathname.startsWith('/api/')
         || url.pathname.startsWith('/livewire/')
-        // Finance pages change after POSTs; never serve a stale cached copy.
-        || url.pathname.startsWith('/finance');
+        || isAuthPage(url);
+}
+
+// Auth pages embed one-time CSRF tokens. Serving them from cache produces
+// 419 Page Expired on submit, so the service worker must never touch them.
+function isAuthPage(url) {
+    return url.pathname === '/login'
+        || url.pathname === '/logout'
+        || url.pathname.startsWith('/setup')
+        || url.pathname.startsWith('/forgot-password')
+        || url.pathname.startsWith('/reset-password');
 }
 
 function offlineHtmlResponse(message) {
@@ -94,16 +103,10 @@ async function matchExactCachedPage(request) {
 }
 
 async function findOfflineFallbackPage(request) {
-    const url = new URL(request.url);
-    const origin = url.origin;
+    const origin = new URL(request.url).origin;
     const cache = await caches.open(PAGES_CACHE);
 
-    // Never substitute a staff page for the public landing (or other exact paths).
-    const paths = url.pathname === '/'
-        ? ['/']
-        : OFFLINE_FALLBACK_PATHS;
-
-    for (const path of paths) {
+    for (const path of OFFLINE_FALLBACK_PATHS) {
         for (const req of requestsForUrl(`${origin}${path}`)) {
             const fallback = await cache.match(req);
 
@@ -117,15 +120,7 @@ async function findOfflineFallbackPage(request) {
 }
 
 async function cachePageResponse(request, response) {
-    if (!response || !response.ok || response.type === 'opaqueredirect' || response.redirected) {
-        return;
-    }
-
-    const requestUrl = new URL(request.url);
-    const responseUrl = new URL(response.url);
-
-    // Do not store a different page under this request path (e.g. old / → dashboard).
-    if (requestUrl.origin !== responseUrl.origin || requestUrl.pathname !== responseUrl.pathname) {
+    if (!response || !response.ok || response.type === 'opaqueredirect') {
         return;
     }
 
@@ -182,11 +177,22 @@ async function serveHtml(request) {
             return response;
         }
 
+        // Redirects (e.g. login -> dashboard -> onboarding) and real error
+        // pages must be passed through to the browser, not treated as offline.
+        if (
+            response.type === 'opaqueredirect'
+            || (response.status >= 300 && response.status < 400)
+        ) {
+            return response;
+        }
+
         const exactCached = await matchExactCachedPage(request);
 
         if (exactCached) {
             return exactCached;
         }
+
+        return response;
     } catch {
         const exactCached = await matchExactCachedPage(request);
 

@@ -1,6 +1,7 @@
 import { app, BrowserWindow, shell } from 'electron';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { REMOTE_URL, START_PATH } from './config.js';
 import {
     ensureDesktopSetup,
     findFreePort,
@@ -68,6 +69,39 @@ app.on('before-quit', () => {
 });
 
 async function bootDesktopApp() {
+    if (REMOTE_URL) {
+        // Remote mode always needs the network, so stale service workers and
+        // cached pages only cause trouble (e.g. 419 from cached CSRF tokens).
+        // Cookies are kept so "remember me" sessions survive restarts.
+        const { session } = await import('electron');
+        await session.defaultSession.clearStorageData({
+            storages: ['serviceworkers', 'cachestorage'],
+        });
+        await session.defaultSession.clearCache();
+
+        // The site root is the public landing page, which has no place in the
+        // desktop app. Rewrite it to the login screen (after logout, brand
+        // link clicks, etc.). Authenticated sessions are bounced onward to
+        // the dashboard by the server.
+        session.defaultSession.webRequest.onBeforeRequest(
+            { urls: [`${REMOTE_URL}/`] },
+            (details, callback) => {
+                if (details.resourceType === 'mainFrame') {
+                    callback({ redirectURL: `${REMOTE_URL}${START_PATH}` });
+
+                    return;
+                }
+
+                callback({});
+            },
+        );
+
+        appUrl = `${REMOTE_URL}${START_PATH}`;
+        await createMainWindow(appUrl);
+
+        return;
+    }
+
     const laravelRoot = resolveUserLaravelRoot();
     serverPort = await findFreePort();
 
@@ -122,8 +156,44 @@ async function createMainWindow(url) {
         mainWindow?.show();
     });
 
+    // 419 Page Expired (stale CSRF token): recover by loading a fresh login
+    // page instead of showing the error to the user.
+    mainWindow.webContents.on('did-navigate', (event, navigatedUrl, httpResponseCode) => {
+        if (httpResponseCode === 419 && REMOTE_URL) {
+            mainWindow?.loadURL(`${REMOTE_URL}${START_PATH}`);
+        }
+    });
+
+    // If the hosted site is unreachable (e.g. no internet), show a retry screen
+    // instead of a blank window.
+    mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedUrl, isMainFrame) => {
+        if (!isMainFrame || errorCode === -3 /* aborted */) {
+            return;
+        }
+
+        const retryHtml = `
+            <!DOCTYPE html>
+            <html>
+            <head><meta charset="utf-8"><title>AutoSpa Pro</title></head>
+            <body style="margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0b1326;color:#dae2fd;font-family:system-ui,sans-serif;text-align:center;">
+                <div>
+                    <h2 style="margin-bottom:0.5rem;">Cannot reach AutoSpa Pro</h2>
+                    <p style="color:#8b90a0;margin-bottom:1.5rem;">Check your internet connection and try again.<br><small>${errorDescription}</small></p>
+                    <button onclick="location.href='${url}'" style="background:#adc6ff;color:#002e69;border:none;border-radius:0.5rem;padding:0.6rem 1.5rem;font-size:1rem;font-weight:600;cursor:pointer;">Retry</button>
+                </div>
+            </body>
+            </html>`;
+
+        mainWindow?.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(retryHtml)}`);
+    });
+
+    const isAppOrigin = (targetUrl) => targetUrl.startsWith('http://127.0.0.1')
+        || targetUrl.startsWith('http://localhost')
+        || targetUrl.startsWith('data:')
+        || (REMOTE_URL && isSameHost(targetUrl, REMOTE_URL));
+
     mainWindow.webContents.setWindowOpenHandler(({ url: targetUrl }) => {
-        if (targetUrl.startsWith('http://127.0.0.1') || targetUrl.startsWith('http://localhost')) {
+        if (isAppOrigin(targetUrl)) {
             return { action: 'allow' };
         }
 
@@ -132,10 +202,29 @@ async function createMainWindow(url) {
         return { action: 'deny' };
     });
 
+    mainWindow.webContents.on('will-navigate', (event, targetUrl) => {
+        if (isAppOrigin(targetUrl)) {
+            return;
+        }
+
+        event.preventDefault();
+        shell.openExternal(targetUrl);
+    });
+
     await mainWindow.loadURL(url);
 
     if (!app.isPackaged) {
         mainWindow.webContents.openDevTools({ mode: 'detach' });
+    }
+}
+
+function isSameHost(url, base) {
+    try {
+        const strip = (host) => host.replace(/^www\./, '');
+
+        return strip(new URL(url).host) === strip(new URL(base).host);
+    } catch {
+        return false;
     }
 }
 

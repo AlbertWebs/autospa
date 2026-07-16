@@ -1,0 +1,2 @@
+MAIL_FROM_ADDRESS="hello@expresscarwash.co.ke"
+MAIL_FROM_NAME="Express Car Wash"

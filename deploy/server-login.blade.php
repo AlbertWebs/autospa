@@ -187,27 +187,6 @@
             });
 
             setMode(methodInput.value === 'pin' ? 'pin' : 'password');
-
-            // Refresh the CSRF token every 10 minutes so a login page left
-            // open (kiosk, desktop app) never fails with 419 Page Expired.
-            const tokenInput = form.querySelector('input[name="_token"]');
-
-            setInterval(async () => {
-                try {
-                    const response = await fetch(window.location.href, {
-                        headers: { Accept: 'text/html' },
-                        credentials: 'same-origin',
-                    });
-                    const html = await response.text();
-                    const match = html.match(/name="_token" value="([^"]+)"/);
-
-                    if (match && tokenInput) {
-                        tokenInput.value = match[1];
-                    }
-                } catch {
-                    // Offline — keep the current token.
-                }
-            }, 10 * 60 * 1000);
         })();
     </script>
 </x-auth-layout>

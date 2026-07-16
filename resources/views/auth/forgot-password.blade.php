@@ -1,25 +1,77 @@
-<x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-        {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
-    </div>
+<x-auth-layout title="Forgot Password">
+    <main class="auth-main">
+        {{-- Hero --}}
+        <section class="auth-hero" aria-hidden="true">
+            <img
+                class="auth-hero-image"
+                src="https://images.unsplash.com/photo-1601362840469-51e4d8d58785?auto=format&fit=crop&w=1600&q=80"
+                alt=""
+            >
+            <div class="auth-hero-overlay"></div>
+            <div class="auth-hero-content">
+                <span class="auth-hero-tag">Account Recovery</span>
+                <h2 class="auth-hero-title">
+                    Reset your<br><span>Password</span>
+                </h2>
+                <p class="auth-hero-text">
+                    Enter the email address linked to your account and we will send you a
+                    secure link to choose a new password.
+                </p>
+            </div>
+        </section>
 
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+        {{-- Form --}}
+        <section class="auth-form-section">
+            <div class="auth-mobile-bg" aria-hidden="true">
+                <img
+                    src="https://images.unsplash.com/photo-1601362840469-51e4d8d58785?auto=format&fit=crop&w=800&q=80"
+                    alt=""
+                >
+                <div class="auth-mobile-bg-overlay"></div>
+            </div>
 
-    <form method="POST" action="{{ route('password.email') }}">
-        @csrf
+            <div class="login-card">
+                <h3>Forgot Password?</h3>
+                <p class="login-card-subtitle">We will email you a reset link</p>
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+                @if (session('status'))
+                    <div class="auth-status">{{ session('status') }}</div>
+                @endif
 
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Email Password Reset Link') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
+                <form method="POST" action="{{ route('password.email') }}" class="auth-form">
+                    @csrf
+
+                    <div class="auth-field">
+                        <label for="email">Email Address</label>
+                        <div class="auth-input-wrap">
+                            <span class="material-symbols-outlined auth-input-icon">mail</span>
+                            <input
+                                id="email"
+                                type="email"
+                                name="email"
+                                value="{{ old('email') }}"
+                                required
+                                autofocus
+                                autocomplete="username"
+                                placeholder="you@example.com"
+                                class="auth-input @error('email') is-invalid @enderror"
+                            >
+                        </div>
+                        @error('email')
+                            <p class="auth-error">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <button type="submit" class="auth-submit">Email Reset Link</button>
+                </form>
+
+                <div class="auth-page-nav">
+                    <a href="{{ route('login') }}" class="auth-link">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                        Back to Sign In
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+</x-auth-layout>
