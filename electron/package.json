@@ -24,6 +24,26 @@
             "output": "dist",
             "buildResources": "build"
         },
+        "extraResources": [
+            {
+                "from": "../",
+                "to": "laravel-source",
+                "filter": [
+                    "**/*",
+                    "!**/.git/**",
+                    "!**/node_modules/**",
+                    "!**/electron/node_modules/**",
+                    "!**/electron/dist/**",
+                    "!**/storage/logs/**",
+                    "!**/storage/framework/cache/**",
+                    "!**/storage/framework/sessions/**",
+                    "!**/storage/framework/views/**",
+                    "!**/tests/**",
+                    "!**/.cursor/**",
+                    "!**/agent-transcripts/**"
+                ]
+            }
+        ],
         "files": [
             "main.js",
             "preload.js",

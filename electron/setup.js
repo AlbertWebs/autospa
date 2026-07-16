@@ -10,7 +10,7 @@ const DESKTOP_ENV_MARKER = '.desktop-env-initialized';
 
 export function resolveProjectRoot() {
     if (app.isPackaged) {
-        return path.join(process.resourcesPath, 'app');
+        return path.join(process.resourcesPath, 'laravel-source');
     }
 
     return path.resolve(__dirname, '..');
