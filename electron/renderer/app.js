@@ -3,7 +3,6 @@ const view = document.getElementById('view');
 const headerSection = document.getElementById('header-section');
 const toastEl = document.getElementById('toast');
 const syncBtn = document.getElementById('btn-sync');
-const syncPill = null;
 
 const titles = {
     pos: 'Sales',
@@ -143,12 +142,6 @@ document.querySelectorAll('.nav-link').forEach((btn) => {
 });
 
 document.getElementById('btn-sync').addEventListener('click', runSync);
-document.getElementById('sync-pill')?.addEventListener('click', async () => {
-    const status = await api.syncStatus().catch(() => ({ pending: 0 }));
-    if ((status.pending || 0) > 0) {
-        await runSync();
-    }
-});
 document.getElementById('btn-online').addEventListener('click', async () => {
     showToast('Reconnecting…');
     try {
