@@ -363,6 +363,40 @@ Alpine.store('navMode', {
     },
 });
 
+Alpine.store('cloudSync', {
+    enabled: Boolean(window.autoSpaDesktop?.runtime === 'electron' && window.autoSpaDesktop?.remoteSyncUrl),
+    status: 'checking',
+    label: 'Cloud sync checking',
+    timer: null,
+
+    async refresh() {
+        if (!this.enabled) {
+            this.status = 'disabled';
+            this.label = 'Cloud sync local only';
+            return;
+        }
+
+        try {
+            const ok = await window.autoSpaDesktop.checkRemoteReachable();
+            this.status = ok ? 'connected' : 'offline';
+            this.label = ok ? 'Cloud sync connected' : 'Cloud sync waiting sign-in/connection';
+        } catch {
+            this.status = 'offline';
+            this.label = 'Cloud sync unavailable';
+        }
+    },
+
+    init() {
+        this.refresh();
+
+        if (this.timer) {
+            clearInterval(this.timer);
+        }
+
+        this.timer = setInterval(() => this.refresh(), 30000);
+    },
+});
+
 Alpine.store('offline', {
     online: isOnline(),
     pending: 0,
@@ -669,6 +703,7 @@ document.addEventListener('alpine:init', () => {
     Alpine.store('theme').sync();
     Alpine.store('fullscreen').init();
     Alpine.store('pwa').init();
+    Alpine.store('cloudSync').init();
 
     Alpine.data('onboardingTour', () => ({
         init() {

@@ -18,6 +18,15 @@
         </div>
 
         <div class="flex items-center gap-2 sm:gap-4" data-tour="header-tools">
+            <div x-show="$store.cloudSync.enabled" x-cloak class="hidden sm:inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-xs font-semibold"
+                :class="$store.cloudSync.status === 'connected'
+                    ? 'border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-300'
+                    : 'border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300'"
+                :title="$store.cloudSync.label">
+                <span class="h-2 w-2 rounded-full"
+                    :class="$store.cloudSync.status === 'connected' ? 'bg-emerald-500' : 'bg-amber-500'"></span>
+                <span x-text="$store.cloudSync.status === 'connected' ? 'Cloud sync on' : 'Cloud sync pending'"></span>
+            </div>
             @if ($branches->count() > 0)
                 <form method="POST" action="{{ route('branch.switch') }}" class="hidden sm:block" data-turbo="false">
                     @csrf

@@ -25,6 +25,7 @@ let mainWindow = null;
 let serverPort = null;
 let appUrl = null;
 let remoteHeadersRegistered = false;
+let navGuardsRegistered = false;
 
 const gotLock = app.requestSingleInstanceLock();
 
@@ -103,6 +104,9 @@ function registerRemoteSyncHeaders() {
 }
 
 async function bootDesktopApp() {
+    ensureMainWindow();
+    await showBootScreen('Setting up your local workspace...');
+
     const laravelRoot = resolveUserLaravelRoot();
     serverPort = await findFreePort();
 
@@ -130,11 +134,75 @@ async function bootDesktopApp() {
         phpProcess = null;
     });
 
+    await showBootScreen('Starting local app services...');
     await waitForServer(serverPort);
 
     appUrl = `http://127.0.0.1:${serverPort}${START_PATH}`;
+    registerNavigationGuards(appUrl);
 
-    await createMainWindow(appUrl);
+    if (REMOTE_SYNC_URL && await checkRemoteSession() === false) {
+        await showBootScreen('Checking cloud sync connection...');
+        const online = await isNetworkAvailable();
+
+        if (online) {
+            await showBootScreen('Please sign in once to connect cloud sync...');
+            await ensureRemoteSession(mainWindow);
+        }
+    }
+
+    await mainWindow.loadURL(appUrl);
+
+    if (!app.isPackaged) {
+        mainWindow.webContents.openDevTools({ mode: 'detach' });
+    }
+}
+
+function ensureMainWindow() {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+        return;
+    }
+
+    mainWindow = new BrowserWindow({
+        width: 1440,
+        height: 900,
+        minWidth: 1024,
+        minHeight: 700,
+        show: false,
+        autoHideMenuBar: true,
+        title: 'AutoSpa Pro',
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js'),
+            contextIsolation: true,
+            nodeIntegration: false,
+            sandbox: true,
+        },
+    });
+
+    mainWindow.on('ready-to-show', () => {
+        mainWindow?.show();
+    });
+}
+
+function bootScreenHtml(message) {
+    return `
+        <!DOCTYPE html>
+        <html>
+        <head><meta charset="utf-8"><title>AutoSpa Pro</title></head>
+        <body style="margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0b1326;color:#dae2fd;font-family:system-ui,sans-serif;text-align:center;">
+            <div style="max-width:32rem;padding:1.5rem;">
+                <h2 style="margin-bottom:0.5rem;">Preparing AutoSpa Pro</h2>
+                <p style="color:#8b90a0;margin:0;">${message}</p>
+            </div>
+        </body>
+        </html>`;
+}
+
+async function showBootScreen(message) {
+    if (!mainWindow || mainWindow.isDestroyed()) {
+        return;
+    }
+
+    await mainWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(bootScreenHtml(message))}`);
 }
 
 async function checkRemoteSession() {
@@ -172,6 +240,7 @@ async function ensureRemoteSession(window) {
 
     await new Promise((resolve) => {
         let settled = false;
+        const timeout = setTimeout(() => finish(), 120000);
 
         const finish = () => {
             if (settled) {
@@ -179,6 +248,7 @@ async function ensureRemoteSession(window) {
             }
 
             settled = true;
+            clearTimeout(timeout);
             window.webContents.removeListener('did-navigate', onNavigate);
             window.webContents.removeListener('did-finish-load', onFinishLoad);
             resolve();
@@ -207,27 +277,11 @@ async function ensureRemoteSession(window) {
     });
 }
 
-async function createMainWindow(url) {
-    mainWindow = new BrowserWindow({
-        width: 1440,
-        height: 900,
-        minWidth: 1024,
-        minHeight: 700,
-        show: false,
-        autoHideMenuBar: true,
-        title: 'AutoSpa Pro',
-        webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
-            contextIsolation: true,
-            nodeIntegration: false,
-            sandbox: true,
-        },
-    });
-
-    mainWindow.on('ready-to-show', () => {
-        mainWindow?.show();
-    });
-
+function registerNavigationGuards(url) {
+    if (!mainWindow || navGuardsRegistered) {
+        return;
+    }
+    
     const isLocalOrigin = (targetUrl) => targetUrl.startsWith('http://127.0.0.1')
         || targetUrl.startsWith('http://localhost')
         || targetUrl.startsWith('data:');
@@ -280,19 +334,7 @@ async function createMainWindow(url) {
         shell.openExternal(targetUrl);
     });
 
-    if (REMOTE_SYNC_URL && await checkRemoteSession() === false) {
-        const online = await isNetworkAvailable();
-
-        if (online) {
-            await ensureRemoteSession(mainWindow);
-        }
-    }
-
-    await mainWindow.loadURL(url);
-
-    if (!app.isPackaged) {
-        mainWindow.webContents.openDevTools({ mode: 'detach' });
-    }
+    navGuardsRegistered = true;
 }
 
 async function isNetworkAvailable() {
