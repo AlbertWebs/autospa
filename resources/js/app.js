@@ -365,9 +365,12 @@ Alpine.store('navMode', {
 
 Alpine.store('cloudSync', {
     enabled: Boolean(window.autoSpaDesktop?.runtime === 'electron' && window.autoSpaDesktop?.remoteSyncUrl),
+    remoteSyncUrl: window.autoSpaDesktop?.remoteSyncUrl ?? '',
     status: 'checking',
     label: 'Cloud sync checking',
     timer: null,
+    dismissed: false,
+    bannerKey: 'autospa.cloudSyncBannerDismissed',
 
     async refresh() {
         if (!this.enabled) {
@@ -387,6 +390,12 @@ Alpine.store('cloudSync', {
     },
 
     init() {
+        try {
+            this.dismissed = localStorage.getItem(this.bannerKey) === '1';
+        } catch {
+            this.dismissed = false;
+        }
+
         this.refresh();
 
         if (this.timer) {
@@ -394,6 +403,15 @@ Alpine.store('cloudSync', {
         }
 
         this.timer = setInterval(() => this.refresh(), 30000);
+    },
+
+    dismissBanner() {
+        this.dismissed = true;
+        try {
+            localStorage.setItem(this.bannerKey, '1');
+        } catch {
+            // Ignore storage failures.
+        }
     },
 });
 

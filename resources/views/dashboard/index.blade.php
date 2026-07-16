@@ -63,6 +63,45 @@
         </div>
     </header>
 
+    <div
+        x-show="$store.cloudSync.enabled && ! $store.cloudSync.dismissed && $store.cloudSync.status !== 'connected'"
+        x-cloak
+        class="relative mb-6"
+    >
+        <div
+            class="rounded-2xl border border-amber-200/80 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-100"
+        >
+            <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <div class="min-w-0">
+                    <p class="font-semibold">
+                        Cloud sync: <span x-text="$store.cloudSync.label"></span>
+                    </p>
+                    <p class="mt-0.5 text-amber-900/90 dark:text-amber-200/90">
+                        {{ __('If cloud sync is pending, please sign in once while online. Your offline changes will upload automatically when connected.') }}
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button
+                        type="button"
+                        class="rounded-xl bg-brand-primary px-4 py-2 text-xs font-semibold text-brand-on-primary shadow-glow-sm transition hover:shadow-glow active:scale-[0.98]"
+                        @click="window.location.href = $store.cloudSync.remoteSyncUrl + '/login'"
+                    >
+                        Sign in to cloud
+                    </button>
+
+                    <button
+                        type="button"
+                        class="rounded-xl border border-amber-300/80 bg-white px-4 py-2 text-xs font-semibold text-amber-900 hover:bg-amber-100 disabled:opacity-60 dark:border-amber-500/30 dark:bg-brand-surface-high dark:text-amber-100 dark:hover:bg-amber-500/20"
+                        @click="$store.cloudSync.dismissBanner()"
+                    >
+                        Got it
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div x-show="! $store.offline.online" x-cloak class="relative mb-8">
         <x-ui.panel title="Offline Tools" subtitle="These workflows queue changes and sync when you reconnect">
             <div class="grid gap-2 sm:grid-cols-2">
