@@ -221,6 +221,115 @@ export function getServerId(clientRef) {
     return row?.server_id ?? null;
 }
 
+export function resolveLocalServerId(clientRef) {
+    if (typeof clientRef !== 'string' || !clientRef.startsWith('client:')) {
+        return null;
+    }
+
+    const mapped = getServerId(clientRef);
+
+    if (mapped != null) {
+        return mapped;
+    }
+
+    const uuid = clientRef.slice('client:'.length);
+    const database = getDb();
+
+    const customer = database.prepare(`
+        SELECT server_id FROM customers WHERE uuid = ? AND server_id IS NOT NULL LIMIT 1
+    `).get(uuid);
+
+    if (customer?.server_id != null) {
+        saveIdMap(clientRef, customer.server_id, 'customer');
+        return customer.server_id;
+    }
+
+    const vehicle = database.prepare(`
+        SELECT server_id FROM vehicles WHERE uuid = ? AND server_id IS NOT NULL LIMIT 1
+    `).get(uuid);
+
+    if (vehicle?.server_id != null) {
+        saveIdMap(clientRef, vehicle.server_id, 'vehicle');
+        return vehicle.server_id;
+    }
+
+    const job = database.prepare(`
+        SELECT server_id FROM job_cards WHERE uuid = ? AND server_id IS NOT NULL LIMIT 1
+    `).get(uuid);
+
+    if (job?.server_id != null) {
+        saveIdMap(clientRef, job.server_id, 'job_card');
+        return job.server_id;
+    }
+
+    return null;
+}
+
+export function markEntitySynced(entityType, clientUuid, serverId, serverUuid = null) {
+    if (!clientUuid || serverId == null) {
+        return;
+    }
+
+    saveIdMap(`client:${clientUuid}`, serverId, entityType);
+
+    const database = getDb();
+    const stamp = nowIso();
+
+    if (entityType === 'customer') {
+        database.prepare(`
+            UPDATE customers
+            SET server_id = ?, synced_at = ?, updated_at = ?
+            WHERE uuid = ?
+        `).run(serverId, stamp, stamp, clientUuid);
+        return;
+    }
+
+    if (entityType === 'vehicle') {
+        database.prepare(`
+            UPDATE vehicles
+            SET server_id = ?, synced_at = ?, updated_at = ?
+            WHERE uuid = ?
+        `).run(serverId, stamp, stamp, clientUuid);
+        return;
+    }
+
+    if (entityType === 'job_card') {
+        database.prepare(`
+            UPDATE job_cards
+            SET server_id = ?, synced_at = ?, updated_at = ?
+            WHERE uuid = ?
+        `).run(serverId, stamp, stamp, clientUuid);
+    }
+
+    if (serverUuid && serverUuid !== clientUuid && entityType === 'vehicle') {
+        // Keep a map for any server-assigned uuid as well.
+        saveIdMap(`client:${serverUuid}`, serverId, 'vehicle');
+    }
+}
+
+export function remapVehiclesByRegistration(vehicles = []) {
+    const database = getDb();
+
+    for (const vehicle of vehicles) {
+        if (!vehicle?.registration_number || vehicle.id == null) {
+            continue;
+        }
+
+        const registration = String(vehicle.registration_number).trim().toUpperCase();
+        const local = database.prepare(`
+            SELECT uuid FROM vehicles
+            WHERE UPPER(registration_number) = ?
+            LIMIT 1
+        `).get(registration);
+
+        if (!local?.uuid) {
+            continue;
+        }
+
+        markEntitySynced('vehicle', local.uuid, vehicle.id, vehicle.uuid || null);
+    }
+}
+
 export function applyBootstrap(data) {
     const database = getDb();
     const tx = database.transaction(() => {
@@ -348,6 +457,8 @@ export function applyBootstrap(data) {
             saveIdMap(`client:${uuid}`, vehicle.id, 'vehicle');
         }
 
+        remapVehiclesByRegistration(data.vehicles ?? []);
+
         if (data.branch_id != null) {
             setMeta('branch_id', data.branch_id);
         }
@@ -389,6 +500,7 @@ export function createCustomerLocal(input) {
     }
 
     // Remote SyncService creates the optional vehicle from registration_number on customer.create.
+    // Pass the local vehicle uuid so later job/POS mutations can resolve the same client ref.
     enqueueMutation('customer.create', {
         uuid,
         full_name: input.full_name.trim(),
@@ -396,6 +508,7 @@ export function createCustomerLocal(input) {
         email: input.email?.trim() || null,
         notes: input.notes?.trim() || null,
         registration_number: registration,
+        vehicle_uuid: vehicle?.uuid ?? null,
     }, uuid);
 
     return { uuid, vehicle };

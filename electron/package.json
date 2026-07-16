@@ -1,6 +1,6 @@
 {
     "name": "autospa-desktop",
-    "version": "1.4.7",
+    "version": "1.4.8",
     "description": "AutoSpa Pro desktop — live web UI online, operable offline shell",
     "private": true,
     "type": "module",

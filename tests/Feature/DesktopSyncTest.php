@@ -393,6 +393,39 @@ class DesktopSyncTest extends TestCase
         ]);
     }
 
+    public function test_push_customer_create_reuses_client_vehicle_uuid(): void
+    {
+        $user = $this->makeUserWithRole(RoleSlug::Manager);
+        $customerUuid = (string) Str::uuid();
+        $vehicleUuid = (string) Str::uuid();
+
+        $response = $this->actingAs($user)
+            ->withHeader('X-AutoSpa-Client', 'electron')
+            ->postJson(route('desktop.sync.push'), [
+                'mutations' => [[
+                    'id' => (string) Str::uuid(),
+                    'type' => 'customer.create',
+                    'client_entity_uuid' => $customerUuid,
+                    'payload' => [
+                        'uuid' => $customerUuid,
+                        'full_name' => 'Driver With Car',
+                        'phone' => '0700999888',
+                        'registration_number' => 'KDD999Z',
+                        'vehicle_uuid' => $vehicleUuid,
+                    ],
+                    'created_at' => now()->toIso8601String(),
+                ]],
+            ]);
+
+        $response->assertOk();
+        $response->assertJsonPath('results.0.status', 'applied');
+        $response->assertJsonPath('results.0.vehicle.uuid', $vehicleUuid);
+        $this->assertDatabaseHas('vehicles', [
+            'uuid' => $vehicleUuid,
+            'registration_number' => 'KDD999Z',
+        ]);
+    }
+
     public function test_guest_cannot_push_mutations(): void
     {
         $this->postJson(route('desktop.sync.push'), [

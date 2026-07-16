@@ -7,11 +7,12 @@ import {
 import {
     applyBootstrap,
     getMeta,
-    getServerId,
     listPendingMutations,
+    markEntitySynced,
     pendingCount,
+    remapVehiclesByRegistration,
     removeMutations,
-    saveIdMap,
+    resolveLocalServerId,
     setMeta,
 } from './db.js';
 
@@ -47,8 +48,8 @@ const CLIENT_REF_KEYS = [
 ];
 
 /**
- * Prefer numeric server IDs from the local id map so bootstrapped customers/vehicles
- * (and any already-synced offline entities) resolve reliably on push.
+ * Prefer numeric server IDs from the local id map / synced rows so bootstrapped
+ * and previously synced offline entities resolve reliably on push.
  */
 function rewritePayloadRefs(payload = {}) {
     const rewritten = { ...payload };
@@ -61,7 +62,7 @@ function rewritePayloadRefs(payload = {}) {
         const value = rewritten[key];
 
         if (typeof value === 'string' && value.startsWith('client:')) {
-            const serverId = getServerId(value);
+            const serverId = resolveLocalServerId(value);
 
             if (serverId != null) {
                 rewritten[key] = serverId;
@@ -155,15 +156,20 @@ export async function pullBootstrap() {
 
 function persistIdMapsFromResult(result) {
     if (result.customer?.uuid && result.customer?.id) {
-        saveIdMap(`client:${result.customer.uuid}`, result.customer.id, 'customer');
+        markEntitySynced('customer', result.customer.uuid, result.customer.id, result.customer.uuid);
     }
 
     if (result.vehicle?.uuid && result.vehicle?.id) {
-        saveIdMap(`client:${result.vehicle.uuid}`, result.vehicle.id, 'vehicle');
+        markEntitySynced('vehicle', result.vehicle.uuid, result.vehicle.id, result.vehicle.uuid);
+
+        // Heal older offline installs where local vehicle uuid differed from server uuid.
+        if (result.vehicle.registration_number) {
+            remapVehiclesByRegistration([result.vehicle]);
+        }
     }
 
     if (result.job_card?.uuid && result.job_card?.id) {
-        saveIdMap(`client:${result.job_card.uuid}`, result.job_card.id, 'job_card');
+        markEntitySynced('job_card', result.job_card.uuid, result.job_card.id, result.job_card.uuid);
     }
 }
 
@@ -250,6 +256,13 @@ export async function pushPendingMutations() {
 }
 
 export async function syncNow() {
+    const hadPending = pendingCount() > 0;
+
+    // Refresh catalog + heal local vehicle id maps before pushing dependents.
+    if (hadPending) {
+        await pullBootstrap().catch(() => null);
+    }
+
     const push = await pushPendingMutations();
 
     if (push.reason === 'needs_sign_in' || push.reason === 'offline' || push.reason === 'unreachable') {
@@ -260,7 +273,9 @@ export async function syncNow() {
         };
     }
 
-    const bootstrap = await pullBootstrap();
+    const bootstrap = hadPending
+        ? { ok: true, pending: pendingCount() }
+        : await pullBootstrap();
 
     return {
         ...push,

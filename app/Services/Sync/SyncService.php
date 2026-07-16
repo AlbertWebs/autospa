@@ -228,13 +228,21 @@ class SyncService
             $vehicle = null;
 
             if ($registrationNumber) {
-                $vehicle = Vehicle::query()->create([
-                    'uuid' => (string) Str::uuid(),
-                    'branch_id' => $branchId,
-                    'customer_id' => $customer->id,
-                    'registration_number' => $registrationNumber,
-                    'status' => VehicleStatus::Active,
-                ]);
+                $vehicleUuid = filled($payload['vehicle_uuid'] ?? null)
+                    ? (string) $payload['vehicle_uuid']
+                    : (string) Str::uuid();
+
+                $vehicle = Vehicle::query()->where('uuid', $vehicleUuid)->first();
+
+                if (! $vehicle) {
+                    $vehicle = Vehicle::query()->create([
+                        'uuid' => $vehicleUuid,
+                        'branch_id' => $branchId,
+                        'customer_id' => $customer->id,
+                        'registration_number' => $registrationNumber,
+                        'status' => VehicleStatus::Active,
+                    ]);
+                }
             }
 
             return [$customer, $vehicle];
