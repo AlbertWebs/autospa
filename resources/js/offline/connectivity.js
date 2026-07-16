@@ -1,6 +1,7 @@
 const listeners = new Set();
 
 let remoteReachable = typeof navigator !== 'undefined' ? navigator.onLine : true;
+let lastNotifiedOnline = null;
 let pollTimer = null;
 
 function isElectronDesktop() {
@@ -53,42 +54,64 @@ async function probeRemote() {
     return remoteReachable;
 }
 
-async function notify() {
-    const wasOnline = isOnline();
-    await probeRemote();
-    const online = isOnline();
-
+function emitConnectivity(online) {
     setTurboDrive(online);
 
-    if (online !== wasOnline) {
-        listeners.forEach((callback) => callback(online));
+    if (lastNotifiedOnline === online) {
+        return;
     }
+
+    lastNotifiedOnline = online;
+    listeners.forEach((callback) => callback(online));
 }
 
-function pollRemoteReachability() {
-    probeRemote().then(() => {
-        const online = isOnline();
-        setTurboDrive(online);
-        listeners.forEach((callback) => callback(online));
-    });
+async function refreshAndEmit() {
+    await probeRemote();
+    emitConnectivity(isOnline());
+}
+
+function handleBrowserOnline() {
+    if (!(isElectronDesktop() && hasRemoteSync())) {
+        remoteReachable = true;
+        emitConnectivity(true);
+
+        return;
+    }
+
+    refreshAndEmit();
+}
+
+function handleBrowserOffline() {
+    if (!(isElectronDesktop() && hasRemoteSync())) {
+        remoteReachable = false;
+        emitConnectivity(false);
+
+        return;
+    }
+
+    refreshAndEmit();
 }
 
 export function initConnectivity() {
     probeRemote().then(() => {
-        setTurboDrive(isOnline());
+        lastNotifiedOnline = isOnline();
+        setTurboDrive(lastNotifiedOnline);
     });
 
-    window.addEventListener('online', notify);
-    window.addEventListener('offline', notify);
+    window.addEventListener('online', handleBrowserOnline);
+    window.addEventListener('offline', handleBrowserOffline);
 
+    // Faster resume detection for Electron remote reachability.
     if (isElectronDesktop() && hasRemoteSync()) {
-        pollTimer = window.setInterval(pollRemoteReachability, 30000);
+        pollTimer = window.setInterval(() => {
+            refreshAndEmit();
+        }, 5000);
     }
 }
 
 export function destroyConnectivity() {
-    window.removeEventListener('online', notify);
-    window.removeEventListener('offline', notify);
+    window.removeEventListener('online', handleBrowserOnline);
+    window.removeEventListener('offline', handleBrowserOffline);
 
     if (pollTimer !== null) {
         window.clearInterval(pollTimer);

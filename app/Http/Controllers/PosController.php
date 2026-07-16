@@ -37,6 +37,13 @@ class PosController extends Controller
         return view('pos.index', $this->posService->checkoutData($branchId, $jobCard));
     }
 
+    public function offlineReceipt(): View
+    {
+        abort_unless(PosSettings::enabled(), 403);
+
+        return view('pos.offline-receipt');
+    }
+
     public function store(PosCheckoutRequest $request): RedirectResponse|JsonResponse
     {
         abort_unless(PosSettings::enabled(), 403);

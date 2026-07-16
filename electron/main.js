@@ -1,31 +1,28 @@
-import { app, BrowserWindow, ipcMain, session, shell } from 'electron';
+import { app, BrowserWindow, dialog, session, shell } from 'electron';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { REMOTE_LOGIN_PATH, REMOTE_SYNC_URL, START_PATH } from './config.js';
 import {
-    ensureDesktopSetup,
-    findFreePort,
-    loadDesktopEnvironment,
-    resolveUserLaravelRoot,
-    startPhpServer,
-    waitForServer,
-} from './setup.js';
+    DESKTOP_CLIENT_HEADER,
+    DESKTOP_CLIENT_VALUE,
+    REMOTE_LOGIN_PATH,
+    REMOTE_SYNC_URL,
+} from './config.js';
+import { closeDatabase, initDatabase } from './src/db.js';
+import { registerIpcHandlers } from './src/ipc.js';
+import { checkRemoteSession, isRemoteReachable, syncNow } from './src/sync.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const DESKTOP_CLIENT_HEADER = 'X-AutoSpa-Client';
-const DESKTOP_CLIENT_VALUE = 'electron';
+const REMOTE_HOME = `${REMOTE_SYNC_URL.replace(/\/$/, '')}/dashboard`;
+const REMOTE_LOGIN = `${REMOTE_SYNC_URL.replace(/\/$/, '')}${REMOTE_LOGIN_PATH}`;
 
-/** @type {import('node:child_process').ChildProcess | null} */
-let phpProcess = null;
-
-/** @type {import('electron').BrowserWindow | null} */
+/** @type {BrowserWindow | null} */
 let mainWindow = null;
-
-let serverPort = null;
-let appUrl = null;
 let remoteHeadersRegistered = false;
-let navGuardsRegistered = false;
+/** @type {'remote' | 'offline' | 'boot'} */
+let uiMode = 'boot';
+let modeWatchTimer = null;
+let switchingMode = false;
 
 const gotLock = app.requestSingleInstanceLock();
 
@@ -44,11 +41,45 @@ if (!gotLock) {
 
     app.whenReady().then(async () => {
         try {
-            registerIpcHandlers();
+            initDatabase();
             registerRemoteSyncHeaders();
+            registerIpcHandlers({
+                openCloudLogin: () => ensureRemoteSession({ returnToRemote: true }),
+                goOnline: async () => {
+                    if (!(await isRemoteReachable())) {
+                        dialog.showMessageBox(mainWindow, {
+                            type: 'warning',
+                            title: 'Still offline',
+                            message: 'Cloud is not reachable yet. Keep working in offline mode.',
+                        });
+
+                        return;
+                    }
+
+                    try {
+                        await syncNow();
+                    } catch (error) {
+                        console.error('Resume sync failed', error);
+                    }
+
+                    const sessionOk = await checkRemoteSession();
+
+                    if (!sessionOk.ok) {
+                        await ensureRemoteSession({ returnToRemote: true });
+                        return;
+                    }
+
+                    await switchToRemote();
+                },
+                goOffline: () => switchToOffline(),
+            });
             await bootDesktopApp();
         } catch (error) {
             console.error(error);
+            dialog.showErrorBox(
+                'AutoSpa Pro failed to start',
+                error instanceof Error ? error.message : String(error),
+            );
             app.quit();
         }
     });
@@ -62,31 +93,20 @@ app.on('window-all-closed', () => {
 
 app.on('activate', async () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-        try {
-            await bootDesktopApp();
-        } catch (error) {
-            console.error(error);
-            app.quit();
-        }
+        await bootDesktopApp();
     }
 });
 
 app.on('before-quit', () => {
-    stopPhpServer();
+    if (modeWatchTimer) {
+        clearInterval(modeWatchTimer);
+    }
+
+    closeDatabase();
 });
 
-function registerIpcHandlers() {
-    ipcMain.on('desktop:get-remote-sync-url', (event) => {
-        event.returnValue = REMOTE_SYNC_URL ?? '';
-    });
-
-    ipcMain.handle('desktop:check-remote-reachable', async () => {
-        return checkRemoteSession();
-    });
-}
-
 function registerRemoteSyncHeaders() {
-    if (!REMOTE_SYNC_URL || remoteHeadersRegistered) {
+    if (remoteHeadersRegistered) {
         return;
     }
 
@@ -105,56 +125,65 @@ function registerRemoteSyncHeaders() {
 
 async function bootDesktopApp() {
     ensureMainWindow();
-    await showBootScreen('Setting up your local workspace...');
+    await showBootScreen('Opening AutoSpa Pro...');
 
-    const laravelRoot = resolveUserLaravelRoot();
-    serverPort = await findFreePort();
+    const reachable = await isRemoteReachable();
 
-    const setup = await ensureDesktopSetup(laravelRoot, serverPort);
-    const environment = loadDesktopEnvironment(laravelRoot);
+    if (reachable) {
+        const sessionOk = await checkRemoteSession();
 
-    phpProcess = startPhpServer(laravelRoot, serverPort, {
-        ...environment.values,
-        ...setup.envValues,
-    });
-
-    phpProcess.stdout?.on('data', (chunk) => {
-        console.log(`[php] ${chunk.toString().trim()}`);
-    });
-
-    phpProcess.stderr?.on('data', (chunk) => {
-        console.error(`[php] ${chunk.toString().trim()}`);
-    });
-
-    phpProcess.on('exit', (code) => {
-        if (code !== null && code !== 0) {
-            console.error(`PHP server exited with code ${code}`);
+        if (!sessionOk.ok) {
+            await showBootScreen('Sign in to continue…');
+            await ensureRemoteSession({ returnToRemote: true });
+        } else {
+            await switchToRemote();
         }
-
-        phpProcess = null;
-    });
-
-    await showBootScreen('Starting local app services...');
-    await waitForServer(serverPort);
-
-    appUrl = `http://127.0.0.1:${serverPort}${START_PATH}`;
-    registerNavigationGuards(appUrl);
-
-    if (REMOTE_SYNC_URL && await checkRemoteSession() === false) {
-        await showBootScreen('Checking cloud sync connection...');
-        const online = await isNetworkAvailable();
-
-        if (online) {
-            await showBootScreen('Please sign in once to connect cloud sync...');
-            await ensureRemoteSession(mainWindow);
-        }
+    } else {
+        await switchToOffline();
     }
 
-    await mainWindow.loadURL(appUrl);
+    syncNow().catch((error) => {
+        console.error('Background sync failed', error);
+    });
 
-    if (!app.isPackaged) {
-        mainWindow.webContents.openDevTools({ mode: 'detach' });
+    startModeWatch();
+    setInterval(() => {
+        syncNow().catch(() => {});
+    }, 60000);
+}
+
+function startModeWatch() {
+    if (modeWatchTimer) {
+        clearInterval(modeWatchTimer);
     }
+
+    modeWatchTimer = setInterval(async () => {
+        if (switchingMode || !mainWindow || mainWindow.isDestroyed()) {
+            return;
+        }
+
+        const reachable = await isRemoteReachable();
+
+        if (uiMode === 'remote' && !reachable) {
+            await switchToOffline();
+            return;
+        }
+
+        if (uiMode === 'offline' && reachable) {
+            // Connection resumed — push offline SQLite outbox immediately, then return to live UI.
+            try {
+                await syncNow();
+            } catch (error) {
+                console.error('Resume sync failed', error);
+            }
+
+            const sessionOk = await checkRemoteSession();
+
+            if (sessionOk.ok) {
+                await switchToRemote();
+            }
+        }
+    }, 5000);
 }
 
 function ensureMainWindow() {
@@ -170,8 +199,9 @@ function ensureMainWindow() {
         show: false,
         autoHideMenuBar: true,
         title: 'AutoSpa Pro',
+        backgroundColor: '#0b1326',
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
+            preload: path.join(__dirname, 'preload.cjs'),
             contextIsolation: true,
             nodeIntegration: false,
             sandbox: true,
@@ -181,20 +211,35 @@ function ensureMainWindow() {
     mainWindow.on('ready-to-show', () => {
         mainWindow?.show();
     });
-}
 
-function bootScreenHtml(message) {
-    return `
-        <!DOCTYPE html>
-        <html>
-        <head><meta charset="utf-8"><title>AutoSpa Pro</title></head>
-        <body style="margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0b1326;color:#dae2fd;font-family:system-ui,sans-serif;text-align:center;">
-            <div style="max-width:32rem;padding:1.5rem;">
-                <h2 style="margin-bottom:0.5rem;">Preparing AutoSpa Pro</h2>
-                <p style="color:#8b90a0;margin:0;">${message}</p>
-            </div>
-        </body>
-        </html>`;
+    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+        if (url.startsWith(REMOTE_SYNC_URL) || url.startsWith('file:') || url.startsWith('data:')) {
+            return { action: 'allow' };
+        }
+
+        shell.openExternal(url);
+
+        return { action: 'deny' };
+    });
+
+    mainWindow.webContents.on('will-navigate', (event, url) => {
+        if (url.startsWith(REMOTE_SYNC_URL) || url.startsWith('file:') || url.startsWith('data:')) {
+            return;
+        }
+
+        event.preventDefault();
+        shell.openExternal(url);
+    });
+
+    mainWindow.webContents.on('did-fail-load', async (_event, errorCode, _errorDescription, validatedUrl, isMainFrame) => {
+        if (!isMainFrame || errorCode === -3) {
+            return;
+        }
+
+        if (uiMode === 'remote' && validatedUrl.startsWith(REMOTE_SYNC_URL)) {
+            await switchToOffline();
+        }
+    });
 }
 
 async function showBootScreen(message) {
@@ -202,45 +247,71 @@ async function showBootScreen(message) {
         return;
     }
 
-    await mainWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(bootScreenHtml(message))}`);
+    uiMode = 'boot';
+
+    const html = `
+        <!DOCTYPE html>
+        <html class="dark">
+        <head><meta charset="utf-8"><title>AutoSpa Pro</title></head>
+        <body style="margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0b1326;color:#dae2fd;font-family:system-ui,sans-serif;text-align:center;">
+            <div style="max-width:32rem;padding:1.5rem;">
+                <h2 style="margin-bottom:0.5rem;">AutoSpa Pro</h2>
+                <p style="color:#8b90a0;margin:0;">${message}</p>
+            </div>
+        </body>
+        </html>`;
+
+    await mainWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
 }
 
-async function checkRemoteSession() {
-    if (!REMOTE_SYNC_URL) {
-        return false;
+async function switchToRemote() {
+    if (!mainWindow || mainWindow.isDestroyed() || switchingMode) {
+        return;
     }
+
+    switchingMode = true;
 
     try {
-        const response = await session.defaultSession.fetch(
-            `${REMOTE_SYNC_URL}/desktop/sync/ping`,
-            {
-                headers: {
-                    Accept: 'application/json',
-                    [DESKTOP_CLIENT_HEADER]: DESKTOP_CLIENT_VALUE,
-                },
-            },
-        );
-
-        return response.status === 200;
-    } catch {
-        return false;
+        uiMode = 'remote';
+        await mainWindow.loadURL(REMOTE_HOME);
+        syncNow().catch(() => {});
+    } finally {
+        switchingMode = false;
     }
 }
 
-async function ensureRemoteSession(window) {
-    if (!REMOTE_SYNC_URL) {
+async function switchToOffline() {
+    if (!mainWindow || mainWindow.isDestroyed() || switchingMode) {
         return;
     }
 
-    if (await checkRemoteSession()) {
+    switchingMode = true;
+
+    try {
+        uiMode = 'offline';
+        const indexHtml = path.join(__dirname, 'renderer', 'index.html');
+        await mainWindow.loadFile(indexHtml);
+    } finally {
+        switchingMode = false;
+    }
+}
+
+async function ensureRemoteSession({ returnToRemote = true } = {}) {
+    if ((await checkRemoteSession()).ok) {
+        if (returnToRemote) {
+            await switchToRemote();
+        }
+
         return;
     }
 
-    const loginUrl = `${REMOTE_SYNC_URL}${REMOTE_LOGIN_PATH}`;
+    if (!mainWindow) {
+        return;
+    }
 
     await new Promise((resolve) => {
         let settled = false;
-        const timeout = setTimeout(() => finish(), 120000);
+        const timeout = setTimeout(() => finish(), 180000);
 
         const finish = () => {
             if (settled) {
@@ -249,8 +320,8 @@ async function ensureRemoteSession(window) {
 
             settled = true;
             clearTimeout(timeout);
-            window.webContents.removeListener('did-navigate', onNavigate);
-            window.webContents.removeListener('did-finish-load', onFinishLoad);
+            mainWindow?.webContents.removeListener('did-navigate', onNavigate);
+            mainWindow?.webContents.removeListener('did-finish-load', onFinishLoad);
             resolve();
         };
 
@@ -259,116 +330,36 @@ async function ensureRemoteSession(window) {
                 return;
             }
 
-            if (await checkRemoteSession()) {
+            if (url.includes('/login') || url.includes('/forgot-password') || url.includes('/reset-password')) {
+                return;
+            }
+
+            if ((await checkRemoteSession()).ok) {
                 finish();
             }
         };
 
         const onFinishLoad = async () => {
-            if (await checkRemoteSession()) {
+            const url = mainWindow?.webContents.getURL() ?? '';
+
+            if (!url.startsWith(REMOTE_SYNC_URL) || url.includes('/login')) {
+                return;
+            }
+
+            if ((await checkRemoteSession()).ok) {
                 finish();
             }
         };
 
-        window.webContents.on('did-navigate', onNavigate);
-        window.webContents.on('did-finish-load', onFinishLoad);
-
-        window.loadURL(loginUrl).catch(() => finish());
-    });
-}
-
-function registerNavigationGuards(url) {
-    if (!mainWindow || navGuardsRegistered) {
-        return;
-    }
-    
-    const isLocalOrigin = (targetUrl) => targetUrl.startsWith('http://127.0.0.1')
-        || targetUrl.startsWith('http://localhost')
-        || targetUrl.startsWith('data:');
-
-    const isRemoteOrigin = (targetUrl) => REMOTE_SYNC_URL && targetUrl.startsWith(REMOTE_SYNC_URL);
-
-    const isAppOrigin = (targetUrl) => isLocalOrigin(targetUrl) || isRemoteOrigin(targetUrl);
-
-    mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedUrl, isMainFrame) => {
-        if (!isMainFrame || errorCode === -3 /* aborted */) {
-            return;
-        }
-
-        if (!isLocalOrigin(validatedUrl)) {
-            return;
-        }
-
-        const retryHtml = `
-            <!DOCTYPE html>
-            <html>
-            <head><meta charset="utf-8"><title>AutoSpa Pro</title></head>
-            <body style="margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0b1326;color:#dae2fd;font-family:system-ui,sans-serif;text-align:center;">
-                <div>
-                    <h2 style="margin-bottom:0.5rem;">Cannot start AutoSpa Pro</h2>
-                    <p style="color:#8b90a0;margin-bottom:1.5rem;">The local app server is unavailable.<br><small>${errorDescription}</small></p>
-                    <button onclick="location.href='${url}'" style="background:#adc6ff;color:#002e69;border:none;border-radius:0.5rem;padding:0.6rem 1.5rem;font-size:1rem;font-weight:600;cursor:pointer;">Retry</button>
-                </div>
-            </body>
-            </html>`;
-
-        mainWindow?.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(retryHtml)}`);
+        mainWindow.webContents.on('did-navigate', onNavigate);
+        mainWindow.webContents.on('did-finish-load', onFinishLoad);
+        mainWindow.loadURL(REMOTE_LOGIN).catch(() => finish());
     });
 
-    mainWindow.webContents.setWindowOpenHandler(({ url: targetUrl }) => {
-        if (isAppOrigin(targetUrl)) {
-            return { action: 'allow' };
-        }
-
-        shell.openExternal(targetUrl);
-
-        return { action: 'deny' };
-    });
-
-    mainWindow.webContents.on('will-navigate', (event, targetUrl) => {
-        if (isAppOrigin(targetUrl)) {
-            return;
-        }
-
-        event.preventDefault();
-        shell.openExternal(targetUrl);
-    });
-
-    navGuardsRegistered = true;
-}
-
-async function isNetworkAvailable() {
-    if (!REMOTE_SYNC_URL) {
-        return false;
-    }
-
-    try {
-        const response = await session.defaultSession.fetch(`${REMOTE_SYNC_URL}/up`, {
-            method: 'GET',
-        });
-
-        return response.status >= 200 && response.status < 500;
-    } catch {
-        return false;
+    if (returnToRemote && (await checkRemoteSession()).ok) {
+        await switchToRemote();
+    } else if (!(await isRemoteReachable())) {
+        await switchToOffline();
     }
 }
 
-function stopPhpServer() {
-    if (!phpProcess || phpProcess.killed) {
-        return;
-    }
-
-    phpProcess.kill('SIGTERM');
-
-    if (process.platform === 'win32') {
-        spawnTaskKill(phpProcess.pid);
-    }
-}
-
-function spawnTaskKill(pid) {
-    import('node:child_process').then(({ spawn }) => {
-        spawn('taskkill', ['/pid', String(pid), '/f', '/t'], { windowsHide: true });
-    }).catch(() => {
-        // Best-effort cleanup on Windows.
-    });
-}

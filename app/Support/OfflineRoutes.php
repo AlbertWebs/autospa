@@ -175,6 +175,11 @@ class OfflineRoutes
                 'mobile_route' => 'mobile.job-cards.create',
                 'icon' => 'truck',
             ],
+            [
+                'label' => 'Finance',
+                'route' => 'finance.index',
+                'icon' => 'banknotes',
+            ],
         ];
     }
 

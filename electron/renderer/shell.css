@@ -1,0 +1,50 @@
+/* Only nav active state — all form/panel styles come from bundled web CSS */
+.nav-link.is-active {
+    background: rgba(99, 102, 241, 0.15);
+    color: rgb(199 210 254);
+    box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.25);
+}
+
+.nav-link.is-active .nav-icon {
+    background: rgba(99, 102, 241, 0.25);
+    color: rgb(165 180 252);
+}
+
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    line-height: 1;
+}
+
+@media print {
+    body {
+        background: white !important;
+        color: black !important;
+    }
+
+    .sidebar,
+    .asp-receipt-actions,
+    header.sticky,
+    #toast,
+    #sync-pill,
+    #btn-sync,
+    #btn-online,
+    .print\\:hidden {
+        display: none !important;
+    }
+
+    .flex.min-h-screen > div.flex-1 {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+    }
+
+    main {
+        padding: 0 !important;
+    }
+
+    .asp-receipt-print {
+        box-shadow: none !important;
+        border: none !important;
+    }
+}

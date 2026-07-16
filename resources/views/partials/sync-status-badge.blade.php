@@ -1,4 +1,4 @@
-{{-- Shows whether local offline changes are synced. Uses Alpine offline store. --}}
+{{-- Mission Control / header sync status. Sync required is an active button. --}}
 <span
     x-show="$store.offline.online && $store.offline.pending === 0 && ! $store.offline.syncing"
     x-cloak
@@ -19,11 +19,18 @@
     Up to date
 </span>
 
-<span
+<button
+    type="button"
     x-show="$store.offline.pending > 0 || $store.offline.syncing"
     x-cloak
-    class="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-400"
-    x-bind:title="$store.offline.syncing ? 'Syncing local changes…' : 'Local changes waiting to sync with the server'"
+    class="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/15 px-3 py-1.5 text-xs font-semibold text-amber-800 shadow-sm transition hover:bg-amber-500/25 disabled:cursor-not-allowed disabled:opacity-60 dark:border-amber-500/40 dark:bg-amber-500/15 dark:text-amber-300 dark:hover:bg-amber-500/25"
+    x-bind:disabled="! $store.offline.online || $store.offline.syncing"
+    x-bind:title="$store.offline.syncing
+        ? 'Syncing local changes…'
+        : ($store.offline.online
+            ? 'Click to sync all offline changes now'
+            : 'Reconnect to sync offline changes')"
+    @click="$store.offline.syncNow()"
 >
     <span class="material-symbols-outlined text-[14px]" x-show="! $store.offline.syncing">sync_problem</span>
     <span class="material-symbols-outlined animate-spin text-[14px]" x-show="$store.offline.syncing" x-cloak>sync</span>
@@ -31,5 +38,6 @@
     <span x-show="! $store.offline.syncing">
         Sync required
         <span x-show="$store.offline.pending > 0">(<span x-text="$store.offline.pending"></span>)</span>
+        · Sync now
     </span>
-</span>
+</button>

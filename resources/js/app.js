@@ -486,8 +486,8 @@ Alpine.store('offline', {
     },
 
     async syncNow() {
-        if (!this.online || this.syncing) {
-            return;
+        if (! this.online || this.syncing) {
+            return { synced: 0, failed: 0, skipped: true };
         }
 
         this.syncing = true;
@@ -508,12 +508,23 @@ Alpine.store('offline', {
                     'error',
                 );
             }
+
+            return result;
         } catch (error) {
             Alpine.store('toast').show(error.message ?? 'Sync failed.', 'error');
+
+            return { synced: 0, failed: 0, error: error.message ?? 'Sync failed.' };
         } finally {
             this.syncing = false;
             await this.refreshPending();
         }
+    },
+
+    async resumeSync() {
+        this.online = true;
+        await this.bootstrap();
+        await this.syncNow();
+        await this.refreshPending();
     },
 
     init() {
@@ -540,8 +551,9 @@ Alpine.store('offline', {
             this.online = online;
 
             if (online) {
-                await this.bootstrap();
-                await this.syncNow();
+                // Connection resumed — sync everything immediately.
+                await this.resumeSync();
+                return;
             }
 
             await this.refreshPending();
@@ -554,7 +566,7 @@ Alpine.store('offline', {
                 if (result?.cached) {
                     this.pagesCached = result.cached;
 
-                    if (!sessionStorage.getItem('autospa-offline-precache-notified')) {
+                    if (! sessionStorage.getItem('autospa-offline-precache-notified')) {
                         sessionStorage.setItem('autospa-offline-precache-notified', '1');
                         Alpine.store('toast').show(
                             `${result.cached} page${result.cached === 1 ? '' : 's'} saved for offline use.`,
@@ -1597,6 +1609,8 @@ document.addEventListener('alpine:init', () => {
 
             if (config.oldPaymentMethodId) {
                 this.paymentMethodId = String(config.oldPaymentMethodId);
+            } else {
+                this.ensureDefaultCashPayment();
             }
 
             if (config.oldCustomerId && !config.jobCardCart) {
@@ -1612,6 +1626,7 @@ document.addEventListener('alpine:init', () => {
             });
 
             await this.loadOfflineCatalog();
+            this.ensureDefaultCashPayment();
 
             if (config.jobCardCart) {
                 this.loadJobCardCart(config.jobCardCart);
@@ -1647,6 +1662,8 @@ document.addEventListener('alpine:init', () => {
                     }));
                 }
 
+                this.ensureDefaultCashPayment();
+
                 if (Array.isArray(data.customers) && data.customers.length > 0) {
                     const merged = [...this.customers];
 
@@ -1663,6 +1680,24 @@ document.addEventListener('alpine:init', () => {
                 }
             } catch {
                 // Keep server-rendered catalog when bootstrap is unavailable.
+            }
+        },
+
+        ensureDefaultCashPayment() {
+            if (this.paymentMethodId) {
+                const stillValid = this.paymentMethods.some(
+                    (method) => String(method.id) === String(this.paymentMethodId),
+                );
+
+                if (stillValid) {
+                    return;
+                }
+            }
+
+            const cash = this.paymentMethods.find((method) => method.slug === 'cash');
+
+            if (cash) {
+                this.paymentMethodId = String(cash.id);
             }
         },
 
@@ -2274,6 +2309,24 @@ document.addEventListener('alpine:init', () => {
                 total: (item.price * item.qty).toFixed(2),
             }));
 
+            const methodName = this.paymentMethods.find(
+                (method) => String(method.id) === String(this.paymentMethodId),
+            )?.name ?? 'Payment';
+
+            const receiptPayload = {
+                receipt_number: `OFF-${Date.now().toString().slice(-8)}`,
+                amount: this.total,
+                method_name: methodName,
+                customer_name: this.selectedCustomer?.display_name
+                    || this.selectedCustomer?.option_label
+                    || 'Walk-in customer',
+                customer_phone: this.selectedCustomerPhone || null,
+                vehicle_label: this.jobCardVehicleLabel || this.selectedCustomerVehicle || null,
+                items,
+                issued_at: new Date().toISOString(),
+                pending_sync: true,
+            };
+
             try {
                 await enqueueMutation('pos.checkout', {
                     customer_id: this.customerId,
@@ -2288,10 +2341,6 @@ document.addEventListener('alpine:init', () => {
                     items,
                 });
 
-                const methodName = this.paymentMethods.find(
-                    (method) => String(method.id) === String(this.paymentMethodId),
-                )?.name ?? 'Payment';
-
                 this.pendingReceipt = {
                     total: this.total,
                     itemCount: this.itemCount,
@@ -2301,10 +2350,19 @@ document.addEventListener('alpine:init', () => {
 
                 this.cart = [];
                 this.customerId = '';
-                this.paymentMethodId = '';
                 this.clearStkState();
+                this.ensureDefaultCashPayment();
                 Alpine.store('offline').refreshPending();
-                Alpine.store('toast').show('Sale queued for sync. Receipt will be issued when online.', 'success');
+                Alpine.store('toast').show('Sale queued for sync. Opening receipt…', 'success');
+
+                try {
+                    sessionStorage.setItem('autospa.offlineReceipt', JSON.stringify(receiptPayload));
+                    sessionStorage.removeItem('autospa.offlineReceiptPrinted');
+                } catch {
+                    // Ignore storage failures and still try to navigate.
+                }
+
+                window.location.href = '/pos/offline-receipt';
             } catch {
                 Alpine.store('toast').show('Could not queue sale for sync.', 'error');
             } finally {
@@ -2314,6 +2372,49 @@ document.addEventListener('alpine:init', () => {
 
         dismissPendingReceipt() {
             this.pendingReceipt = null;
+        },
+    }));
+
+    Alpine.data('offlineReceiptPage', () => ({
+        receipt: null,
+
+        load() {
+            try {
+                const raw = sessionStorage.getItem('autospa.offlineReceipt');
+                this.receipt = raw ? JSON.parse(raw) : null;
+            } catch {
+                this.receipt = null;
+            }
+
+            if (this.receipt) {
+                this.$nextTick(() => {
+                    if (! sessionStorage.getItem('autospa.offlineReceiptPrinted')) {
+                        sessionStorage.setItem('autospa.offlineReceiptPrinted', '1');
+                        window.setTimeout(() => {
+                            if (Alpine.store('fullscreen')?.printDocument) {
+                                Alpine.store('fullscreen').printDocument();
+                            } else {
+                                window.print();
+                            }
+                        }, 400);
+                    }
+                });
+            }
+        },
+
+        formatMoney(value) {
+            return Number(value || 0).toLocaleString('en-KE', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            });
+        },
+
+        get issuedLabel() {
+            if (! this.receipt?.issued_at) {
+                return 'N/A';
+            }
+
+            return new Date(this.receipt.issued_at).toLocaleString();
         },
     }));
 });

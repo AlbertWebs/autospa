@@ -170,6 +170,7 @@ Route::middleware(['installed', 'auth', 'verified', 'branch'])->group(function (
 
     Route::middleware('permission:pos.access')->group(function () {
         Route::get('pos', [PosController::class, 'index'])->name('pos.index');
+        Route::get('pos/offline-receipt', [PosController::class, 'offlineReceipt'])->name('pos.offline-receipt');
         Route::post('pos/stk-push', [PosController::class, 'stkPush'])->name('pos.stk-push');
         Route::post('pos', [PosController::class, 'store'])->name('pos.store');
     });

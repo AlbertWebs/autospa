@@ -1,17 +1,24 @@
 {
     "name": "autospa-desktop",
-    "version": "1.2.0",
-    "description": "AutoSpa Pro desktop app (offline-first Electron shell)",
+    "version": "1.4.3",
+    "description": "AutoSpa Pro desktop — live web UI online, operable offline shell",
     "private": true,
     "type": "module",
     "main": "main.js",
     "author": "AutoSpa",
     "scripts": {
+        "copy-web-assets": "node scripts/copy-web-assets.js",
+        "preelectron:dev": "node scripts/copy-web-assets.js",
         "electron:dev": "electron .",
+        "preelectron:build": "node scripts/copy-web-assets.js",
+        "preelectron:build:win": "node scripts/copy-web-assets.js",
         "electron:build": "electron-builder",
         "electron:build:win": "electron-builder --win",
-        "electron:build:mac": "electron-builder --mac",
-        "electron:build:linux": "electron-builder --linux"
+        "postinstall": "electron-builder install-app-deps"
+    },
+    "dependencies": {
+        "better-sqlite3": "^11.8.1",
+        "uuid": "^11.1.0"
     },
     "devDependencies": {
         "electron": "^35.0.0",
@@ -24,52 +31,23 @@
             "output": "dist",
             "buildResources": "build"
         },
-        "extraResources": [
-            {
-                "from": "../",
-                "to": "laravel-source",
-                "filter": [
-                    "**/*",
-                    "!**/.git/**",
-                    "!**/node_modules/**",
-                    "!**/electron/node_modules/**",
-                    "!**/electron/dist/**",
-                    "!**/storage/logs/**",
-                    "!**/storage/framework/cache/**",
-                    "!**/storage/framework/sessions/**",
-                    "!**/storage/framework/views/**",
-                    "!**/tests/**",
-                    "!**/.cursor/**",
-                    "!**/agent-transcripts/**"
-                ]
-            }
-        ],
         "files": [
             "main.js",
-            "preload.js",
-            "setup.js",
+            "preload.cjs",
             "config.js",
+            "src/**/*",
+            "renderer/**/*",
             "package.json"
+        ],
+        "asarUnpack": [
+            "node_modules/better-sqlite3/**/*"
         ],
         "win": {
             "target": [
-                "nsis",
-                "msi"
+                "nsis"
             ],
             "artifactName": "${productName}-Setup-${version}.${ext}",
             "signAndEditExecutable": false
-        },
-        "mac": {
-            "target": [
-                "dmg"
-            ],
-            "category": "public.app-category.business"
-        },
-        "linux": {
-            "target": [
-                "AppImage"
-            ],
-            "category": "Office"
         },
         "nsis": {
             "oneClick": false,
