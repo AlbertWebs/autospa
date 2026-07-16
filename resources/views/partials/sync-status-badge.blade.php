@@ -23,7 +23,7 @@
     type="button"
     x-show="$store.offline.pending > 0 || $store.offline.syncing"
     x-cloak
-    class="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/15 px-3 py-1.5 text-xs font-semibold text-amber-800 shadow-sm transition hover:bg-amber-500/25 disabled:cursor-not-allowed disabled:opacity-60 dark:border-amber-500/40 dark:bg-amber-500/15 dark:text-amber-300 dark:hover:bg-amber-500/25"
+    class="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500 px-3.5 py-1.5 text-xs font-semibold text-amber-950 shadow-sm transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60 dark:border-amber-400/40 dark:bg-amber-500 dark:text-amber-950 dark:hover:bg-amber-400"
     x-bind:disabled="$store.offline.syncing || (! $store.offline.online && ! window.autoSpaDesktop)"
     x-bind:title="$store.offline.syncing
         ? 'Syncing local changes…'
@@ -37,7 +37,7 @@
     <span x-show="$store.offline.syncing" x-cloak>Syncing…</span>
     <span x-show="! $store.offline.syncing">
         Sync required
-        <span x-show="$store.offline.pending > 0">(<span x-text="$store.offline.pending"></span>)</span>
+        (<span x-text="$store.offline.pending"></span>)
         · Sync now
     </span>
 </button>

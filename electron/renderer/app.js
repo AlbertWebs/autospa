@@ -2,7 +2,8 @@ const api = window.autoSpaDesktop;
 const view = document.getElementById('view');
 const headerSection = document.getElementById('header-section');
 const toastEl = document.getElementById('toast');
-const syncPill = document.getElementById('sync-pill');
+const syncBtn = document.getElementById('btn-sync');
+const syncPill = null;
 
 const titles = {
     pos: 'Sales',
@@ -78,34 +79,32 @@ function setActiveNav() {
 }
 
 async function refreshSyncPill() {
-    const syncBtn = document.getElementById('btn-sync');
+    if (!syncBtn) {
+        return;
+    }
 
     try {
         const status = await api.syncStatus();
         const pending = status.pending || 0;
 
         if (pending > 0) {
-            syncPill.textContent = `Offline · ${pending} queued`;
-            syncPill.className = 'rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-center text-xs font-semibold text-amber-300 cursor-pointer';
-            syncPill.title = 'Click to sync queued changes';
-            if (syncBtn) {
-                syncBtn.textContent = `Sync now (${pending})`;
-                syncBtn.classList.remove('asp-btn-secondary');
-                syncBtn.classList.add('asp-btn-primary');
-            }
+            syncBtn.textContent = `Sync required (${pending}) · Sync now`;
+            syncBtn.disabled = false;
+            syncBtn.classList.remove('asp-btn-secondary');
+            syncBtn.classList.add('asp-btn-primary');
+            syncBtn.title = 'Click to sync queued changes';
         } else {
-            syncPill.textContent = 'Offline · ready';
-            syncPill.className = 'rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1.5 text-center text-xs font-semibold text-emerald-300';
-            syncPill.title = 'No pending offline changes';
-            if (syncBtn) {
-                syncBtn.textContent = 'Sync now';
-                syncBtn.classList.add('asp-btn-secondary');
-                syncBtn.classList.remove('asp-btn-primary');
-            }
+            syncBtn.textContent = 'Up to date';
+            syncBtn.disabled = true;
+            syncBtn.classList.add('asp-btn-secondary');
+            syncBtn.classList.remove('asp-btn-primary');
+            syncBtn.title = 'No pending offline changes';
         }
     } catch {
-        syncPill.textContent = 'Offline';
-        syncPill.className = 'rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-center text-xs font-semibold text-amber-300';
+        syncBtn.textContent = 'Sync now';
+        syncBtn.disabled = false;
+        syncBtn.classList.add('asp-btn-secondary');
+        syncBtn.classList.remove('asp-btn-primary');
     }
 }
 

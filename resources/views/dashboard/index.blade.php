@@ -39,23 +39,6 @@
 
             @include('partials.sync-status-badge')
 
-            <button
-                type="button"
-                x-show="$store.offline.pending > 0"
-                x-cloak
-                class="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-semibold text-amber-950 shadow-sm transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
-                x-bind:disabled="$store.offline.syncing || (! $store.offline.online && ! window.autoSpaDesktop)"
-                @click="$store.offline.syncNow()"
-            >
-                <span class="material-symbols-outlined text-[18px]" x-show="! $store.offline.syncing">cloud_upload</span>
-                <span class="material-symbols-outlined animate-spin text-[18px]" x-show="$store.offline.syncing" x-cloak>sync</span>
-                <span x-show="! $store.offline.syncing">
-                    Sync all
-                    (<span x-text="$store.offline.pending"></span>)
-                </span>
-                <span x-show="$store.offline.syncing" x-cloak>Syncing…</span>
-            </button>
-
             <span
                 x-show="$store.offline.online"
                 x-cloak
