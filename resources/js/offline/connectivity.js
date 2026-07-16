@@ -9,15 +9,12 @@ function isElectronDesktop() {
         || document.querySelector('meta[name="app-runtime"]')?.content === 'electron';
 }
 
-function hasRemoteSync() {
-    const meta = document.querySelector('meta[name="desktop-remote-sync-url"]')?.content?.trim();
-    const bridge = window.autoSpaDesktop?.remoteSyncUrl?.trim?.() ?? '';
-
-    return Boolean(meta || bridge);
+function canProbeElectronRemote() {
+    return isElectronDesktop() && typeof window.autoSpaDesktop?.checkRemoteReachable === 'function';
 }
 
 export function isOnline() {
-    if (isElectronDesktop() && hasRemoteSync()) {
+    if (canProbeElectronRemote()) {
         return remoteReachable;
     }
 
@@ -39,16 +36,16 @@ export function onConnectivityChange(callback) {
 }
 
 async function probeRemote() {
-    if (!isElectronDesktop() || !hasRemoteSync()) {
+    if (! canProbeElectronRemote()) {
         remoteReachable = navigator.onLine;
 
         return remoteReachable;
     }
 
     try {
-        remoteReachable = await window.autoSpaDesktop?.checkRemoteReachable?.() ?? false;
+        remoteReachable = Boolean(await window.autoSpaDesktop.checkRemoteReachable());
     } catch {
-        remoteReachable = false;
+        remoteReachable = navigator.onLine;
     }
 
     return remoteReachable;
@@ -71,7 +68,7 @@ async function refreshAndEmit() {
 }
 
 function handleBrowserOnline() {
-    if (!(isElectronDesktop() && hasRemoteSync())) {
+    if (! canProbeElectronRemote()) {
         remoteReachable = true;
         emitConnectivity(true);
 
@@ -82,7 +79,7 @@ function handleBrowserOnline() {
 }
 
 function handleBrowserOffline() {
-    if (!(isElectronDesktop() && hasRemoteSync())) {
+    if (! canProbeElectronRemote()) {
         remoteReachable = false;
         emitConnectivity(false);
 
@@ -101,8 +98,8 @@ export function initConnectivity() {
     window.addEventListener('online', handleBrowserOnline);
     window.addEventListener('offline', handleBrowserOffline);
 
-    // Faster resume detection for Electron remote reachability.
-    if (isElectronDesktop() && hasRemoteSync()) {
+    // Electron: poll desktop reachability so resume sync fires reliably.
+    if (canProbeElectronRemote()) {
         pollTimer = window.setInterval(() => {
             refreshAndEmit();
         }, 5000);

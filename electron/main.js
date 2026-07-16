@@ -7,7 +7,7 @@ import {
     REMOTE_LOGIN_PATH,
     REMOTE_SYNC_URL,
 } from './config.js';
-import { closeDatabase, initDatabase } from './src/db.js';
+import { closeDatabase, initDatabase, pendingCount } from './src/db.js';
 import { registerIpcHandlers } from './src/ipc.js';
 import { checkRemoteSession, isRemoteReachable, syncNow } from './src/sync.js';
 
@@ -56,17 +56,34 @@ if (!gotLock) {
                         return;
                     }
 
-                    try {
-                        await syncNow();
-                    } catch (error) {
+                    const syncResult = await syncNow().catch((error) => {
                         console.error('Resume sync failed', error);
-                    }
 
+                        return { synced: 0, failed: 0, reason: 'error', pending: pendingCount() };
+                    });
+
+                    const remaining = pendingCount();
                     const sessionOk = await checkRemoteSession();
 
                     if (!sessionOk.ok) {
+                        if (remaining > 0) {
+                            dialog.showMessageBox(mainWindow, {
+                                type: 'warning',
+                                title: 'Sign in required',
+                                message: `${remaining} offline change(s) are queued. Sign in to upload them.`,
+                            });
+                        }
+
                         await ensureRemoteSession({ returnToRemote: true });
                         return;
+                    }
+
+                    if (remaining > 0) {
+                        dialog.showMessageBox(mainWindow, {
+                            type: 'warning',
+                            title: 'Sync incomplete',
+                            message: `${remaining} change(s) could not be uploaded yet (${syncResult.reason || 'retry from Mission Control'}). You can sync again from the dashboard.`,
+                        });
                     }
 
                     await switchToRemote();
@@ -148,8 +165,13 @@ async function bootDesktopApp() {
 
     startModeWatch();
     setInterval(() => {
-        syncNow().catch(() => {});
-    }, 60000);
+        const pending = pendingCount();
+
+        // Keep retrying while anything is queued; otherwise soft-poll less often.
+        if (pending > 0 || uiMode === 'remote') {
+            syncNow().catch(() => {});
+        }
+    }, 20000);
 }
 
 function startModeWatch() {
@@ -170,18 +192,28 @@ function startModeWatch() {
         }
 
         if (uiMode === 'offline' && reachable) {
-            // Connection resumed — push offline SQLite outbox immediately, then return to live UI.
-            try {
-                await syncNow();
-            } catch (error) {
+            const syncResult = await syncNow().catch((error) => {
                 console.error('Resume sync failed', error);
-            }
+
+                return { pending: pendingCount() };
+            });
 
             const sessionOk = await checkRemoteSession();
+            const remaining = pendingCount();
 
             if (sessionOk.ok) {
+                // Return to live UI even if some items remain — Mission Control can finish sync.
                 await switchToRemote();
+
+                if (remaining > 0) {
+                    console.warn('Switched online with pending outbox items', remaining, syncResult);
+                }
             }
+        }
+
+        // While remote, keep draining SQLite outbox in the background.
+        if (uiMode === 'remote' && reachable && pendingCount() > 0) {
+            syncNow().catch(() => {});
         }
     }, 5000);
 }

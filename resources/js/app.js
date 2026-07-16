@@ -436,7 +436,17 @@ Alpine.store('offline', {
     },
 
     async refreshPending() {
-        this.pending = await getPendingMutationCount();
+        let count = await getPendingMutationCount();
+
+        if (typeof window.autoSpaDesktop?.pendingCount === 'function') {
+            try {
+                count += Number(await window.autoSpaDesktop.pendingCount()) || 0;
+            } catch {
+                // Desktop bridge unavailable — keep browser outbox count only.
+            }
+        }
+
+        this.pending = count;
     },
 
     async precachePagesFromBootstrap(data = null) {
@@ -486,30 +496,55 @@ Alpine.store('offline', {
     },
 
     async syncNow() {
-        if (! this.online || this.syncing) {
+        if (this.syncing) {
+            return { synced: 0, failed: 0, skipped: true };
+        }
+
+        const canDesktopSync = typeof window.autoSpaDesktop?.syncNow === 'function';
+
+        if (! this.online && ! canDesktopSync) {
             return { synced: 0, failed: 0, skipped: true };
         }
 
         this.syncing = true;
 
         try {
-            const result = await syncPendingMutations();
+            let synced = 0;
+            let failed = 0;
 
-            if (result.synced > 0) {
+            if (this.online) {
+                const webResult = await syncPendingMutations();
+                synced += webResult.synced || 0;
+                failed += webResult.failed || 0;
+            }
+
+            if (canDesktopSync) {
+                const desktopResult = await window.autoSpaDesktop.syncNow();
+                synced += desktopResult.synced || 0;
+                failed += desktopResult.failed || 0;
+
+                if (desktopResult.reason === 'needs_sign_in') {
+                    Alpine.store('toast').show('Sign in to sync desktop offline changes.', 'error');
+                } else if (desktopResult.reason === 'offline' || desktopResult.reason === 'unreachable') {
+                    Alpine.store('toast').show('Cloud is unreachable — changes stay queued.', 'error');
+                }
+            }
+
+            if (synced > 0) {
                 Alpine.store('toast').show(
-                    `${result.synced} offline change${result.synced === 1 ? '' : 's'} synced.`,
+                    `${synced} offline change${synced === 1 ? '' : 's'} synced.`,
                     'success',
                 );
             }
 
-            if (result.failed > 0) {
+            if (failed > 0) {
                 Alpine.store('toast').show(
-                    `${result.failed} change${result.failed === 1 ? '' : 's'} could not be synced.`,
+                    `${failed} change${failed === 1 ? '' : 's'} could not be synced.`,
                     'error',
                 );
             }
 
-            return result;
+            return { synced, failed };
         } catch (error) {
             Alpine.store('toast').show(error.message ?? 'Sync failed.', 'error');
 
@@ -560,6 +595,12 @@ Alpine.store('offline', {
         });
 
         this.refreshPending();
+
+        if (typeof window.autoSpaDesktop?.pendingCount === 'function') {
+            window.setInterval(() => {
+                this.refreshPending();
+            }, 5000);
+        }
 
         if (this.online) {
             startOfflinePrecache().then((result) => {

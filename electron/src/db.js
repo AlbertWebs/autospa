@@ -543,7 +543,7 @@ export function checkoutPosLocal(input) {
     enqueueMutation('pos.checkout', {
         customer_id: `client:${input.customer_uuid}`,
         vehicle_id: input.vehicle_uuid ? `client:${input.vehicle_uuid}` : null,
-        job_card_id: null,
+        job_card_id: input.job_card_uuid ? `client:${input.job_card_uuid}` : null,
         payment_method_id: paymentMethodId,
         method: input.method,
         subtotal: amount,

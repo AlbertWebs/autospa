@@ -44,7 +44,7 @@
                 x-show="$store.offline.pending > 0"
                 x-cloak
                 class="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-semibold text-amber-950 shadow-sm transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
-                x-bind:disabled="! $store.offline.online || $store.offline.syncing"
+                x-bind:disabled="$store.offline.syncing || (! $store.offline.online && ! window.autoSpaDesktop)"
                 @click="$store.offline.syncNow()"
             >
                 <span class="material-symbols-outlined text-[18px]" x-show="! $store.offline.syncing">cloud_upload</span>

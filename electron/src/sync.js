@@ -60,6 +60,12 @@ export async function checkRemoteSession() {
             return { ok: false, reason: 'needs_sign_in' };
         }
 
+        if (response.status === 422) {
+            setMeta('cloud_status', 'needs_sign_in');
+
+            return { ok: false, reason: 'needs_sign_in', status: response.status };
+        }
+
         setMeta('cloud_status', 'unreachable');
 
         return { ok: false, reason: 'unreachable', status: response.status };

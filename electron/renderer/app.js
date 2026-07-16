@@ -19,6 +19,9 @@ let cart = [];
 let catalogSearch = '';
 let financeRange = { from: '', to: '' };
 let posCustomerId = '';
+let posVehicleUuid = '';
+let posJobCardUuid = '';
+let posJobVehicleLabel = '';
 let posPaymentMethodId = '';
 let posCheckoutGuide = localStorage.getItem('posCheckoutGuideDismissed') !== 'true';
 let posPendingReceipt = null;
@@ -27,6 +30,15 @@ let posShowCustomerModal = false;
 let posShowCashModal = false;
 let posCheckoutSubmitting = false;
 let posCustomerForm = { full_name: '', phone: '', email: '', registration_number: '' };
+let jobForm = {
+    customerUuid: '',
+    vehicleUuid: '',
+    serviceIds: [],
+    notes: '',
+    showCustomerModal: false,
+    submitting: false,
+    customerForm: { full_name: '', phone: '', email: '', registration_number: '' },
+};
 
 function money(value) {
     return Number(value || 0).toLocaleString('en-KE', { maximumFractionDigits: 0 });
@@ -66,12 +78,34 @@ function setActiveNav() {
 }
 
 async function refreshSyncPill() {
+    const syncBtn = document.getElementById('btn-sync');
+
     try {
         const status = await api.syncStatus();
         const pending = status.pending || 0;
-        syncPill.textContent = pending ? `Offline · ${pending} queued` : 'Offline · ready';
+
+        if (pending > 0) {
+            syncPill.textContent = `Offline · ${pending} queued`;
+            syncPill.className = 'rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-center text-xs font-semibold text-amber-300 cursor-pointer';
+            syncPill.title = 'Click to sync queued changes';
+            if (syncBtn) {
+                syncBtn.textContent = `Sync now (${pending})`;
+                syncBtn.classList.remove('asp-btn-secondary');
+                syncBtn.classList.add('asp-btn-primary');
+            }
+        } else {
+            syncPill.textContent = 'Offline · ready';
+            syncPill.className = 'rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1.5 text-center text-xs font-semibold text-emerald-300';
+            syncPill.title = 'No pending offline changes';
+            if (syncBtn) {
+                syncBtn.textContent = 'Sync now';
+                syncBtn.classList.add('asp-btn-secondary');
+                syncBtn.classList.remove('asp-btn-primary');
+            }
+        }
     } catch {
         syncPill.textContent = 'Offline';
+        syncPill.className = 'rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-center text-xs font-semibold text-amber-300';
     }
 }
 
@@ -105,6 +139,12 @@ document.querySelectorAll('.nav-link').forEach((btn) => {
 });
 
 document.getElementById('btn-sync').addEventListener('click', runSync);
+document.getElementById('sync-pill')?.addEventListener('click', async () => {
+    const status = await api.syncStatus().catch(() => ({ pending: 0 }));
+    if ((status.pending || 0) > 0) {
+        await runSync();
+    }
+});
 document.getElementById('btn-online').addEventListener('click', async () => {
     showToast('Reconnecting…');
     try {
@@ -137,6 +177,61 @@ function customerOptionLabel(customer, vehicles = []) {
     return name
         ? `${name}${vehicleSummary ? ` · ${vehicleSummary}` : ''}`
         : (vehicleSummary || 'Unnamed customer');
+}
+
+function vehicleLabel(vehicle) {
+    const parts = [vehicle.registration_number, vehicle.make, vehicle.model].filter(Boolean);
+    return parts.join(' · ') || 'Vehicle';
+}
+
+function jobStatusLabel(status) {
+    if (status === 'open') return 'Queued';
+    if (status === 'in_progress') return 'Washing';
+    if (status === 'completed') return 'Ready';
+    return status;
+}
+
+function jobProgress(status) {
+    if (status === 'open') return 25;
+    if (status === 'in_progress') return 70;
+    if (status === 'completed') return 100;
+    return 0;
+}
+
+function jobStatusButtonClass(status) {
+    if (status === 'in_progress') return 'asp-btn asp-btn-secondary !px-3 !py-1.5 text-xs';
+    if (status === 'completed') return 'asp-btn asp-btn-primary !px-3 !py-1.5 text-xs';
+    return 'asp-btn asp-btn-ghost !px-3 !py-1.5 text-xs';
+}
+
+async function openPosFromCompletedJob(job, services = []) {
+    const serviceIds = Array.isArray(job.service_ids) ? job.service_ids : [];
+
+    cart = serviceIds.map((id) => {
+        const service = services.find((entry) => Number(entry.id) === Number(id));
+        if (!service) {
+            return null;
+        }
+
+        return {
+            id: service.id,
+            name: service.name,
+            price: Number(service.price),
+            qty: 1,
+            itemType: 'service',
+            type: 'service',
+        };
+    }).filter(Boolean);
+
+    posCustomerId = job.customer_uuid || '';
+    posVehicleUuid = job.vehicle_uuid || '';
+    posJobCardUuid = job.uuid || '';
+    posJobVehicleLabel = job.registration_number || '';
+    posCheckoutGuide = false;
+    route = 'pos';
+    setActiveNav();
+    showToast('Job ready — complete checkout in POS');
+    await render();
 }
 
 function selectedPaymentMethod(methods) {
@@ -190,7 +285,8 @@ async function completePosSale(methods) {
     try {
         await api.checkout({
             customer_uuid: posCustomerId,
-            vehicle_uuid: null,
+            vehicle_uuid: posVehicleUuid || null,
+            job_card_uuid: posJobCardUuid || null,
             payment_method_id: method.id,
             method: method.slug,
             items: cart.map((item) => ({
@@ -222,6 +318,9 @@ async function completePosSale(methods) {
 
         cart = [];
         posCustomerId = '';
+        posVehicleUuid = '';
+        posJobCardUuid = '';
+        posJobVehicleLabel = '';
         posShowCashModal = false;
         ensureCashDefault(methods);
         showToast('Sale queued for sync. Opening receipt…');
@@ -347,6 +446,15 @@ async function renderPos() {
                                 <div class="mt-3 flex justify-end">
                                     <button type="button" id="dismiss-guide" class="asp-btn asp-btn-primary !px-4 !py-2 text-sm">Understood</button>
                                 </div>
+                            </div>
+                        ` : ''}
+
+                        ${posJobCardUuid ? `
+                            <div class="rounded-2xl border border-brand-primary/30 bg-brand-primary/5 px-4 py-3 dark:bg-brand-primary/10">
+                                <p class="font-mono text-[10px] font-semibold uppercase tracking-widest text-brand-primary">From Live Wash Board</p>
+                                <p class="mt-1 text-sm font-medium text-slate-900 dark:text-white">
+                                    Job services loaded for checkout${posJobVehicleLabel ? ` · ${escapeHtml(posJobVehicleLabel)}` : ''}.
+                                </p>
                             </div>
                         ` : ''}
 
@@ -768,35 +876,42 @@ async function renderReceipt() {
 }
 
 async function renderLiveBoard() {
-    const jobs = await api.listJobs();
+    const [jobs, services] = await Promise.all([
+        api.listJobs(),
+        api.listServices(),
+    ]);
     const live = jobs.filter((j) => ['open', 'in_progress'].includes(j.status));
     const queued = live.filter((j) => j.status === 'open').length;
     const washing = live.filter((j) => j.status === 'in_progress').length;
+    const serviceName = (id) => services.find((s) => Number(s.id) === Number(id))?.name;
 
     view.innerHTML = `
         <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
             <div>
                 <p class="asp-page-eyebrow">Operations</p>
                 <h1 class="font-display text-2xl font-bold text-slate-900 dark:text-white">Live</h1>
-                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Track wash bay activity and move vehicles through wash stages.</p>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Track wash bay activity in real time and move vehicles through the wash stages.</p>
             </div>
-            <button type="button" class="asp-btn asp-btn-primary" data-goto="job-create">New Job Card</button>
+            <button type="button" class="asp-btn asp-btn-primary" data-goto="job-create">
+                <span class="material-symbols-outlined text-lg">add</span>
+                New Job Card
+            </button>
         </div>
 
         <div class="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div class="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-brand-border/60 dark:bg-brand-surface-high">
                 <p class="text-xs font-semibold uppercase tracking-widest text-slate-400">Live Cars</p>
                 <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">${live.length}</p>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div class="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-brand-border/60 dark:bg-brand-surface-high">
                 <p class="text-xs font-semibold uppercase tracking-widest text-slate-400">Queued</p>
                 <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">${queued}</p>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div class="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-brand-border/60 dark:bg-brand-surface-high">
                 <p class="text-xs font-semibold uppercase tracking-widest text-slate-400">Washing</p>
                 <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">${washing}</p>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div class="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-brand-border/60 dark:bg-brand-surface-high">
                 <p class="text-xs font-semibold uppercase tracking-widest text-slate-400">All jobs</p>
                 <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">${jobs.length}</p>
             </div>
@@ -804,52 +919,98 @@ async function renderLiveBoard() {
 
         ${live.length === 0 ? `
             <div class="rounded-2xl border border-dashed border-slate-300 bg-white/50 px-6 py-12 text-center dark:border-slate-700 dark:bg-slate-900/40">
+                <span class="material-symbols-outlined mb-2 text-3xl text-slate-300">local_car_wash</span>
                 <p class="text-sm font-medium text-slate-600 dark:text-slate-300">No live wash jobs</p>
                 <p class="mt-1 text-xs text-slate-500">Cars waiting for wash or currently being washed will appear here.</p>
+                <button type="button" class="asp-btn asp-btn-primary mt-4" data-goto="job-create">New Job Card</button>
             </div>
         ` : `
             <div class="grid gap-5 xl:grid-cols-2">
-                ${live.map((j) => `
-                    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                ${live.map((j) => {
+                    const names = (j.service_ids || []).map(serviceName).filter(Boolean);
+                    const progress = jobProgress(j.status);
+                    return `
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-brand-border/60 dark:bg-brand-surface-high">
                         <div class="flex flex-wrap items-start justify-between gap-4">
                             <div>
                                 <p class="font-mono text-xs uppercase tracking-widest text-slate-400">Job</p>
                                 <h2 class="mt-1 text-xl font-semibold text-slate-900 dark:text-white">${escapeHtml(j.registration_number || 'No vehicle')}</h2>
-                                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">${escapeHtml(j.customer_name)}</p>
+                                <p class="mt-1 text-sm font-medium text-brand-primary-dim dark:text-brand-primary">${escapeHtml(names.join(', ') || 'No services')}</p>
                             </div>
                             <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                                 j.status === 'open'
                                     ? 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'
                                     : 'bg-sky-100 text-sky-800 dark:bg-sky-900 dark:text-sky-200'
-                            }">${escapeHtml(j.status)}</span>
+                            }">${escapeHtml(jobStatusLabel(j.status))}</span>
                         </div>
+
+                        <div class="mt-5 space-y-3 text-sm">
+                            <div class="flex justify-between gap-4">
+                                <span class="text-slate-500 dark:text-slate-400">Customer</span>
+                                <span class="font-medium text-slate-900 dark:text-white">${escapeHtml(j.customer_name)}</span>
+                            </div>
+                            <div class="flex justify-between gap-4">
+                                <span class="text-slate-500 dark:text-slate-400">Wash Stage</span>
+                                <span class="font-medium text-slate-900 dark:text-white">${progress}%</span>
+                            </div>
+                        </div>
+
                         <div class="mt-4">
-                            <label class="asp-label">Update status</label>
-                            <select data-status-for="${j.uuid}" class="asp-select mt-1.5">
-                                ${['open', 'in_progress', 'completed', 'closed'].map((s) => `
-                                    <option value="${s}" ${j.status === s ? 'selected' : ''}>${s}</option>
+                            <div class="h-2.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
+                                <div class="h-full rounded-full bg-indigo-500 transition-all" style="width: ${progress}%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="mt-5 border-t border-slate-200/80 pt-4 dark:border-brand-border/60">
+                            <p class="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-400">Change Washing Status</p>
+                            <div class="flex flex-wrap gap-2">
+                                ${['open', 'in_progress', 'completed'].map((status) => `
+                                    <button
+                                        type="button"
+                                        class="${jobStatusButtonClass(status)}"
+                                        data-status-for="${j.uuid}"
+                                        data-status="${status}"
+                                        ${j.status === status ? 'disabled' : ''}
+                                    >${status === 'open' ? 'Queued' : (status === 'in_progress' ? 'Washing' : 'Ready')}</button>
                                 `).join('')}
-                            </select>
+                            </div>
                         </div>
                     </div>
-                `).join('')}
+                    `;
+                }).join('')}
             </div>
         `}
     `;
 
-    view.querySelector('[data-goto="job-create"]')?.addEventListener('click', async () => {
-        route = 'job-create';
-        setActiveNav();
-        await render();
+    view.querySelectorAll('[data-goto="job-create"]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+            route = 'job-create';
+            setActiveNav();
+            await render();
+        });
     });
 
-    view.querySelectorAll('[data-status-for]').forEach((select) => {
-        select.addEventListener('change', async () => {
+    view.querySelectorAll('[data-status-for]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+            const uuid = btn.dataset.statusFor;
+            const status = btn.dataset.status;
+            const job = live.find((entry) => entry.uuid === uuid);
+
+            if (!job || job.status === status) {
+                return;
+            }
+
             try {
-                await api.updateJobStatus({ uuid: select.dataset.statusFor, status: select.value });
-                showToast('Status updated');
+                await api.updateJobStatus({ uuid, status });
+                showToast(status === 'completed' ? 'Marked ready — opening POS…' : 'Status updated');
                 await refreshSyncPill();
                 api.syncNow().catch(() => {});
+
+                if (status === 'completed') {
+                    await openPosFromCompletedJob({ ...job, status }, services);
+                    return;
+                }
+
                 await renderLiveBoard();
             } catch (error) {
                 showToast(error.message || 'Update failed', true);
@@ -865,78 +1026,342 @@ async function renderJobCreate() {
         api.listServices(),
     ]);
 
-    view.innerHTML = `
-        <div class="mb-6">
-            <p class="asp-page-eyebrow">Operations</p>
-            <h1 class="font-display text-2xl font-bold text-slate-900 dark:text-white">New Job Card</h1>
-            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Create a wash job offline. It will sync when you reconnect.</p>
-        </div>
+    const filteredVehicles = jobForm.customerUuid
+        ? vehicles.filter((v) => v.customer_uuid === jobForm.customerUuid)
+        : [];
+    const selectedCustomer = customers.find((c) => c.uuid === jobForm.customerUuid);
+    const selectedVehicle = vehicles.find((v) => v.uuid === jobForm.vehicleUuid);
+    const selectedServices = services.filter((s) => jobForm.serviceIds.includes(Number(s.id)));
+    const serviceTotal = selectedServices.reduce((sum, s) => sum + Number(s.price || 0), 0);
 
-        <div class="asp-panel max-w-3xl">
-            <div class="asp-panel-header">
-                <div>
-                    <h2 class="asp-panel-title">Job details</h2>
-                </div>
-            </div>
+    const servicesByCategory = {};
+    for (const service of services) {
+        const key = service.category_name || 'General';
+        if (!servicesByCategory[key]) {
+            servicesByCategory[key] = [];
+        }
+        servicesByCategory[key].push(service);
+    }
+
+    view.innerHTML = `
+        ${sectionHeader('Operations')}
+
+        <div class="asp-panel">
             <div class="asp-panel-body">
-                <form id="job-form" class="asp-form space-y-5">
-                    <div class="asp-form-grid">
-                        <div class="asp-form-field">
-                            <label class="asp-label asp-label-required">Customer</label>
-                            <select name="customer_uuid" class="asp-select" required>
-                                <option value="">Select…</option>
-                                ${customers.map((c) => `<option value="${c.uuid}">${escapeHtml(c.full_name)}</option>`).join('')}
-                            </select>
+                <form id="job-form" class="asp-form">
+                    <div class="asp-job-card-form-layout">
+                        <div class="asp-job-card-form-main">
+                            <section class="asp-job-card-step">
+                                <div class="asp-job-card-step-header">
+                                    <span class="asp-job-card-step-badge">1</span>
+                                    <div>
+                                        <h2 class="asp-job-card-step-title">Vehicle &amp; Customer</h2>
+                                        <p class="asp-job-card-step-desc">Who is checking in and which vehicle is being washed.</p>
+                                    </div>
+                                </div>
+
+                                <div class="asp-form-grid">
+                                    <div class="asp-form-field sm:col-span-2">
+                                        <label class="asp-label asp-label-required" for="job_customer">Customer</label>
+                                        <div class="asp-field-addon">
+                                            <select id="job_customer" name="customer_uuid" class="asp-select" required>
+                                                <option value="">Select customer…</option>
+                                                ${customers.map((c) => `
+                                                    <option value="${c.uuid}" ${jobForm.customerUuid === c.uuid ? 'selected' : ''}>${escapeHtml(customerOptionLabel(c, vehicles))}</option>
+                                                `).join('')}
+                                            </select>
+                                            <button type="button" id="open-job-customer-modal" class="asp-btn asp-btn-secondary shrink-0 !px-3" title="Create new customer">
+                                                <span class="material-symbols-outlined text-lg">person_add</span>
+                                            </button>
+                                        </div>
+                                        <p class="asp-field-hint">
+                                            <button type="button" id="open-job-customer-link" class="text-brand-primary-dim hover:underline dark:text-brand-primary">+ Create new customer</button>
+                                        </p>
+                                    </div>
+
+                                    <div class="asp-form-field sm:col-span-2">
+                                        <label class="asp-label" for="job_vehicle">Vehicle</label>
+                                        <select id="job_vehicle" name="vehicle_uuid" class="asp-select" ${jobForm.customerUuid ? '' : 'disabled'}>
+                                            <option value="">No vehicle (optional)</option>
+                                            ${filteredVehicles.map((v) => `
+                                                <option value="${v.uuid}" ${jobForm.vehicleUuid === v.uuid ? 'selected' : ''}>${escapeHtml(vehicleLabel(v))}</option>
+                                            `).join('')}
+                                        </select>
+                                        <p class="asp-field-hint">${jobForm.customerUuid ? 'Optional — leave blank for carpet wash or non-vehicle jobs.' : 'Select a customer first to choose a vehicle.'}</p>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section class="asp-job-card-step">
+                                <div class="asp-job-card-step-header">
+                                    <span class="asp-job-card-step-badge">2</span>
+                                    <div>
+                                        <h2 class="asp-job-card-step-title">Services</h2>
+                                        <p class="asp-job-card-step-desc">Select one or more wash or detailing services.</p>
+                                    </div>
+                                </div>
+
+                                ${services.length === 0 ? `
+                                    <div class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+                                        No active services found. Sync catalog while online first.
+                                    </div>
+                                ` : `
+                                    <div class="space-y-5">
+                                        ${Object.entries(servicesByCategory).map(([categoryName, categoryServices]) => `
+                                            <div class="space-y-3">
+                                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">${escapeHtml(categoryName)}</p>
+                                                <div class="grid gap-3 sm:grid-cols-2">
+                                                    ${categoryServices.map((s) => {
+                                                        const checked = jobForm.serviceIds.includes(Number(s.id));
+                                                        return `
+                                                            <label class="asp-service-pick-card">
+                                                                <input type="checkbox" name="service_ids" value="${s.id}" class="asp-checkbox" ${checked ? 'checked' : ''} />
+                                                                <span class="asp-service-pick-content">
+                                                                    <span class="asp-service-pick-icon">
+                                                                        <span class="material-symbols-outlined text-[20px]">local_car_wash</span>
+                                                                    </span>
+                                                                    <span class="min-w-0 flex-1">
+                                                                        <span class="block text-sm font-semibold text-slate-900 dark:text-white">${escapeHtml(s.name)}</span>
+                                                                        <span class="mt-0.5 block font-mono text-xs text-slate-500 dark:text-slate-400">KES ${money(s.price)}</span>
+                                                                    </span>
+                                                                </span>
+                                                            </label>
+                                                        `;
+                                                    }).join('')}
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                `}
+                            </section>
+
+                            <section class="asp-job-card-step">
+                                <div class="asp-job-card-step-header">
+                                    <span class="asp-job-card-step-badge">3</span>
+                                    <div>
+                                        <h2 class="asp-job-card-step-title">Notes</h2>
+                                        <p class="asp-job-card-step-desc">Optional instructions for the wash bay team.</p>
+                                    </div>
+                                </div>
+                                <div class="asp-form-field">
+                                    <label class="asp-label" for="job_notes">Notes</label>
+                                    <textarea id="job_notes" name="notes" class="asp-textarea" rows="4" placeholder="Damage notes, special requests, bay instructions…">${escapeHtml(jobForm.notes)}</textarea>
+                                </div>
+                            </section>
                         </div>
-                        <div class="asp-form-field">
-                            <label class="asp-label">Vehicle</label>
-                            <select name="vehicle_uuid" class="asp-select">
-                                <option value="">Optional</option>
-                                ${vehicles.map((v) => `<option value="${v.uuid}">${escapeHtml(v.registration_number)}</option>`).join('')}
-                            </select>
-                        </div>
+
+                        <aside class="asp-job-card-form-aside">
+                            <div class="asp-job-card-summary">
+                                <div class="asp-job-card-summary-header">
+                                    <span class="material-symbols-outlined text-brand-primary">receipt_long</span>
+                                    <h3 class="asp-job-card-summary-title">Job Summary</h3>
+                                </div>
+                                <dl class="asp-job-card-summary-meta">
+                                    <div>
+                                        <dt>Customer</dt>
+                                        <dd>${escapeHtml(selectedCustomer?.full_name || 'Not selected')}</dd>
+                                    </div>
+                                    <div>
+                                        <dt>Vehicle</dt>
+                                        <dd>${escapeHtml(selectedVehicle ? vehicleLabel(selectedVehicle) : 'Not selected')}</dd>
+                                    </div>
+                                </dl>
+                                <div class="asp-job-card-summary-divider"></div>
+                                <div class="space-y-2">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Selected services</p>
+                                    ${selectedServices.length === 0
+                                        ? '<p class="text-sm text-slate-400">No services selected yet.</p>'
+                                        : `<ul class="space-y-2">${selectedServices.map((s) => `
+                                            <li class="flex items-center justify-between gap-3 text-sm">
+                                                <span class="truncate text-slate-700 dark:text-slate-200">${escapeHtml(s.name)}</span>
+                                                <span class="shrink-0 font-mono text-xs text-slate-500">KES ${money(s.price)}</span>
+                                            </li>
+                                        `).join('')}</ul>`}
+                                </div>
+                                <div class="asp-job-card-summary-total">
+                                    <span>Estimated total</span>
+                                    <span class="font-display text-xl font-bold text-slate-900 dark:text-white">KES ${money(serviceTotal)}</span>
+                                </div>
+                            </div>
+                        </aside>
                     </div>
-                    <div class="asp-form-field">
-                        <label class="asp-label asp-label-required">Services</label>
-                        <div class="mt-2 space-y-2 rounded-xl border border-slate-200 p-3 dark:border-brand-border/60">
-                            ${services.length ? services.map((s) => `
-                                <label class="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 hover:bg-brand-primary/5">
-                                    <input type="checkbox" name="service_ids" value="${s.id}" class="asp-checkbox" />
-                                    <span class="text-sm text-slate-700 dark:text-slate-200">${escapeHtml(s.name)}</span>
-                                    <span class="ml-auto font-mono text-sm text-brand-primary">KES ${money(s.price)}</span>
-                                </label>
-                            `).join('') : `<p class="text-sm text-slate-500">Sync catalog online first.</p>`}
-                        </div>
-                    </div>
-                    <div class="asp-form-field">
-                        <label class="asp-label">Notes</label>
-                        <textarea name="notes" class="asp-textarea" rows="3"></textarea>
-                    </div>
-                    <div class="asp-form-actions">
-                        <button type="submit" class="asp-btn asp-btn-primary min-w-[10rem]">Create job card</button>
+
+                    <div class="asp-form-actions mt-8">
+                        <button type="submit" class="asp-btn asp-btn-primary min-w-[10rem]" ${jobForm.submitting ? 'disabled' : ''}>
+                            <span class="material-symbols-outlined text-lg">check_circle</span>
+                            ${jobForm.submitting ? 'Creating…' : 'Create Job Card'}
+                        </button>
+                        <button type="button" id="cancel-job" class="asp-btn asp-btn-ghost">Cancel</button>
                     </div>
                 </form>
             </div>
         </div>
+
+        ${jobForm.showCustomerModal ? `
+            <div class="asp-modal-backdrop" id="job-customer-modal-backdrop">
+                <div class="asp-modal">
+                    <div class="asp-modal-header">
+                        <div>
+                            <p class="font-mono text-[10px] font-semibold uppercase tracking-widest text-brand-primary">New Customer</p>
+                            <h3 class="asp-modal-title">Quick Add Customer</h3>
+                        </div>
+                        <button type="button" id="close-job-customer-modal" class="rounded-lg p-1 text-slate-400">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+                    <form id="job-quick-customer-form" class="asp-form !space-y-5">
+                        <div class="asp-modal-body space-y-5">
+                            <div class="asp-form-field">
+                                <label class="asp-label asp-label-required">Full Name</label>
+                                <input name="full_name" class="asp-input" required value="${escapeHtml(jobForm.customerForm.full_name)}" />
+                            </div>
+                            <div class="asp-form-field">
+                                <label class="asp-label">Phone</label>
+                                <input name="phone" class="asp-input" value="${escapeHtml(jobForm.customerForm.phone)}" />
+                            </div>
+                            <div class="asp-form-field">
+                                <label class="asp-label">Email</label>
+                                <input name="email" type="email" class="asp-input" value="${escapeHtml(jobForm.customerForm.email)}" />
+                            </div>
+                            <div class="asp-form-field">
+                                <label class="asp-label">Registration number</label>
+                                <input name="registration_number" class="asp-input font-mono uppercase" placeholder="Optional vehicle" value="${escapeHtml(jobForm.customerForm.registration_number)}" />
+                            </div>
+                        </div>
+                        <div class="asp-modal-footer">
+                            <button type="button" id="cancel-job-customer-modal" class="asp-btn asp-btn-ghost">Cancel</button>
+                            <button type="submit" class="asp-btn asp-btn-primary">Save Customer</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        ` : ''}
     `;
+
+    const openCustomerModal = async () => {
+        jobForm.showCustomerModal = true;
+        await renderJobCreate();
+    };
+
+    document.getElementById('open-job-customer-modal')?.addEventListener('click', openCustomerModal);
+    document.getElementById('open-job-customer-link')?.addEventListener('click', openCustomerModal);
+    document.getElementById('cancel-job')?.addEventListener('click', async () => {
+        route = 'live';
+        await render();
+    });
+
+    document.getElementById('job_customer')?.addEventListener('change', async (e) => {
+        jobForm.customerUuid = e.target.value;
+        jobForm.vehicleUuid = '';
+        await renderJobCreate();
+    });
+
+    document.getElementById('job_vehicle')?.addEventListener('change', async (e) => {
+        jobForm.vehicleUuid = e.target.value;
+        await renderJobCreate();
+    });
+
+    document.getElementById('job_notes')?.addEventListener('input', (e) => {
+        jobForm.notes = e.target.value;
+    });
+
+    view.querySelectorAll('input[name="service_ids"]').forEach((input) => {
+        input.addEventListener('change', async () => {
+            const id = Number(input.value);
+            if (input.checked) {
+                if (!jobForm.serviceIds.includes(id)) {
+                    jobForm.serviceIds = [...jobForm.serviceIds, id];
+                }
+            } else {
+                jobForm.serviceIds = jobForm.serviceIds.filter((entry) => entry !== id);
+            }
+            await renderJobCreate();
+        });
+    });
+
+    const closeCustomerModal = async () => {
+        jobForm.showCustomerModal = false;
+        await renderJobCreate();
+    };
+
+    document.getElementById('close-job-customer-modal')?.addEventListener('click', closeCustomerModal);
+    document.getElementById('cancel-job-customer-modal')?.addEventListener('click', closeCustomerModal);
+    document.getElementById('job-customer-modal-backdrop')?.addEventListener('click', async (e) => {
+        if (e.target.id === 'job-customer-modal-backdrop') {
+            await closeCustomerModal();
+        }
+    });
+
+    document.getElementById('job-quick-customer-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        try {
+            const created = await api.createCustomer({
+                full_name: form.full_name.value,
+                phone: form.phone.value || null,
+                email: form.email.value || null,
+                registration_number: form.registration_number.value || null,
+            });
+            jobForm.customerUuid = created.uuid;
+            jobForm.vehicleUuid = created.vehicle?.uuid || '';
+            jobForm.showCustomerModal = false;
+            jobForm.customerForm = { full_name: '', phone: '', email: '', registration_number: '' };
+            showToast('Customer created');
+            await refreshSyncPill();
+            await renderJobCreate();
+        } catch (error) {
+            showToast(error.message || 'Could not create customer', true);
+        }
+    });
 
     document.getElementById('job-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const form = e.target;
-        const serviceIds = [...form.querySelectorAll('input[name="service_ids"]:checked')].map((el) => Number(el.value));
+
+        if (!jobForm.customerUuid) {
+            showToast('Select a customer', true);
+            return;
+        }
+
+        if (!jobForm.serviceIds.length) {
+            showToast('Select at least one service', true);
+            return;
+        }
+
+        if (jobForm.submitting) {
+            return;
+        }
+
+        jobForm.submitting = true;
+        await renderJobCreate();
+
         try {
             await api.createJob({
-                customer_uuid: form.customer_uuid.value,
-                vehicle_uuid: form.vehicle_uuid.value || null,
-                notes: form.notes.value,
-                service_ids: serviceIds,
+                customer_uuid: jobForm.customerUuid,
+                vehicle_uuid: jobForm.vehicleUuid || null,
+                notes: jobForm.notes,
+                service_ids: jobForm.serviceIds,
             });
-            form.reset();
-            showToast('Job card created');
+
+            jobForm = {
+                customerUuid: '',
+                vehicleUuid: '',
+                serviceIds: [],
+                notes: '',
+                showCustomerModal: false,
+                submitting: false,
+                customerForm: { full_name: '', phone: '', email: '', registration_number: '' },
+            };
+
+            showToast('Job card created — opening Live Board');
             await refreshSyncPill();
             api.syncNow().catch(() => {});
+            route = 'live';
+            setActiveNav();
+            await render();
         } catch (error) {
+            jobForm.submitting = false;
             showToast(error.message || 'Could not create job', true);
+            await renderJobCreate();
         }
     });
 }
@@ -1366,7 +1791,7 @@ async function boot() {
     setActiveNav();
     await refreshSyncPill();
     await render();
-    setInterval(refreshSyncPill, 15000);
+    setInterval(refreshSyncPill, 5000);
 }
 
 boot();

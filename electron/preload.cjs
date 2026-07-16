@@ -2,7 +2,8 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('autoSpaDesktop', {
     runtime: 'electron',
-    mode: 'offline-shell',
+    // Remote site URL used by web offline sync helpers when meta tags are absent.
+    remoteSyncUrl: 'https://expresscarwash.co.ke',
     dashboard: () => ipcRenderer.invoke('desktop:dashboard'),
     listCustomers: (search) => ipcRenderer.invoke('desktop:customers:list', search),
     createCustomer: (input) => ipcRenderer.invoke('desktop:customers:create', input),
@@ -23,6 +24,8 @@ contextBridge.exposeInMainWorld('autoSpaDesktop', {
     syncNow: () => ipcRenderer.invoke('desktop:sync:now'),
     pullBootstrap: () => ipcRenderer.invoke('desktop:sync:bootstrap'),
     checkSession: () => ipcRenderer.invoke('desktop:sync:check'),
+    checkRemoteReachable: () => ipcRenderer.invoke('desktop:sync:reachable'),
+    pendingCount: () => ipcRenderer.invoke('desktop:sync:pending'),
     openCloudLogin: () => ipcRenderer.invoke('desktop:cloud:login'),
     goOnline: () => ipcRenderer.invoke('desktop:ui:go-online'),
     goOffline: () => ipcRenderer.invoke('desktop:ui:go-offline'),
