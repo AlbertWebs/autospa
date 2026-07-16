@@ -414,6 +414,11 @@ class SyncService
         $data['customer_id'] = $this->resolveReference($payload['customer_id'] ?? null, $idMap);
         $data['vehicle_id'] = $this->resolveReference($payload['vehicle_id'] ?? null, $idMap);
 
+        $jobCardRef = $payload['job_card_id'] ?? null;
+        $data['job_card_id'] = ($jobCardRef === null || $jobCardRef === '')
+            ? null
+            : $this->resolveJobCard($branchId, $jobCardRef, $idMap)->id;
+
         if ($data['customer_id'] === null) {
             throw new InvalidArgumentException('POS checkout requires a valid customer_id.');
         }
@@ -436,6 +441,11 @@ class SyncService
     {
         if (is_string($reference) && str_starts_with($reference, 'client:')) {
             $uuid = substr($reference, 7);
+
+            if (preg_match('/^server-job_card-(\d+)$/', $uuid, $matches) === 1) {
+                return JobCard::query()->where('branch_id', $branchId)->findOrFail((int) $matches[1]);
+            }
+
             $mappedId = $idMap["job_card:{$uuid}"] ?? null;
 
             if ($mappedId) {
@@ -469,6 +479,12 @@ class SyncService
 
         if (is_string($value) && str_starts_with($value, 'client:')) {
             $uuid = substr($value, 7);
+
+            // Electron bootstrap may invent local refs like client:server-customer-12
+            // when the server row has no uuid yet — map those directly to the server id.
+            if (preg_match('/^server-(customer|vehicle|job_card)-(\d+)$/', $uuid, $matches) === 1) {
+                return (int) $matches[2];
+            }
 
             foreach (['customer', 'vehicle', 'job_card'] as $entity) {
                 if (isset($idMap["{$entity}:{$uuid}"])) {

@@ -117,6 +117,11 @@ async function runSync() {
             showToast('Sign in online to upload changes', true);
         } else if (result.reason === 'offline' || result.reason === 'unreachable') {
             showToast('Still offline — changes stay queued');
+        } else if ((result.failed || 0) > 0) {
+            const detail = Array.isArray(result.errors) && result.errors[0]
+                ? ` — ${result.errors[0]}`
+                : '';
+            showToast(`${result.failed} change(s) could not be synced${detail}`, true);
         } else {
             showToast(`Synced ${result.synced || 0} change(s)`);
         }

@@ -12,6 +12,7 @@ import { registerIpcHandlers } from './src/ipc.js';
 import { checkRemoteSession, isRemoteReachable, syncNow } from './src/sync.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const APP_ICON = path.join(__dirname, 'renderer', 'logo.png');
 
 const REMOTE_HOME = `${REMOTE_SYNC_URL.replace(/\/$/, '')}/dashboard`;
 const REMOTE_LOGIN = `${REMOTE_SYNC_URL.replace(/\/$/, '')}${REMOTE_LOGIN_PATH}`;
@@ -41,6 +42,11 @@ if (!gotLock) {
 
     app.whenReady().then(async () => {
         try {
+            // Helps Windows use this app's icon in the taskbar instead of a generic Electron icon.
+            if (process.platform === 'win32') {
+                app.setAppUserModelId('com.autospa.desktop');
+            }
+
             initDatabase();
             registerRemoteSyncHeaders();
             registerIpcHandlers({
@@ -231,6 +237,7 @@ function ensureMainWindow() {
         show: false,
         autoHideMenuBar: true,
         title: 'AutoSpa Pro',
+        icon: APP_ICON,
         backgroundColor: '#0b1326',
         webPreferences: {
             preload: path.join(__dirname, 'preload.cjs'),

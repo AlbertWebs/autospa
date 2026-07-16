@@ -527,6 +527,8 @@ Alpine.store('offline', {
                     Alpine.store('toast').show('Sign in to sync desktop offline changes.', 'error');
                 } else if (desktopResult.reason === 'offline' || desktopResult.reason === 'unreachable') {
                     Alpine.store('toast').show('Cloud is unreachable — changes stay queued.', 'error');
+                } else if (Array.isArray(desktopResult.errors) && desktopResult.errors.length > 0) {
+                    Alpine.store('toast').show(desktopResult.errors[0], 'error');
                 }
             }
 

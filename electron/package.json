@@ -1,6 +1,6 @@
 {
     "name": "autospa-desktop",
-    "version": "1.4.5",
+    "version": "1.4.7",
     "description": "AutoSpa Pro desktop — live web UI online, operable offline shell",
     "private": true,
     "type": "module",
@@ -43,6 +43,7 @@
             "node_modules/better-sqlite3/**/*"
         ],
         "win": {
+            "icon": "build/icon.png",
             "target": [
                 "nsis"
             ],

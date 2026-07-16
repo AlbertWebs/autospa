@@ -7,6 +7,7 @@ import {
 import {
     applyBootstrap,
     getMeta,
+    getServerId,
     listPendingMutations,
     pendingCount,
     removeMutations,
@@ -35,6 +36,40 @@ async function syncFetch(path, options = {}) {
             ...syncHeaders(options.headers),
         },
     });
+}
+
+const CLIENT_REF_KEYS = [
+    'customer_id',
+    'vehicle_id',
+    'job_card_id',
+    'booking_id',
+    'assigned_to',
+];
+
+/**
+ * Prefer numeric server IDs from the local id map so bootstrapped customers/vehicles
+ * (and any already-synced offline entities) resolve reliably on push.
+ */
+function rewritePayloadRefs(payload = {}) {
+    const rewritten = { ...payload };
+
+    for (const key of CLIENT_REF_KEYS) {
+        if (!(key in rewritten)) {
+            continue;
+        }
+
+        const value = rewritten[key];
+
+        if (typeof value === 'string' && value.startsWith('client:')) {
+            const serverId = getServerId(value);
+
+            if (serverId != null) {
+                rewritten[key] = serverId;
+            }
+        }
+    }
+
+    return rewritten;
 }
 
 export async function checkRemoteSession() {
@@ -166,7 +201,7 @@ export async function pushPendingMutations() {
                     id: entry.id,
                     type: entry.type,
                     client_entity_uuid: entry.client_entity_uuid,
-                    payload: entry.payload,
+                    payload: rewritePayloadRefs(entry.payload),
                     created_at: entry.created_at,
                 })),
             }),
@@ -179,12 +214,14 @@ export async function pushPendingMutations() {
                 synced: 0,
                 failed: pending.length,
                 reason: data.message || 'Push failed',
+                errors: [data.message || 'Push failed'].filter(Boolean),
                 pending: pendingCount(),
             };
         }
 
         const appliedIds = [];
         let failed = 0;
+        const errors = [];
 
         for (const result of data.results ?? []) {
             if (result.status === 'applied' || result.status === 'duplicate') {
@@ -192,6 +229,9 @@ export async function pushPendingMutations() {
                 persistIdMapsFromResult(result);
             } else {
                 failed += 1;
+                if (result.error) {
+                    errors.push(result.error);
+                }
             }
         }
 
@@ -201,6 +241,7 @@ export async function pushPendingMutations() {
         return {
             synced: appliedIds.length,
             failed,
+            errors,
             pending: pendingCount(),
         };
     } finally {

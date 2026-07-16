@@ -271,6 +271,128 @@ class DesktopSyncTest extends TestCase
         $this->assertDatabaseCount('receipts', 0);
     }
 
+    public function test_push_resolves_client_job_card_reference_on_checkout(): void
+    {
+        $branch = Branch::query()->firstOrFail();
+        $user = $this->makeUserWithRole(RoleSlug::Manager, $branch);
+        $paymentMethod = PaymentMethod::query()->where('slug', 'cash')->firstOrFail();
+        $customer = Customer::factory()->create(['branch_id' => $branch->id]);
+        $vehicle = Vehicle::query()->create([
+            'uuid' => (string) Str::uuid(),
+            'branch_id' => $branch->id,
+            'customer_id' => $customer->id,
+            'registration_number' => 'KDA123A',
+            'status' => 'active',
+        ]);
+        $category = ServiceCategory::query()->create([
+            'branch_id' => $branch->id,
+            'name' => 'Wash',
+            'is_active' => true,
+        ]);
+        $service = Service::query()->create([
+            'branch_id' => $branch->id,
+            'service_category_id' => $category->id,
+            'name' => 'Exterior',
+            'price' => 500,
+            'duration_minutes' => 20,
+            'is_active' => true,
+        ]);
+        $jobCard = JobCard::query()->create([
+            'uuid' => (string) Str::uuid(),
+            'branch_id' => $branch->id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'created_by' => $user->id,
+            'status' => JobCardStatus::Completed,
+        ]);
+        $jobCard->services()->create([
+            'service_id' => $service->id,
+            'price' => $service->price,
+            'status' => 'pending',
+        ]);
+
+        $response = $this->actingAs($user)
+            ->withHeader('X-AutoSpa-Client', 'electron')
+            ->postJson(route('desktop.sync.push'), [
+                'mutations' => [[
+                    'id' => (string) Str::uuid(),
+                    'type' => 'pos.checkout',
+                    'payload' => [
+                        'customer_id' => 'client:'.$customer->uuid,
+                        'vehicle_id' => 'client:'.$vehicle->uuid,
+                        'job_card_id' => 'client:'.$jobCard->uuid,
+                        'payment_method_id' => $paymentMethod->id,
+                        'method' => 'cash',
+                        'subtotal' => '500.00',
+                        'discount_amount' => '0',
+                        'tax_amount' => '0',
+                        'total_amount' => '500.00',
+                        'items' => [[
+                            'item_type' => 'service',
+                            'item_id' => $service->id,
+                            'description' => $service->name,
+                            'quantity' => 1,
+                            'unit_price' => '500.00',
+                            'total' => '500.00',
+                        ]],
+                    ],
+                    'created_at' => now()->toIso8601String(),
+                ]],
+            ]);
+
+        $response->assertOk();
+        $response->assertJsonPath('results.0.status', 'applied');
+        $this->assertDatabaseHas('invoices', [
+            'job_card_id' => $jobCard->id,
+            'customer_id' => $customer->id,
+        ]);
+    }
+
+    public function test_push_resolves_synthetic_server_customer_reference(): void
+    {
+        $branch = Branch::query()->firstOrFail();
+        $user = $this->makeUserWithRole(RoleSlug::Manager, $branch);
+        $customer = Customer::factory()->create(['branch_id' => $branch->id]);
+        $category = ServiceCategory::query()->create([
+            'branch_id' => $branch->id,
+            'name' => 'Detail',
+            'is_active' => true,
+        ]);
+        $service = Service::query()->create([
+            'branch_id' => $branch->id,
+            'service_category_id' => $category->id,
+            'name' => 'Interior',
+            'price' => 300,
+            'duration_minutes' => 15,
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($user)
+            ->withHeader('X-AutoSpa-Client', 'electron')
+            ->postJson(route('desktop.sync.push'), [
+                'mutations' => [[
+                    'id' => (string) Str::uuid(),
+                    'type' => 'job_card.create',
+                    'client_entity_uuid' => (string) Str::uuid(),
+                    'payload' => [
+                        'customer_id' => 'client:server-customer-'.$customer->id,
+                        'vehicle_id' => null,
+                        'service_ids' => [$service->id],
+                        'status' => 'open',
+                        'notes' => 'Synthetic ref',
+                    ],
+                    'created_at' => now()->toIso8601String(),
+                ]],
+            ]);
+
+        $response->assertOk();
+        $response->assertJsonPath('results.0.status', 'applied');
+        $this->assertDatabaseHas('job_cards', [
+            'customer_id' => $customer->id,
+            'notes' => 'Synthetic ref',
+        ]);
+    }
+
     public function test_guest_cannot_push_mutations(): void
     {
         $this->postJson(route('desktop.sync.push'), [
