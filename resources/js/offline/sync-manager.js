@@ -13,29 +13,54 @@ import { isOnline } from './connectivity';
 
 let syncing = false;
 
+function isElectronDesktop() {
+    return window.autoSpaDesktop?.runtime === 'electron'
+        || document.querySelector('meta[name="app-runtime"]')?.content === 'electron';
+}
+
 function csrfToken() {
     return document.querySelector('meta[name="csrf-token"]')?.content ?? '';
 }
 
 function remoteSyncBaseUrl() {
-    const remote = document.querySelector('meta[name="desktop-remote-sync-url"]')?.content?.trim();
+    const remote = document.querySelector('meta[name="desktop-remote-sync-url"]')?.content?.trim()
+        || window.autoSpaDesktop?.remoteSyncUrl?.trim?.()
+        || '';
 
     return remote ? remote.replace(/\/$/, '') : '';
 }
 
+function syncApiPrefix() {
+    if (isElectronDesktop() || remoteSyncBaseUrl()) {
+        return '/desktop/sync';
+    }
+
+    return '/sync';
+}
+
 function syncUrl(path) {
     const base = remoteSyncBaseUrl();
+    const prefix = syncApiPrefix();
 
-    return base ? `${base}${path}` : path;
+    return base ? `${base}${prefix}${path}` : `${prefix}${path}`;
 }
 
 function syncHeaders() {
-    return {
+    const headers = {
         Accept: 'application/json',
         'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': csrfToken(),
         'X-Requested-With': 'XMLHttpRequest',
     };
+
+    if (isElectronDesktop()) {
+        headers['X-AutoSpa-Client'] = 'electron';
+    }
+
+    if (!remoteSyncBaseUrl()) {
+        headers['X-CSRF-TOKEN'] = csrfToken();
+    }
+
+    return headers;
 }
 
 function syncFetchOptions(options = {}) {
@@ -59,7 +84,7 @@ export async function pullBootstrap() {
         return getBootstrap();
     }
 
-    const response = await fetch(syncUrl('/sync/bootstrap'), syncFetchOptions());
+    const response = await fetch(syncUrl('/bootstrap'), syncFetchOptions());
 
     if (!response.ok) {
         throw new Error('Could not download offline data.');
@@ -99,7 +124,7 @@ export async function syncPendingMutations() {
     syncing = true;
 
     try {
-        const response = await fetch(syncUrl('/sync/push'), syncFetchOptions({
+        const response = await fetch(syncUrl('/push'), syncFetchOptions({
             method: 'POST',
             body: JSON.stringify({
                 mutations: pending.map((entry) => ({

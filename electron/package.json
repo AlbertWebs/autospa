@@ -1,6 +1,6 @@
 {
     "name": "autospa-desktop",
-    "version": "1.1.3",
+    "version": "1.2.0",
     "description": "AutoSpa Pro desktop app (offline-first Electron shell)",
     "private": true,
     "type": "module",

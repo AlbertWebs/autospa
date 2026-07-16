@@ -251,6 +251,7 @@ export function ensureDesktopEnvFile(laravelRoot, port) {
     }
 
     updateAppUrlInEnv(envPath, port);
+    ensureDesktopEnvDefaults(envPath);
 
     const sqlitePath = path.join(laravelRoot, 'database', 'autospa_desktop.sqlite');
     fs.mkdirSync(path.dirname(sqlitePath), { recursive: true });
@@ -270,6 +271,28 @@ export function updateAppUrlInEnv(envPath, port) {
         contents = contents.replace(/^APP_URL=.*$/m, `APP_URL=${appUrl}`);
     } else {
         contents += `${contents.endsWith('\n') || contents === '' ? '' : '\n'}APP_URL=${appUrl}\n`;
+    }
+
+    fs.writeFileSync(envPath, contents);
+}
+
+function ensureDesktopEnvDefaults(envPath) {
+    const defaults = {
+        APP_RUNTIME: 'electron',
+        DB_CONNECTION: 'sqlite',
+        DB_DATABASE: 'database/autospa_desktop.sqlite',
+        DESKTOP_AUTO_SYNC: 'true',
+        DESKTOP_REMOTE_URL: 'https://expresscarwash.co.ke',
+        DESKTOP_CLIENT_HEADER: 'X-AutoSpa-Client',
+        DESKTOP_CLIENT_VALUE: 'electron',
+    };
+
+    let contents = fs.existsSync(envPath) ? fs.readFileSync(envPath, 'utf8') : '';
+
+    for (const [key, value] of Object.entries(defaults)) {
+        if (!new RegExp(`^${key}=`, 'm').test(contents)) {
+            contents += `${contents.endsWith('\n') || contents === '' ? '' : '\n'}${key}=${value}\n`;
+        }
     }
 
     fs.writeFileSync(envPath, contents);
